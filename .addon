@@ -1,0 +1,40 @@
+{
+  "Title": "Jumpy",
+  "Type": "game",
+  "Org": "brick",
+  "Ident": "jumpy",
+  "Tags": null,
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "ResourcePaths": null,
+  "HasCode": true,
+  "CodePath": "/code/",
+  "Metadata": {
+    "MapList": [],
+    "MaxPlayers": 8,
+    "MinPlayers": 1,
+    "GameNetworkType": "Multiplayer",
+    "MapSelect": "Empty",
+    "RankType": "None",
+    "PerMapRanking": false,
+    "LeaderboardType": "None",
+    "GameCategory": "Racing",
+    "ControlModes": {
+      "Keyboard": true,
+      "Gamepad": true
+    },
+    "Physics": {
+      "SubSteps": 1,
+      "TimeScale": 1,
+      "Gravity": "0,0,-800",
+      "AirDensity": 1.2,
+      "SleepingEnabled": true,
+      "SimulationMode": "Continuous",
+      "PositionIterations": 2,
+      "VelocityIterations": 8,
+      "SoftBodyIterations": 1,
+      "SoftBodySubsteps": 1
+    }
+  }
+}

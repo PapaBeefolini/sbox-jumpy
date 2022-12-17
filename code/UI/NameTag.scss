@@ -1,0 +1,20 @@
+﻿NameTag {
+    justify-content: center;
+    align-items: center;
+
+    .title {
+        font-family: Roboto;
+        font-size: 86px;
+        white-space: nowrap;
+        color: #00ff90;
+        text-shadow: 4px 4px 2px #000000;
+    }
+
+    .avatar {
+        width: 256px;
+        height: 128px;
+        margin-right: 16px;
+        border-radius: 100px;
+        background-size: cover;
+    }
+}
