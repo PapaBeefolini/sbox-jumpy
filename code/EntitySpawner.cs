@@ -8,10 +8,8 @@ namespace Jumpy
 	{
 		public async Task SpawnEntities<T>( float delayMin, float delayMax, bool flipped = false ) where T : MovingEntity, new()
 		{
-			while ( true )
+			while ( this.IsValid() )
 			{
-				await Task.DelaySeconds( Game.Random.Float( delayMin, delayMax ) );
-
 				T entity = new()
 				{
 					Position = Position,
@@ -20,6 +18,8 @@ namespace Jumpy
 
 				if ( flipped )
 					entity.Speed = -entity.Speed;
+
+				await Task.DelaySeconds( Game.Random.Float( delayMin, delayMax ) );
 			}
 		}
 	}

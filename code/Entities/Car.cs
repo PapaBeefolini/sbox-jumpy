@@ -1,4 +1,6 @@
 ﻿using Sandbox;
+using Sandbox.Physics;
+using System.Diagnostics;
 
 namespace Jumpy
 {
@@ -28,18 +30,20 @@ namespace Jumpy
 		{
 			base.Spawn();
 			
-			Speed = Game.Random.Int(1200, 1400);
+			Speed = Game.Random.Int(1000, 1200);
 
 			SetModel( models[Game.Random.Int( models.Length - 1 )] );
 			RenderColor = colors[Game.Random.Int( colors.Length - 1 )];
 
-			using ( Prediction.Off() )
-				engineSound = Sound.FromEntity( "sounds/engine-loop.sound", this );
+			engineSound = Sound.FromEntity( "engine.loop", this );
+
+			Tags.Add( "car" );
 		}
 
 		protected override void OnDestroy()
 		{
 			base.OnDestroy();
+			engineSound.SetVolume( 0.0f );
 			engineSound.Stop();
 		}
 	}

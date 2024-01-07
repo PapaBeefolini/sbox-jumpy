@@ -34,7 +34,7 @@
 						collision_tags = "solid"
 						origin = [ 0.0, 0.0, 20.0 ]
 						angles = [ 0.0, 0.0, 0.0 ]
-						dimensions = [ 64.0, 384.0, 50.0 ]
+						dimensions = [ 64.0, 420.0, 50.0 ]
 					},
 				]
 			},

@@ -53,10 +53,7 @@
 						_class = "PhysicsShapeBox"
 						parent_bone = ""
 						surface_prop = "default"
-						collision_group = ""
-						collision_interact_as = ""
-						collision_interact_with = ""
-						collision_interact_exclude = ""
+						collision_tags = "solid"
 						origin = [ 0.0, 0.0, 16.0 ]
 						angles = [ 0.0, 0.0, 0.0 ]
 						dimensions = [ 96.0, 96.0, 32.0 ]
@@ -67,5 +64,6 @@
 		model_archetype = ""
 		primary_associated_entity = ""
 		anim_graph_name = ""
+		base_model_name = ""
 	}
 }

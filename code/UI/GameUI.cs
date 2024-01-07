@@ -1,4 +1,5 @@
-﻿using Sandbox.UI;
+﻿using Sandbox;
+using Sandbox.UI;
 
 namespace Jumpy.UI
 {
@@ -6,13 +7,16 @@ namespace Jumpy.UI
 	{
 		public GameUI()
 		{
-			if ( IsClient )
+			if ( Game.IsClient )
 			{
 				RootPanel.StyleSheet.Load( "/ui/GameUI.scss" );
 
 				ChatBox chat = RootPanel.AddChild<ChatBox>();
 				RootPanel.AddChild<VoiceList>();
 				RootPanel.AddChild<Score>();
+
+				var text = RootPanel.AddChild<Label>();
+				text.Text = "Jumpy";
 			}
 		}
 	}

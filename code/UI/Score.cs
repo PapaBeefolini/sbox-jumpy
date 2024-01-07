@@ -15,6 +15,7 @@ namespace Jumpy.UI
 		{
 			PanelTransform pt = new PanelTransform();
 			pt.AddRotation( 0, 0, System.MathF.Sin( 12 * Time.Now ) * 8 );
+			pt.AddTranslateY( System.MathF.Sin( 24 * Time.Now ) * 4 );
 			Style.Transform = pt;
 			Style.Dirty();
 		}

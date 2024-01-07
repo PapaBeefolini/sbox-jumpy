@@ -2,7 +2,7 @@
 
 namespace Jumpy
 {
-	public partial class MovingEntity : ModelEntity
+	public partial class MovingEntity : AnimatedEntity
 	{
 		public float Speed;
 
@@ -10,10 +10,12 @@ namespace Jumpy
 		{
 			base.Spawn();
 
+			EnableLagCompensation = true;
+
 			SetupPhysicsFromModel( PhysicsMotionType.Static );
 		}
-		
-		[Event.Tick.Server]
+
+		[GameEvent.Tick.Server]
 		public void Move()
 		{
 			Position += Vector3.Right * Speed * Time.Delta;
