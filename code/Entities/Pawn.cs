@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Jumpy
@@ -43,6 +44,9 @@ namespace Jumpy
 			EnableLagCompensation = true;
 
 			Tags.Add( "player" );
+
+			if ( IsAuthority )
+				ResetCamera();
 		}
 
 		public override void Simulate( IClient cl )
@@ -50,6 +54,9 @@ namespace Jumpy
 			base.Simulate( cl );
 
 			JumpyGame current = (JumpyGame.Current as JumpyGame);
+
+			if(CurrentSequence.Name == string.Empty)
+				CurrentSequence.Name = "idle";
 
 			if ( Input.Released( "Use" ))
 				_ = current.StartNewGame();
@@ -59,7 +66,7 @@ namespace Jumpy
 
 			using ( LagCompensation() )
 			{
-				if ( IsGrounded )
+				if ( IsGrounded && !Game.IsMainMenuVisible )
 				{
 					if ( Input.Down( "Forward" ) )
 						Move( Vector3.Forward );
@@ -104,10 +111,7 @@ namespace Jumpy
 		{
 			if ( !Owner.IsAuthority )
 				return;
-			
 			Camera.Position = Vector3.Lerp( Camera.Position, Position + Camera.Rotation.Backward * 800, Time.Delta * 4 );
-			Camera.Rotation = new Angles( 30, 15, 0 ).ToRotation();
-			Camera.FieldOfView = 65;
 		}
 
 		[ClientRpc]
@@ -116,6 +120,8 @@ namespace Jumpy
 			if ( !Owner.IsAuthority )
 				return;
 			Camera.Position = Position + Camera.Rotation.Backward * 800;
+			Camera.Rotation = new Angles( 30, 15, 0 ).ToRotation();
+			Camera.FieldOfView = 65;
 		}
 
 		private void Move( Vector3 direction )
@@ -171,7 +177,6 @@ namespace Jumpy
 				_ = Die( DeathType.Car );
 			else if ( other.Tags.Has( "goal" ) )
 				(JumpyGame.Current as JumpyGame)?.RespawnPawn( this );
-
 		}
 
 		public void Respawn( Vector3 position )
@@ -192,7 +197,6 @@ namespace Jumpy
 
 		private async Task Die(DeathType deathType)
 		{
-			return;
 			if ( !Game.IsServer || IsDead )
 				return;
 

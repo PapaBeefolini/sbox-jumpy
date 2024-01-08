@@ -33,8 +33,8 @@ namespace Jumpy
 			base.ClientJoined( client );
 
 			var pawn = new Pawn();
-			RespawnPawn( pawn );
 			client.Pawn = pawn;
+			RespawnPawn( pawn );
 		}
 
 		public override void PostLevelLoaded()

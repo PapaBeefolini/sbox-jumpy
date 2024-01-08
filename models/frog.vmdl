@@ -63,6 +63,7 @@
 						hidden = false
 						anim_markup_ordered = false
 						disable_compression = false
+						enable_scale = false
 						source_filename = "models/frog@idle.fbx"
 						start_frame = -1
 						end_frame = -1
@@ -84,6 +85,7 @@
 						hidden = false
 						anim_markup_ordered = false
 						disable_compression = false
+						enable_scale = false
 						source_filename = "models/frog@jump.fbx"
 						start_frame = -1
 						end_frame = -1
@@ -98,5 +100,6 @@
 		model_archetype = ""
 		primary_associated_entity = ""
 		anim_graph_name = ""
+		base_model_name = ""
 	}
 }

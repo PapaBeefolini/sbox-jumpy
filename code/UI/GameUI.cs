@@ -13,10 +13,6 @@ namespace Jumpy.UI
 
 				ChatBox chat = RootPanel.AddChild<ChatBox>();
 				RootPanel.AddChild<VoiceList>();
-				RootPanel.AddChild<Score>();
-
-				var text = RootPanel.AddChild<Label>();
-				text.Text = "Jumpy";
 			}
 		}
 	}

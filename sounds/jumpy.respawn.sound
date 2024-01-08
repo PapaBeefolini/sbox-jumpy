@@ -2,12 +2,12 @@
   "UI": false,
   "Volume": "1.00,1.00,0",
   "Pitch": "1.00,1.00,0",
-  "Decibels": 150,
+  "Decibels": 170,
   "SelectionMode": "Random",
   "Sounds": [
-    "sounds/jumpy-respawn.vsnd"
+    "sounds/jumpy.respawn.vsnd"
   ],
-  "MaximumDistance": 5137.8174,
-  "MinimumDistance": 256.89087,
+  "MaximumDistance": 6590.138,
+  "MinimumDistance": 329.50693,
   "__references": []
 }
