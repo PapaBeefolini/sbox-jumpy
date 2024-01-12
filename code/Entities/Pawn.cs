@@ -1,4 +1,5 @@
-﻿using Sandbox;
+﻿using Jumpy.UI;
+using Sandbox;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -9,6 +10,8 @@ namespace Jumpy
 	{
 		[Net, Predicted] public Vector3 WorldPosition { get; set; }
 		[Net, Predicted] public bool IsGrounded { get; set; } = false;
+		[Net, Predicted] public Sandbox.Entity Log { get; set; }
+		[Net, Predicted] public Vector3 LogOffset { get; set; }
 
 		[Net] public bool IsDead { get; set; } = false;
 		private enum DeathType
@@ -23,9 +26,6 @@ namespace Jumpy
 
 		private Vector3 jumpOffset;
 		private float timeJumpStarted;
-
-		[Net, Predicted] public Sandbox.Entity Log { get; set; }
-		[Net, Predicted] public Vector3 LogOffset { get; set; }
 
 		public override void Spawn()
 		{
@@ -55,11 +55,8 @@ namespace Jumpy
 
 			JumpyGame current = (JumpyGame.Current as JumpyGame);
 
-			if(CurrentSequence.Name == string.Empty)
+			if (CurrentSequence.Name == string.Empty)
 				CurrentSequence.Name = "idle";
-
-			if ( Input.Released( "Use" ))
-				_ = current.StartNewGame();
 
 			if ( IsDead || !current.IsGameActive )
 				return;
@@ -175,8 +172,6 @@ namespace Jumpy
 				_ = Die(DeathType.Water);
 			else if ( other.Tags.Has( "player" ) )
 				_ = Die( DeathType.Car );
-			else if ( other.Tags.Has( "goal" ) )
-				(JumpyGame.Current as JumpyGame)?.RespawnPawn( this );
 		}
 
 		public void Respawn( Vector3 position )

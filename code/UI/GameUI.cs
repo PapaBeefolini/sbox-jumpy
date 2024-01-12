@@ -5,6 +5,8 @@ namespace Jumpy.UI
 {
 	public partial class GameUI : Sandbox.HudEntity<RootPanel>
 	{
+		public Label GameEndText { get; set; }
+
 		public GameUI()
 		{
 			if ( Game.IsClient )
@@ -13,7 +15,20 @@ namespace Jumpy.UI
 
 				ChatBox chat = RootPanel.AddChild<ChatBox>();
 				RootPanel.AddChild<VoiceList>();
+
+				GameEndText = RootPanel.AddChild<Label>();
 			}
+		}
+
+		[GameEvent.Client.Frame]
+		public void Frame()
+		{
+			JumpyGame current = (JumpyGame.Current as JumpyGame);
+
+			if ( current.IsGameOver )
+				GameEndText.Text = "Game Over!";
+			else
+				GameEndText.Text = "";
 		}
 	}
 }

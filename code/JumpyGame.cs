@@ -1,4 +1,5 @@
-﻿using Sandbox;
+﻿using Jumpy.UI;
+using Sandbox;
 using Sandbox.PostProcess;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,12 @@ namespace Jumpy
 	partial class JumpyGame : GameManager
 	{
 		[Net] public bool IsGameActive { get; set; } = false;
+		[Net] public bool IsGameOver { get; set; } = false;
 
-		private int worldLength = 96;
+		private int worldLength = 64;
 		private int worldWidth = 28;
 		private int tileSize = 96;
+		private int winTilePosition = 0;
 		private bool lastGenerationWasRoad = false;
 		private List<Entity> worldEntities = new List<Entity>();
 
@@ -52,12 +55,30 @@ namespace Jumpy
 			_ = StartNewGame();
 		}
 
+		public override void Simulate( IClient cl )
+		{
+			base.Simulate( cl );
+
+			if ( !IsGameActive )
+				return;
+
+			foreach ( Pawn pawn in All.OfType<Pawn>() )
+			{
+				if ( pawn.Position.x >= winTilePosition )
+				{
+					_ = EndGame();
+					return;
+				}
+			}
+		}
+
 		public async Task StartNewGame()
 		{
 			if ( !Game.IsServer )
 				return;
 
 			IsGameActive = false;
+			IsGameOver = false;
 
 			GenerateWorld();
 			RespawnAllPlayers();
@@ -65,6 +86,19 @@ namespace Jumpy
 			await Task.DelaySeconds( 1.5f );
 
 			IsGameActive = true;
+		}
+
+		public async Task EndGame()
+		{
+			if ( !Game.IsServer )
+				return;
+
+			IsGameActive = false;
+			IsGameOver = true;
+
+			await Task.DelaySeconds( 3.0f );
+
+			_ = StartNewGame();
 		}
 
 		private void CreateLighting()
@@ -140,13 +174,7 @@ namespace Jumpy
 					if ( x >= worldLength - 1 )
 					{
 						CreateTile( currentPosition, new Color( 1, 0.75f, 0.75f ) );
-						ModelEntity trigger = new ModelEntity();
-						trigger.Position = currentPosition + Vector3.Up * 32;
-						trigger.SetupPhysicsFromSphere( PhysicsMotionType.Static, Vector3.Zero, 8 );
-						trigger.EnableAllCollisions = true;
-						trigger.Tags.Add( "goal" );
-						worldEntities.Add( trigger );
-						DebugOverlay.Sphere( trigger.CollisionPosition, trigger.CollisionBounds.Size.Length, Color.Red, -1 );
+						winTilePosition = (int)currentPosition.x;
 						continue;
 					}
 
