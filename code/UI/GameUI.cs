@@ -12,6 +12,8 @@ namespace Jumpy.UI
 			if ( Game.IsClient )
 			{
 				RootPanel.StyleSheet.Load( "/ui/GameUI.scss" );
+				RootPanel.StyleSheet.Load( "/ui/mainmenu/mainmenu.scss" );
+				RootPanel.StyleSheet.Load( "/ui/mainmenu/loadingpanel.scss" );
 
 				ChatBox chat = RootPanel.AddChild<ChatBox>();
 				RootPanel.AddChild<VoiceList>();
