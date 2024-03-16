@@ -6,6 +6,10 @@ using System.Diagnostics;
 
 public sealed class Frog : Component, Component.ITriggerListener
 {
+	[Property] public GameObject JumpParticles { get; set; }
+	[Property] public GameObject DeathParticlesCar { get; set; }
+	[Property] public GameObject DeathParticlesWater { get; set; }
+
 	[Property] public SoundEvent JumpSound { get; set; }
 	[Property] public SoundEvent RespawnSound { get; set; }
 	[Property] public SoundEvent DeathSound { get; set; }
@@ -148,7 +152,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 				renderer.Set( "Grounded", false );
 				Sound.Play( JumpSound, Transform.Position );
-				//Particles.Create( "particles/jump_particles.vpcf", Position );
+				JumpParticles.Clone( Transform.Position, Rotation.FromPitch(-90) );
 			}
 		}
 	}
@@ -196,15 +200,15 @@ public sealed class Frog : Component, Component.ITriggerListener
 		renderer.Enabled = false;
 		Sound.Play( DeathSound, Transform.Position );
 
-		/*switch ( deathType )
+		switch ( deathType )
 		{
 			case DeathType.Car:
-				Particles.Create( "particles/death_particles_car.vpcf", Position + Vector3.Up * 8 );
+				DeathParticlesCar.Clone( Transform.Position + Vector3.Up * 8 );
 				break;
 			case DeathType.Water:
-				Particles.Create( "particles/death_particles_water.vpcf", Position + Vector3.Down * 2 );
+				DeathParticlesWater.Clone( Transform.Position + Vector3.Up * 2, Rotation.FromPitch(-90) );
 				break;
-		}*/
+		}
 
 		await Task.DelaySeconds( 5.0f );
 

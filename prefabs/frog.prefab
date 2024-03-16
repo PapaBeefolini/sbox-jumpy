@@ -1,6 +1,6 @@
 {
   "RootObject": {
-    "__guid": "62c055a8-4c78-41b5-a7ef-8fc1721ee558",
+    "__guid": "50721eeb-8008-4ec3-8894-e96f4d712fe4",
     "Name": "frog",
     "Tags": "player",
     "Enabled": true,
@@ -8,7 +8,7 @@
     "Components": [
       {
         "__type": "SkinnedModelRenderer",
-        "__guid": "2944e1dc-ccb2-40ca-aeab-e07313217290",
+        "__guid": "12f43845-d848-4e95-9084-5ce28ba26099",
         "AnimationGraph": "animgraphs/frog.vanmgrph",
         "BodyGroups": 18446744073709551615,
         "CreateBoneObjects": false,
@@ -18,7 +18,7 @@
       },
       {
         "__type": "SphereCollider",
-        "__guid": "cfc8b093-8ba1-4a16-8277-be80144e76f2",
+        "__guid": "66c6e1a4-cdae-4ea3-8980-920eac4f99e7",
         "Center": "0,0,2",
         "IsTrigger": true,
         "Radius": 8,
@@ -26,8 +26,20 @@
       },
       {
         "__type": "Frog",
-        "__guid": "3b373179-3d4b-460f-8812-8e2cb20ff58e",
+        "__guid": "17c87859-4e13-4ef8-8197-c4ee77f341da",
+        "DeathParticlesCar": {
+          "_type": "gameobject",
+          "prefab": "prefabs/particles_death.prefab"
+        },
+        "DeathParticlesWater": {
+          "_type": "gameobject",
+          "prefab": "prefabs/particles_death_water.prefab"
+        },
         "DeathSound": "sounds/jumpy.death.sound",
+        "JumpParticles": {
+          "_type": "gameobject",
+          "prefab": "prefabs/particles_jump.prefab"
+        },
         "JumpSound": "sounds/jumpy.hop.sound",
         "RespawnSound": "sounds/jumpy.respawn.sound"
       }

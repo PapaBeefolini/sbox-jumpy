@@ -114,6 +114,15 @@
           "Contrast": 1.05,
           "HueRotate": 0,
           "Saturation": 1.1
+        },
+        {
+          "__type": "Vignette",
+          "__guid": "860201c8-625e-492d-8e38-5195efbebb5f",
+          "Center": "0.5,0.5",
+          "Color": "0,0,0,1",
+          "Intensity": 0.4,
+          "Roundness": 0.7,
+          "Smoothness": 1
         }
       ]
     },
@@ -236,7 +245,7 @@
   },
   "Title": "main",
   "Description": "",
-  "LastSaved": "2024-03-15T21:24:23.311279-04:00",
+  "LastSaved": "2024-03-16T00:16:18.2846696-04:00",
   "ResourceVersion": 1,
   "__version": 1,
   "__references": []
