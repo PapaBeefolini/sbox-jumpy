@@ -1,0 +1,53 @@
+{
+  "RootObject": {
+    "__guid": "1cb3433a-74e4-4ac1-8a7c-541338490ff1",
+    "Name": "car",
+    "Tags": "car",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "Components": [
+      {
+        "__type": "SkinnedModelRenderer",
+        "__guid": "3405ec72-5713-45cc-aaa6-c187e44d2709",
+        "BodyGroups": 18446744073709551615,
+        "CreateBoneObjects": false,
+        "Model": "models/car-lowpoly-1.vmdl",
+        "RenderType": "On",
+        "Tint": "1,1,1,1"
+      },
+      {
+        "__type": "ModelCollider",
+        "__guid": "d1970e96-8c0e-4951-9f6b-5c08bce04e5c",
+        "IsTrigger": false,
+        "Model": "models/car-lowpoly-1.vmdl",
+        "Static": false
+      },
+      {
+        "__type": "Rigidbody",
+        "__guid": "b530d593-69fc-4ff7-9b8e-4c50ebc4c0a3",
+        "__enabled": false,
+        "AngularDamping": 0,
+        "Gravity": false,
+        "LinearDamping": 0,
+        "Locking": {},
+        "MassOverride": 0,
+        "MotionEnabled": true,
+        "RigidbodyFlags": 0,
+        "StartAsleep": false
+      },
+      {
+        "__type": "Car",
+        "__guid": "998e49a9-6e8f-4ce3-9289-e7bfa5307f1e",
+        "MaxSpeed": 1200,
+        "MinSpeed": 1000
+      }
+    ],
+    "Children": []
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

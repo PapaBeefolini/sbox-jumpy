@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("jumpy")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3e5bf726196872c0cf355652c0a5161f8030eb1f")]
 [assembly: System.Reflection.AssemblyProductAttribute("jumpy")]
 [assembly: System.Reflection.AssemblyTitleAttribute("jumpy")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

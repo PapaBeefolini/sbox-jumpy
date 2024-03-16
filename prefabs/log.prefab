@@ -1,0 +1,52 @@
+{
+  "RootObject": {
+    "__guid": "e6d9aa41-68cc-4711-83e3-d64ddc59cb3f",
+    "Name": "log",
+    "Tags": "log",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "Components": [
+      {
+        "__type": "ModelRenderer",
+        "__guid": "0033dc64-9b29-4379-90c2-fa5a1ed3dc5b",
+        "BodyGroups": 18446744073709551615,
+        "Model": "models/log.vmdl",
+        "RenderType": "On",
+        "Tint": "1,1,1,1"
+      },
+      {
+        "__type": "ModelCollider",
+        "__guid": "a9d60b5d-7d98-42b4-ab7c-55694eac5fb1",
+        "IsTrigger": false,
+        "Model": "models/log.vmdl",
+        "Static": false
+      },
+      {
+        "__type": "Rigidbody",
+        "__guid": "7009cead-567f-4bff-a092-b9bd71dfbc5b",
+        "__enabled": false,
+        "AngularDamping": 0,
+        "Gravity": false,
+        "LinearDamping": 0,
+        "Locking": {},
+        "MassOverride": 0,
+        "MotionEnabled": true,
+        "RigidbodyFlags": 0,
+        "StartAsleep": false
+      },
+      {
+        "__type": "MovingEntity",
+        "__guid": "e02d3635-cb07-441c-b3d6-1512a1aa3912",
+        "MaxSpeed": 350,
+        "MinSpeed": 350
+      }
+    ],
+    "Children": []
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

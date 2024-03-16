@@ -24,7 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<AdditionalFiles Include="**/*.razor" />
+		<AdditionalFiles Include="**/*.razor" Exclude="**\editor\**\*;**\unittest\**\*" />
 	</ItemGroup>
 
 
@@ -45,7 +45,6 @@
 		<Reference Include="..\..\..\bin\managed/Sandbox.System.dll" />
 		<Reference Include="..\..\..\bin\managed/Sandbox.Engine.dll" />
 		<Reference Include="..\..\..\bin\managed/Sandbox.Game.dll" />
-		<Reference Include="..\..\..\bin\managed/Sandbox.Event.dll" />
 		<Reference Include="..\..\..\bin\managed/Sandbox.Reflection.dll" />
 	</ItemGroup>
 

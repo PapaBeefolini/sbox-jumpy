@@ -1,0 +1,25 @@
+{
+  "RootObject": {
+    "__guid": "d389f47c-4051-4ffc-bb8b-6d982458c668",
+    "Name": "pebbles",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "Components": [
+      {
+        "__type": "ModelRenderer",
+        "__guid": "96a16547-662c-43cc-8213-7c208e41b8eb",
+        "BodyGroups": 18446744073709551615,
+        "Model": "models/pebbles.vmdl",
+        "RenderType": "On",
+        "Tint": "1,1,1,1"
+      }
+    ],
+    "Children": []
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

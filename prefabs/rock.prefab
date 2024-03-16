@@ -1,0 +1,44 @@
+{
+  "RootObject": {
+    "__guid": "eb2e9cca-392f-47dd-80e2-08dec0b07fdc",
+    "Name": "rock",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "Components": [
+      {
+        "__type": "ModelRenderer",
+        "__guid": "9b182c4b-9935-4bb0-bbe9-57dfc8122858",
+        "BodyGroups": 18446744073709551615,
+        "Model": "models/rock.vmdl",
+        "RenderType": "On",
+        "Tint": "1,1,1,1"
+      },
+      {
+        "__type": "ModelCollider",
+        "__guid": "24eedf29-d611-4412-9a2a-e942163d905c",
+        "IsTrigger": false,
+        "Model": "models/rock.vmdl",
+        "Static": true
+      },
+      {
+        "__type": "Rigidbody",
+        "__guid": "d8e2567d-f3b2-4183-9b0c-ec2c627daba3",
+        "AngularDamping": 0,
+        "Gravity": true,
+        "LinearDamping": 0,
+        "Locking": {},
+        "MassOverride": 0,
+        "MotionEnabled": false,
+        "RigidbodyFlags": 0,
+        "StartAsleep": false
+      }
+    ],
+    "Children": []
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

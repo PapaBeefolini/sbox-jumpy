@@ -2,26 +2,31 @@
 
 namespace Jumpy
 {
-	public partial class MovingEntity : AnimatedEntity
+	public class MovingEntity : Component
 	{
-		public float Speed;
+		[Property] public float MinSpeed = 350;
+		[Property] public float MaxSpeed = 350;
+		public float Speed { get; set; }
 
-		public override void Spawn()
+
+		protected override void OnAwake()
 		{
-			base.Spawn();
-
-			EnableLagCompensation = true;
-
-			SetupPhysicsFromModel( PhysicsMotionType.Static );
+			Speed = Game.Random.Float( MinSpeed, MaxSpeed );
 		}
 
-		[GameEvent.Tick.Server]
-		public void Move()
-		{
-			Position += Vector3.Right * Speed * Time.Delta;
 
-			if ( Position.y > 5000 || Position.y < -5000 )
-				Delete();
+		protected override void OnUpdate()
+		{
+			Move();
+		}
+
+
+		void Move()
+		{
+			Transform.Position += Vector3.Right * Speed * Time.Delta;
+
+			if ( Transform.Position.y > 5000 || Transform.Position.y < -5000 )
+				GameObject.Destroy();
 		}
 	}
 }

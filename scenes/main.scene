@@ -1,0 +1,242 @@
+{
+  "__guid": "41fec647-431c-40b5-8686-66f34a3f05d0",
+  "GameObjects": [
+    {
+      "__guid": "853183fb-778a-418e-becc-fbc58bf3e755",
+      "Name": "GameManager",
+      "Enabled": true,
+      "NetworkMode": 1,
+      "Components": [
+        {
+          "__type": "GameManager",
+          "__guid": "ba27bea5-12a3-440c-86a5-4281175ec73f",
+          "BigRoadPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/big-road.prefab"
+          },
+          "CarPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/car.prefab"
+          },
+          "LillyPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/lilly.prefab"
+          },
+          "LogPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/log.prefab"
+          },
+          "PebblesPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/pebbles.prefab"
+          },
+          "PlayerPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/frog.prefab"
+          },
+          "RoadPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/road.prefab"
+          },
+          "RockPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/rock.prefab"
+          },
+          "TilePrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/tile.prefab"
+          },
+          "TreePrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/tree.prefab"
+          }
+        }
+      ]
+    },
+    {
+      "__guid": "7b6b3e2f-a30d-4007-8ce3-e9024815a049",
+      "Name": "Camera",
+      "Position": "-300,0,100",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "CameraComponent",
+          "__guid": "96d1ce86-4acd-4fe3-a7ec-7f9e5a03ac05",
+          "BackgroundColor": "0.33333,0.46275,0.52157,1",
+          "ClearFlags": "All",
+          "FieldOfView": 60,
+          "IsMainCamera": true,
+          "Orthographic": false,
+          "OrthographicHeight": 1204,
+          "Priority": 1,
+          "RenderExcludeTags": "",
+          "RenderTags": "",
+          "TargetEye": "None",
+          "Viewport": "0,0,1,1",
+          "ZFar": 10000,
+          "ZNear": 10
+        },
+        {
+          "__type": "Bloom",
+          "__guid": "e904e854-0077-4f3e-860e-67414701cd4c",
+          "BloomColor": {
+            "color": [
+              {
+                "c": "1,1,1,1"
+              },
+              {
+                "t": 1,
+                "c": "1,1,1,1"
+              }
+            ],
+            "alpha": []
+          },
+          "BloomCurve": [
+            {
+              "y": 0.5
+            },
+            {
+              "x": 1,
+              "y": 1
+            }
+          ],
+          "Mode": "Additive",
+          "Strength": 0.3,
+          "Threshold": 0.1,
+          "ThresholdWidth": 0
+        },
+        {
+          "__type": "ColorAdjustments",
+          "__guid": "de806548-cee9-4f6c-95d5-78b24fcc590e",
+          "Brightness": 1.4,
+          "Contrast": 1.05,
+          "HueRotate": 0,
+          "Saturation": 1.1
+        }
+      ]
+    },
+    {
+      "__guid": "7c8250f2-e4d4-4fe3-80c0-4e516bd5e8c6",
+      "Name": "Lighting",
+      "Position": "0,0,100",
+      "Tags": "skybox",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "SkyBox2D",
+          "__guid": "29cf2268-8488-4cbc-acd1-ebc5b467a525",
+          "SkyMaterial": "materials/skybox/light_test_sky_sunny03.vmat",
+          "Tint": "1,1,1,1"
+        }
+      ],
+      "Children": [
+        {
+          "__guid": "c192ae82-23f4-4a49-943e-7a5f7305bde4",
+          "Name": "Sun",
+          "Position": "0,0,50",
+          "Rotation": "0.4594657,0.6549615,0.1879589,0.5697264",
+          "Tags": "light_directional,light",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "Components": [
+            {
+              "__type": "DirectionalLight",
+              "__guid": "65b14dde-4766-494c-b61a-0df5460fe996",
+              "FogMode": "Enabled",
+              "FogStrength": 1,
+              "LightColor": "1.5,1.5,1.5,1",
+              "Shadows": true,
+              "SkyColor": "1,1,1,1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "__guid": "50b401b6-5fa9-4850-9396-123876c6ce16",
+      "Name": "Water",
+      "Position": "0,0,12",
+      "Tags": "water",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "ModelRenderer",
+          "__guid": "e1f37804-d52e-4c8b-9090-70c9b410fa4b",
+          "BodyGroups": 18446744073709551615,
+          "Model": "models/water.vmdl",
+          "RenderType": "On",
+          "Tint": "1,1,1,1"
+        },
+        {
+          "__type": "ModelCollider",
+          "__guid": "fd565734-ac23-485c-8c42-8ce8ee441d31",
+          "IsTrigger": false,
+          "Model": "models/water.vmdl",
+          "Static": true
+        },
+        {
+          "__type": "Rigidbody",
+          "__guid": "6879c36d-017f-4b56-97e1-75172073a14c",
+          "AngularDamping": 0,
+          "Gravity": false,
+          "LinearDamping": 0,
+          "Locking": {},
+          "MassOverride": 0,
+          "MotionEnabled": false,
+          "RigidbodyFlags": 0,
+          "StartAsleep": false
+        }
+      ],
+      "Children": [
+        {
+          "__guid": "e4c767f1-649b-46a4-872e-c906c2f67054",
+          "Name": "Seabed",
+          "Position": "0,0,-4",
+          "Rotation": "-0,0,1,-0.00000004371139",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "f23f26f2-4f37-4bf7-94c8-c2758728a47b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/water.vmdl",
+              "RenderType": "Off",
+              "Tint": "1,1,1,1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "SceneProperties": {
+    "FixedUpdateFrequency": 50,
+    "Lerping": true,
+    "MaxFixedUpdates": 5,
+    "NetworkFrequency": 30,
+    "ThreadedAnimation": true,
+    "TimeScale": 1,
+    "UseFixedUpdate": true,
+    "NavMesh": {
+      "Enabled": false,
+      "IncludeStaticBodies": true,
+      "IncludeKeyframedBodies": true,
+      "EditorAutoUpdate": true,
+      "AgentHeight": 64,
+      "AgentRadius": 16,
+      "AgentStepSize": 18,
+      "AgentMaxSlope": 40,
+      "ExcludedBodies": "",
+      "IncludedBodies": ""
+    }
+  },
+  "Title": "main",
+  "Description": "",
+  "LastSaved": "2024-03-15T20:24:03.4645933-04:00",
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

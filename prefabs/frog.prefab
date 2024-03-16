@@ -1,0 +1,40 @@
+{
+  "RootObject": {
+    "__guid": "5032e116-15b4-4f66-bd51-ffe606f1f928",
+    "Name": "frog",
+    "Tags": "player",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "Components": [
+      {
+        "__type": "SkinnedModelRenderer",
+        "__guid": "6257a0ab-4256-4f9e-9483-401afa9f3cdb",
+        "AnimationGraph": "animgraphs/frog.vanmgrph",
+        "BodyGroups": 18446744073709551615,
+        "CreateBoneObjects": false,
+        "Model": "models/frog.vmdl",
+        "RenderType": "On",
+        "Tint": "1,1,1,1"
+      },
+      {
+        "__type": "SphereCollider",
+        "__guid": "e405332b-04b0-44a4-9cd9-b17b56198253",
+        "Center": "0,0,2",
+        "IsTrigger": true,
+        "Radius": 8,
+        "Static": false
+      },
+      {
+        "__type": "Frog",
+        "__guid": "6e172896-50b7-423a-a4e2-c9f1f10197ed"
+      }
+    ],
+    "Children": []
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

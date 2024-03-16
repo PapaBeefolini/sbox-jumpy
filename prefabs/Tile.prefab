@@ -1,0 +1,44 @@
+{
+  "RootObject": {
+    "__guid": "beb2870b-39ce-4552-8c0e-c5bc9c1bb9af",
+    "Name": "tile",
+    "Enabled": true,
+    "NetworkMode": 1,
+    "Components": [
+      {
+        "__type": "ModelRenderer",
+        "__guid": "b258b445-0e8f-4b3e-8674-5e03cd2d3c7b",
+        "BodyGroups": 18446744073709551615,
+        "Model": "models/tile.vmdl",
+        "RenderType": "On",
+        "Tint": "1,1,1,1"
+      },
+      {
+        "__type": "ModelCollider",
+        "__guid": "64529320-bf21-4657-86dc-d8e71749fed9",
+        "IsTrigger": false,
+        "Model": "models/tile.vmdl",
+        "Static": true
+      },
+      {
+        "__type": "Rigidbody",
+        "__guid": "67162088-7418-4f4d-9b86-4483e769cf96",
+        "AngularDamping": 0,
+        "Gravity": true,
+        "LinearDamping": 0,
+        "Locking": {},
+        "MassOverride": 0,
+        "MotionEnabled": false,
+        "RigidbodyFlags": 0,
+        "StartAsleep": false
+      }
+    ],
+    "Children": []
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}
