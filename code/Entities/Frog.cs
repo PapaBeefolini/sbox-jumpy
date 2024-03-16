@@ -6,8 +6,11 @@ using System.Diagnostics;
 
 public sealed class Frog : Component, Component.ITriggerListener
 {
-	public Jumpy.GameManager Jumpy { get; set; }
+	[Property] public SoundEvent JumpSound { get; set; }
+	[Property] public SoundEvent RespawnSound { get; set; }
+	[Property] public SoundEvent DeathSound { get; set; }
 
+	public Jumpy.GameManager Jumpy { get; set; }
 	public Vector3 WorldPosition { get; set; }
 	public bool IsGrounded { get; set; } = false;
 	public GameObject Log { get; set; }
@@ -144,7 +147,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 					Transform.Rotation = Rotation.LookAt( direction, Vector3.Up );
 
 				renderer.Set( "Grounded", false );
-				//Sound.FromWorld( "jumpy.hop", Position );
+				Sound.Play( JumpSound, Transform.Position );
 				//Particles.Create( "particles/jump_particles.vpcf", Position );
 			}
 		}
@@ -153,6 +156,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	public void OnTriggerEnter( Collider other )
 	{
+		if ( !Jumpy.IsGameActive )
+			return;
+
 		if ( other.Tags.Has( "car" ) )
 			_ = Die( DeathType.Car );
 		else if ( other.Tags.Has( "water" ) )
@@ -174,7 +180,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		collider.Enabled = true;
 		renderer.Enabled = true;
 		renderer.Set( "Grounded", true );
-		//Sound.FromWorld( "jumpy.respawn", Position );
+		Sound.Play( RespawnSound, Transform.Position );
 		ResetCamera();
 	}
 
@@ -188,8 +194,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		Log = null;
 		collider.Enabled = false;
 		renderer.Enabled = false;
-		//Sound.FromWorld( "jumpy.death", Position );
-		//Sound.PlayFile( SoundFile.Load("jumpy.death") );
+		Sound.Play( DeathSound, Transform.Position );
 
 		/*switch ( deathType )
 		{

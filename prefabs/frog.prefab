@@ -1,6 +1,6 @@
 {
   "RootObject": {
-    "__guid": "5032e116-15b4-4f66-bd51-ffe606f1f928",
+    "__guid": "62c055a8-4c78-41b5-a7ef-8fc1721ee558",
     "Name": "frog",
     "Tags": "player",
     "Enabled": true,
@@ -8,7 +8,7 @@
     "Components": [
       {
         "__type": "SkinnedModelRenderer",
-        "__guid": "6257a0ab-4256-4f9e-9483-401afa9f3cdb",
+        "__guid": "2944e1dc-ccb2-40ca-aeab-e07313217290",
         "AnimationGraph": "animgraphs/frog.vanmgrph",
         "BodyGroups": 18446744073709551615,
         "CreateBoneObjects": false,
@@ -18,7 +18,7 @@
       },
       {
         "__type": "SphereCollider",
-        "__guid": "e405332b-04b0-44a4-9cd9-b17b56198253",
+        "__guid": "cfc8b093-8ba1-4a16-8277-be80144e76f2",
         "Center": "0,0,2",
         "IsTrigger": true,
         "Radius": 8,
@@ -26,7 +26,10 @@
       },
       {
         "__type": "Frog",
-        "__guid": "6e172896-50b7-423a-a4e2-c9f1f10197ed"
+        "__guid": "3b373179-3d4b-460f-8812-8e2cb20ff58e",
+        "DeathSound": "sounds/jumpy.death.sound",
+        "JumpSound": "sounds/jumpy.hop.sound",
+        "RespawnSound": "sounds/jumpy.respawn.sound"
       }
     ],
     "Children": []

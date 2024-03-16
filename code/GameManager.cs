@@ -11,6 +11,8 @@ namespace Jumpy
 {
 	public sealed class GameManager : Component, Component.INetworkListener
 	{
+		[Property] public SoundEvent GameMusic { get; set; }
+
 		[Property] public GameObject PlayerPrefab { get; set; }
 		[Property] public GameObject TilePrefab { get; set; }
 
@@ -63,6 +65,8 @@ namespace Jumpy
 
 		protected override void OnStart()
 		{
+			Sound.Play( GameMusic );
+
 			_ = StartNewGame();
 		}
 

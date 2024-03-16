@@ -1,15 +1,19 @@
 {
-	"UI": false,
-	"Volume": 1,
-	"VolumeRandom": 0,
-	"Pitch": 1,
-	"PitchRandom": 0.020000,
-	"Decibels": 95,
-	"Sounds":
-	[
-		"sounds/jumpy.hop.vsnd"
-	],
-	"SelectionMode": "Random",
-	"MaximumDistance": 2080,
-	"MinimumDistance": 104
+  "UI": false,
+  "Volume": "10.00,1.00,0",
+  "Pitch": "0.98,1.02,1",
+  "Decibels": 95,
+  "SelectionMode": "Random",
+  "Sounds": [
+    "sounds/jumpy.hop.vsnd"
+  ],
+  "Occlusion": true,
+  "Reflections": true,
+  "AirAbsorption": true,
+  "Transmission": true,
+  "OcclusionRadius": 64,
+  "DistanceAttenuation": true,
+  "ResourceVersion": 0,
+  "__version": 0,
+  "__references": []
 }
