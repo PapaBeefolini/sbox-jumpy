@@ -1,0 +1,35 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Threading.Tasks
+@using Sandbox;
+@using Sandbox.Network
+@inherits PanelComponent
+@namespace Jumpy
+
+<root>
+	@if (IsGameOver)
+	{
+		<label>Game Over!</label>
+	}
+</root>
+
+@code
+{
+	private Manager Manager { get; set; }
+	private bool IsGameOver { get; set; }
+	protected override int BuildHash() => HashCode.Combine(RealTime.Now);
+
+
+	protected override void OnUpdate()
+	{
+		if (!Manager.IsValid())
+		{
+			Manager = Scene.GetAllComponents<Manager>().FirstOrDefault();
+		}
+		else
+		{
+			IsGameOver = Manager.IsGameOver;
+		}
+	}
+}

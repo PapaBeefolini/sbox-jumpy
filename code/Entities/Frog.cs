@@ -3,6 +3,10 @@ using System.Threading.Tasks;
 using System;
 using Jumpy;
 using System.Diagnostics;
+using System.Numerics;
+using Sandbox.Diagnostics;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 public sealed class Frog : Component, Component.ITriggerListener
 {
@@ -14,7 +18,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 	[Property] public SoundEvent RespawnSound { get; set; }
 	[Property] public SoundEvent DeathSound { get; set; }
 
-	public Jumpy.GameManager Jumpy { get; set; }
+	[Sync] public Color FrogColor { get; set; } = Color.White;
+
+	public Manager Manager { get; set; }
 	public Vector3 WorldPosition { get; set; }
 	public bool IsGrounded { get; set; } = false;
 	public GameObject Log { get; set; }
@@ -31,7 +37,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private SphereCollider collider;
 
 	private float jumpDistance = 96;
-	private float jumpHeight = 3;
+	private float jumpHeight = 6;
 	private float maxJumpAngle = 35;
 
 	private Vector3 jumpOffset;
@@ -40,25 +46,26 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	protected override void OnAwake()
 	{
+		Manager = Scene.GetAllComponents<Manager>().FirstOrDefault();
 		renderer = Components.Get<SkinnedModelRenderer>();
-		renderer.Tint = Color.Random;
 		collider = Components.Get<SphereCollider>();
-	}
-
-
-	protected override void OnStart()
-	{
-		if ( !IsProxy )
-			ResetCamera();
 	}
 
 
 	protected override void OnUpdate()
 	{
-		if ( IsProxy || IsDead )
+		UpdateCamera();
+
+		renderer.Tint = FrogColor;
+	}
+
+
+	protected override void OnFixedUpdate()
+	{
+		if ( IsProxy || IsDead || !Manager.IsGameActive )
 			return;
 
-		if ( IsGrounded && !Game.IsMainMenuVisible )
+		if ( IsGrounded )
 		{
 			if ( Input.Down( "Forward" ) )
 				Move( Vector3.Forward );
@@ -68,6 +75,8 @@ public sealed class Frog : Component, Component.ITriggerListener
 				Move( Vector3.Left );
 			else if ( Input.Down( "Right" ) )
 				Move( Vector3.Right );
+			else if ( Input.Pressed( "Use" ) )
+				_ = Manager.EndGame();
 		}
 
 		if ( Log != null )
@@ -82,21 +91,14 @@ public sealed class Frog : Component, Component.ITriggerListener
 		float distanceToLand = (Transform.Position - WorldPosition).Length;
 
 		if ( distanceToLand <= 16.0f )
-			renderer.Set( "Grounded", true );
+			UpdateAnimation( true );
 
-		if ( distanceToLand < 0.4f )
+		if ( distanceToLand < 0.2f )
 			IsGrounded = true;
 
-		if ( Networking.IsHost )
-		{
-			if ( Jumpy == null )
-				return;
-			float killBorder = (Jumpy.GetWorldWidthY() / 2) + Jumpy.GetTileSize();
-			if ( Transform.Position.y <= -killBorder || Transform.Position.y >= killBorder )
-				_ = Die( DeathType.Car );
-		}
-
-		UpdateCamera();
+		float killBorder = (Manager.GetWorldWidthY() / 2) + Manager.GetTileSize();
+		if ( Transform.Position.y <= -killBorder || Transform.Position.y >= killBorder )
+			_ = Die( DeathType.Car );
 	}
 
 
@@ -150,9 +152,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 				if ( direction != Vector3.Up || direction != Vector3.Down )
 					Transform.Rotation = Rotation.LookAt( direction, Vector3.Up );
 
-				renderer.Set( "Grounded", false );
+				UpdateAnimation( false );
+				SpawnJumpParticles( Transform.Position );
 				Sound.Play( JumpSound, Transform.Position );
-				JumpParticles.Clone( Transform.Position, Rotation.FromPitch(-90) );
 			}
 		}
 	}
@@ -160,60 +162,96 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	public void OnTriggerEnter( Collider other )
 	{
-		if ( !Jumpy.IsGameActive )
+		if ( IsProxy || !Manager.IsValid() || !Manager.IsGameActive )
 			return;
 
 		if ( other.Tags.Has( "car" ) )
 			_ = Die( DeathType.Car );
 		else if ( other.Tags.Has( "water" ) )
 			_ = Die( DeathType.Water );
-		else if ( other.Tags.Has( "player" ) )
-			_ = Die( DeathType.Car );
 	}
 
 
+	[Broadcast]
 	public void Respawn( Vector3 position )
 	{
+		if ( IsProxy )
+			return;
+
 		IsDead = false;
 		Log = null;
 		IsGrounded = false;
 		WorldPosition = position;
 		Transform.Position = position;
 		Transform.Rotation = Rotation.LookAt( Vector3.Forward, Vector3.Up );
-		renderer.Tint = Color.Random;
-		collider.Enabled = true;
-		renderer.Enabled = true;
-		renderer.Set( "Grounded", true );
-		Sound.Play( RespawnSound, Transform.Position );
+		FrogColor = Color.Random;
+		UpdateAppearance( IsDead );
+		UpdateAnimation( true );
 		ResetCamera();
 	}
 
 
 	private async Task Die( DeathType deathType )
 	{
-		if ( !Networking.IsHost || IsDead )
+		if ( IsProxy || IsDead )
 			return;
 
 		IsDead = true;
 		Log = null;
-		collider.Enabled = false;
-		renderer.Enabled = false;
-		Sound.Play( DeathSound, Transform.Position );
-
-		switch ( deathType )
-		{
-			case DeathType.Car:
-				DeathParticlesCar.Clone( Transform.Position + Vector3.Up * 8 );
-				break;
-			case DeathType.Water:
-				DeathParticlesWater.Clone( Transform.Position + Vector3.Up * 2, Rotation.FromPitch(-90) );
-				break;
-		}
+		UpdateAppearance( IsDead );
+		SpawnDeathParticles( deathType, Transform.Position );
 
 		await Task.DelaySeconds( 5.0f );
 
 		if ( IsDead )
-			Jumpy.RespawnFrog( this );
+			Manager.RespawnFrog( this );
+	}
+
+
+	[Broadcast]
+	private void SpawnDeathParticles(DeathType deathType, Vector3 position)
+	{
+		switch ( deathType )
+		{
+			case DeathType.Car:
+				DeathParticlesCar.Clone( position + Vector3.Up * 8 );
+				break;
+			case DeathType.Water:
+				DeathParticlesWater.Clone( position + Vector3.Up * 2, Rotation.FromPitch( -90 ) );
+				break;
+		}
+	}
+
+
+	[Broadcast]
+	private void SpawnJumpParticles(Vector3 position)
+	{
+		JumpParticles.Clone( position, Rotation.FromPitch( -90 ) );
+	}
+
+
+	[Broadcast]
+	private void UpdateAppearance(bool dead)
+	{
+		if ( dead )
+		{
+			collider.Enabled = false;
+			renderer.Enabled = false;
+			Sound.Play( DeathSound, Transform.Position );
+		}
+		else
+		{
+			collider.Enabled = true;
+			renderer.Enabled = true;
+			Sound.Play( RespawnSound, Transform.Position );
+		}
+	}
+
+
+	[Broadcast]
+	private void UpdateAnimation( bool grounded )
+	{
+		renderer.Set( "Grounded", grounded );
 	}
 
 

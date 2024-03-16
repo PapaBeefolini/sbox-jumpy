@@ -15,7 +15,7 @@ namespace Jumpy
 		}
 
 
-		protected override void OnUpdate()
+		protected override void OnFixedUpdate()
 		{
 			Move();
 		}
@@ -23,6 +23,9 @@ namespace Jumpy
 
 		void Move()
 		{
+			if ( !Networking.IsHost )
+				return;
+
 			Transform.Position += Vector3.Right * Speed * Time.Delta;
 
 			if ( Transform.Position.y > 5000 || Transform.Position.y < -5000 )

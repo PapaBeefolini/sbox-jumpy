@@ -1,0 +1,19 @@
+﻿gameui {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	font-family: Poppins;
+
+	label {
+		font-size: 96px;
+		font-weight: bold;
+		color: #b6ff00;
+		text-shadow: 4px 4px 0 black;
+		width: 100%;
+		height: 100%;
+		text-align: center;
+		align-items: center;
+	}
+}

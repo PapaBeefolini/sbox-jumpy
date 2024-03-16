@@ -1,6 +1,6 @@
 {
   "RootObject": {
-    "__guid": "1cb3433a-74e4-4ac1-8a7c-541338490ff1",
+    "__guid": "eef3cb51-f92a-4a84-ac0f-d56690543e80",
     "Name": "car",
     "Tags": "car",
     "Enabled": true,
@@ -8,7 +8,7 @@
     "Components": [
       {
         "__type": "SkinnedModelRenderer",
-        "__guid": "3405ec72-5713-45cc-aaa6-c187e44d2709",
+        "__guid": "03fe8465-f60c-4f49-b03a-692f07f98728",
         "BodyGroups": 18446744073709551615,
         "CreateBoneObjects": false,
         "Model": "models/car-lowpoly-1.vmdl",
@@ -17,29 +17,37 @@
       },
       {
         "__type": "ModelCollider",
-        "__guid": "d1970e96-8c0e-4951-9f6b-5c08bce04e5c",
+        "__guid": "8b55d8d4-d892-4c55-a1a2-af13daa714a1",
         "IsTrigger": false,
         "Model": "models/car-lowpoly-1.vmdl",
         "Static": false
       },
       {
-        "__type": "Rigidbody",
-        "__guid": "b530d593-69fc-4ff7-9b8e-4c50ebc4c0a3",
-        "__enabled": false,
-        "AngularDamping": 0,
-        "Gravity": false,
-        "LinearDamping": 0,
-        "Locking": {},
-        "MassOverride": 0,
-        "MotionEnabled": true,
-        "RigidbodyFlags": 0,
-        "StartAsleep": false
-      },
-      {
         "__type": "Car",
-        "__guid": "998e49a9-6e8f-4ce3-9289-e7bfa5307f1e",
+        "__guid": "fa621b8c-8616-4524-9b37-d379d10a0bf3",
         "MaxSpeed": 1200,
         "MinSpeed": 1000
+      },
+      {
+        "__type": "SoundPointComponent",
+        "__guid": "10f24d05-84f8-4934-b33f-1d38c685d189",
+        "DistanceAttenuation": false,
+        "DistanceAttenuationOverride": false,
+        "Force2d": false,
+        "MaxRepeatTime": 1,
+        "MinRepeatTime": 1,
+        "Occlusion": false,
+        "OcclusionOverride": false,
+        "OcclusionRadius": 32,
+        "Pitch": 1,
+        "PlayOnStart": false,
+        "ReflectionOverride": false,
+        "Reflections": false,
+        "Repeat": false,
+        "SoundEvent": "sounds/engine.loop.sound",
+        "SoundOverride": false,
+        "StopOnNew": false,
+        "Volume": 1
       }
     ],
     "Children": []

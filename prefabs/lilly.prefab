@@ -1,13 +1,13 @@
 {
   "RootObject": {
-    "__guid": "597fb7f8-6a0c-4a9f-bfec-21b56b035a09",
+    "__guid": "aac3fdec-de5d-4718-9d8c-1462cf4e9d39",
     "Name": "lilly",
     "Enabled": true,
     "NetworkMode": 1,
     "Components": [
       {
         "__type": "ModelRenderer",
-        "__guid": "5445fd6b-9c5a-4d64-adca-233b9fab7e74",
+        "__guid": "4ee7d53f-5dbb-419a-993d-d158b476d0a6",
         "BodyGroups": 18446744073709551615,
         "Model": "models/lilly.vmdl",
         "RenderType": "On",
@@ -15,22 +15,10 @@
       },
       {
         "__type": "ModelCollider",
-        "__guid": "3df19ca9-e9b5-4c03-a0a5-03425398e842",
+        "__guid": "e6824e30-67a2-444e-a12e-d7d6647e0c0b",
         "IsTrigger": false,
         "Model": "models/lilly.vmdl",
         "Static": true
-      },
-      {
-        "__type": "Rigidbody",
-        "__guid": "0e73bf4d-55bb-42e2-98e8-ac9bd7070ba3",
-        "AngularDamping": 0,
-        "Gravity": true,
-        "LinearDamping": 0,
-        "Locking": {},
-        "MassOverride": 0,
-        "MotionEnabled": false,
-        "RigidbodyFlags": 0,
-        "StartAsleep": false
       }
     ],
     "Children": []

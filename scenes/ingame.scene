@@ -1,0 +1,285 @@
+{
+  "__guid": "b0a02057-e12d-4159-b905-e43d3aabce78",
+  "GameObjects": [
+    {
+      "__guid": "ecd361e5-0d58-467f-8d32-64245be88b64",
+      "Name": "GameManager",
+      "Enabled": true,
+      "NetworkMode": 1,
+      "Components": [
+        {
+          "__type": "Manager",
+          "__guid": "bd392391-6d5b-4fc3-98bd-773fae32db90",
+          "BigRoadPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/big-road.prefab"
+          },
+          "CarPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/car.prefab"
+          },
+          "LillyPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/lilly.prefab"
+          },
+          "LogPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/log.prefab"
+          },
+          "PebblesPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/pebbles.prefab"
+          },
+          "PlayerPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/frog.prefab"
+          },
+          "RoadPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/road.prefab"
+          },
+          "RockPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/rock.prefab"
+          },
+          "SpawnerPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/spawner.prefab"
+          },
+          "TilePrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/tile.prefab"
+          },
+          "TreePrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/tree.prefab"
+          }
+        },
+        {
+          "__type": "SoundPointComponent",
+          "__guid": "e9567b89-151a-4554-8b13-b300ec3a0f0e",
+          "DistanceAttenuation": false,
+          "DistanceAttenuationOverride": false,
+          "Force2d": false,
+          "MaxRepeatTime": 1,
+          "MinRepeatTime": 1,
+          "Occlusion": false,
+          "OcclusionOverride": false,
+          "OcclusionRadius": 32,
+          "Pitch": 1,
+          "PlayOnStart": true,
+          "ReflectionOverride": false,
+          "Reflections": false,
+          "Repeat": false,
+          "SoundEvent": "sounds/jumpy.music.sound",
+          "SoundOverride": false,
+          "StopOnNew": false,
+          "Volume": 1
+        }
+      ]
+    },
+    {
+      "__guid": "d2fbf6df-7a4b-46bb-b326-cec5ef05b705",
+      "Name": "Camera",
+      "Position": "-300,0,100",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "CameraComponent",
+          "__guid": "7af598d4-d0c7-43d3-9bc4-068f0df3c1f3",
+          "BackgroundColor": "0.33333,0.46275,0.52157,1",
+          "ClearFlags": "All",
+          "FieldOfView": 60,
+          "IsMainCamera": true,
+          "Orthographic": false,
+          "OrthographicHeight": 1204,
+          "Priority": 1,
+          "RenderExcludeTags": "",
+          "RenderTags": "",
+          "TargetEye": "None",
+          "Viewport": "0,0,1,1",
+          "ZFar": 10000,
+          "ZNear": 10
+        },
+        {
+          "__type": "Bloom",
+          "__guid": "027528a6-81f2-4de6-befd-5ecb5b1a644e",
+          "BloomColor": {
+            "color": [
+              {
+                "c": "1,1,1,1"
+              },
+              {
+                "t": 1,
+                "c": "1,1,1,1"
+              }
+            ],
+            "alpha": []
+          },
+          "BloomCurve": [
+            {
+              "y": 0.5
+            },
+            {
+              "x": 1,
+              "y": 1
+            }
+          ],
+          "Mode": "Additive",
+          "Strength": 0.3,
+          "Threshold": 0.1,
+          "ThresholdWidth": 0
+        },
+        {
+          "__type": "ColorAdjustments",
+          "__guid": "e761e10c-edb7-429b-b2fa-59ee5a208483",
+          "Brightness": 1.4,
+          "Contrast": 1.05,
+          "HueRotate": 0,
+          "Saturation": 1.1
+        },
+        {
+          "__type": "Vignette",
+          "__guid": "26ba8b5d-3c36-4bbb-b25c-a6bcb1f048c5",
+          "Center": "0.5,0.5",
+          "Color": "0,0,0,1",
+          "Intensity": 0.4,
+          "Roundness": 0.7,
+          "Smoothness": 1
+        }
+      ]
+    },
+    {
+      "__guid": "19c8e219-b898-4933-8fc5-d264a48e0e7a",
+      "Name": "Lighting",
+      "Position": "0,0,100",
+      "Tags": "skybox",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "SkyBox2D",
+          "__guid": "af15bee8-cc54-4d5f-9e6d-f12b03c87420",
+          "SkyMaterial": "materials/skybox/light_test_sky_sunny03.vmat",
+          "Tint": "1,1,1,1"
+        }
+      ],
+      "Children": [
+        {
+          "__guid": "886998f3-e728-40dc-b1a5-4a0231305db5",
+          "Name": "Sun",
+          "Position": "0,0,50",
+          "Rotation": "0.4594657,0.6549615,0.1879589,0.5697264",
+          "Tags": "light_directional,light",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "Components": [
+            {
+              "__type": "DirectionalLight",
+              "__guid": "23f98bcd-a168-421d-9b0c-463c1915a2ca",
+              "FogMode": "Enabled",
+              "FogStrength": 1,
+              "LightColor": "1.5,1.5,1.5,1",
+              "Shadows": true,
+              "SkyColor": "1,1,1,1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "__guid": "589f22b6-19ee-4dd0-8e6d-7fe859e7207a",
+      "Name": "Water",
+      "Position": "0,0,12",
+      "Tags": "water",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "ModelRenderer",
+          "__guid": "d81c9319-69b9-4409-810e-7c0b4fd0643c",
+          "BodyGroups": 18446744073709551615,
+          "Model": "models/water.vmdl",
+          "RenderType": "On",
+          "Tint": "1,1,1,1"
+        },
+        {
+          "__type": "ModelCollider",
+          "__guid": "43053181-b28d-42b2-8398-7a508a38437f",
+          "IsTrigger": false,
+          "Model": "models/water.vmdl",
+          "Static": true
+        }
+      ],
+      "Children": [
+        {
+          "__guid": "2593a199-1e26-4f8b-8347-4a61d1ad0a9f",
+          "Name": "Seabed",
+          "Position": "0,0,-4",
+          "Rotation": "-0,0,1,-0.00000004371139",
+          "Enabled": true,
+          "NetworkMode": 2,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "fbd2b26e-a64b-4efb-8196-b7bc8042e28b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/water.vmdl",
+              "RenderType": "Off",
+              "Tint": "1,1,1,1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "__guid": "9ee23e6c-0911-4396-9b3d-818c89149a68",
+      "Name": "HUD",
+      "Position": "-267.1772,18.08483,93.69555",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "ScreenPanel",
+          "__guid": "be0e7be7-9716-4afc-8e73-c40f9f2ab83f",
+          "AutoScreenScale": true,
+          "Opacity": 1,
+          "Scale": 1,
+          "ZIndex": 100
+        },
+        {
+          "__type": "gameui",
+          "__guid": "eb756471-630d-4222-9132-3d0d1b14d000"
+        }
+      ]
+    }
+  ],
+  "SceneProperties": {
+    "FixedUpdateFrequency": 50,
+    "Lerping": true,
+    "MaxFixedUpdates": 5,
+    "NetworkFrequency": 30,
+    "ThreadedAnimation": true,
+    "TimeScale": 1,
+    "UseFixedUpdate": true,
+    "NavMesh": {
+      "Enabled": false,
+      "IncludeStaticBodies": true,
+      "IncludeKeyframedBodies": true,
+      "EditorAutoUpdate": true,
+      "AgentHeight": 64,
+      "AgentRadius": 16,
+      "AgentStepSize": 18,
+      "AgentMaxSlope": 40,
+      "ExcludedBodies": "",
+      "IncludedBodies": ""
+    }
+  },
+  "Title": "ingame",
+  "Description": "",
+  "LastSaved": "2024-03-16T19:34:10.1997528-04:00",
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

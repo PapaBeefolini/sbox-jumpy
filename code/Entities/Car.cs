@@ -28,9 +28,16 @@ namespace Jumpy
 
 		protected override void OnStart()
 		{
+			SetAppearance( models[Game.Random.Int( models.Length - 1 )], colors[Game.Random.Int( colors.Length - 1 )] );
+		}
+
+
+		[Broadcast(NetPermission.HostOnly)]
+		private void SetAppearance( string modelPath, Color color )
+		{
 			var renderer = Components.Get<ModelRenderer>();
-			renderer.Model = Model.Load( models[Game.Random.Int( models.Length - 1 )] );
-			renderer.Tint = colors[Game.Random.Int( colors.Length - 1 )];
+			renderer.Model = Model.Load( modelPath );
+			renderer.Tint = color;
 
 			var collider = Components.Get<ModelCollider>();
 			collider.Model = renderer.Model;

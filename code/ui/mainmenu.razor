@@ -1,0 +1,114 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Threading.Tasks
+@using Sandbox;
+@using Sandbox.Network
+@inherits PanelComponent
+@namespace Jumpy
+
+<root>
+	<div class="center">
+		<div class="left">
+			<div class="title">Jumpy</div>
+			<div class="button-list">
+				<div class="button" onclick=@( () => CreateServer() )>
+					Start Jumping
+				</div>
+
+				<div class="button" onclick=@( () => Quit() )>
+					Quit
+				</div>
+			</div>
+		</div>
+		<div class="lobby-list">
+			<div class="header">
+				<div class="title">Servers 🐸</div>
+			</div>
+
+			@if (IsRefreshing)
+			{
+				<label>Refreshing the server list.</label>
+			}
+			else if (List.Count == 0)
+			{
+				<label>Nobody else is jumpin' currently.</label>
+			}
+			else
+			{
+				<div class="button-list">
+					@foreach (var lobby in List)
+					{
+						<div class="button" onclick=@( () => OpenLobby( lobby ) )>
+							<div class="title">
+								@lobby.Name
+							</div>
+
+							<div class="meta">
+								<div class="map">
+									@lobby.Map
+								</div>
+
+								<div class="count">
+									@lobby.Members / @lobby.MaxMembers
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+</root>
+
+@code
+{
+	private bool IsRefreshing { get; set; }
+	private List<LobbyInformation> List { get; set; } = new();
+	protected override int BuildHash() => HashCode.Combine(RealTime.Now);
+
+
+	protected override void OnEnabled()
+	{
+		base.OnEnabled();
+
+		_ = RefreshLobbyList();
+	}
+
+
+	private async Task RefreshLobbyList()
+	{
+		while ( true )
+		{
+			IsRefreshing = true;
+			StateHasChanged();
+
+			List = await Networking.QueryLobbies();
+
+			IsRefreshing = false;
+			StateHasChanged();
+
+			await Task.DelayRealtimeSeconds( 5f );
+		}
+	}
+
+
+	private void OpenLobby( LobbyInformation lobby )
+	{
+		GameNetworkSystem.Connect( lobby.LobbyId );
+	}
+
+
+	private void CreateServer()
+	{
+		Game.ActiveScene.LoadFromFile( "scenes/ingame.scene" );
+	}
+
+
+	private void Quit()
+	{
+		if (Game.IsEditor)
+			return;
+		Game.Close();
+	}
+}

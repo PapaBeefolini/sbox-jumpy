@@ -1,8 +1,8 @@
 {
   "UI": false,
-  "Volume": "8.00,1.00,0",
+  "Volume": "0.50,1.00,0",
   "Pitch": "1.00,1.00,0",
-  "Decibels": 170,
+  "Decibels": 70,
   "SelectionMode": "Random",
   "Sounds": [
     "sounds/jumpy.respawn.vsnd"
@@ -12,7 +12,7 @@
   "AirAbsorption": true,
   "Transmission": true,
   "OcclusionRadius": 64,
-  "DistanceAttenuation": true,
+  "DistanceAttenuation": false,
   "ResourceVersion": 0,
   "__version": 0,
   "__references": []

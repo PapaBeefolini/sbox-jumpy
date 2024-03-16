@@ -1,13 +1,13 @@
 {
   "RootObject": {
-    "__guid": "b295cfeb-1d55-4593-b48e-1c4158ad693f",
+    "__guid": "43fdc6b4-5b04-430c-9941-c70ca1ccb4d5",
     "Name": "tree",
     "Enabled": true,
     "NetworkMode": 1,
     "Components": [
       {
         "__type": "ModelRenderer",
-        "__guid": "08496f88-9450-4ac6-9b76-473592c51980",
+        "__guid": "24042d38-b88e-4688-8358-fc3b2c88715b",
         "BodyGroups": 18446744073709551615,
         "Model": "models/tree-lowpoly-1.vmdl",
         "RenderType": "On",
@@ -15,22 +15,10 @@
       },
       {
         "__type": "ModelCollider",
-        "__guid": "bff7e1e8-dc1f-4731-895f-de0dc0ad7445",
+        "__guid": "2c06eda8-f54a-4f9e-94d7-044e95c8995b",
         "IsTrigger": false,
         "Model": "models/tree-lowpoly-1.vmdl",
         "Static": true
-      },
-      {
-        "__type": "Rigidbody",
-        "__guid": "9b0211c4-e835-4ddc-b15a-d29bfc94d2c1",
-        "AngularDamping": 0,
-        "Gravity": true,
-        "LinearDamping": 0,
-        "Locking": {},
-        "MassOverride": 0,
-        "MotionEnabled": false,
-        "RigidbodyFlags": 0,
-        "StartAsleep": false
       }
     ],
     "Children": []

@@ -1,13 +1,13 @@
 {
   "RootObject": {
-    "__guid": "d5cf88e7-2ef2-44df-a821-c2405a79052f",
+    "__guid": "7ad87ddb-ff00-4ce6-91c2-849f05b8fcd4",
     "Name": "road",
     "Enabled": true,
     "NetworkMode": 1,
     "Components": [
       {
         "__type": "ModelRenderer",
-        "__guid": "8778d7b0-2847-485e-9841-6d465d743fc8",
+        "__guid": "a76b1516-dca7-406f-aa0d-952bac14582b",
         "BodyGroups": 18446744073709551615,
         "Model": "models/road.vmdl",
         "RenderType": "On",
@@ -15,22 +15,10 @@
       },
       {
         "__type": "ModelCollider",
-        "__guid": "67571c0f-c57c-4d64-9e01-37050ce82aed",
+        "__guid": "c7b716bd-75e2-4819-af60-4b8af37d89c5",
         "IsTrigger": false,
         "Model": "models/road.vmdl",
         "Static": true
-      },
-      {
-        "__type": "Rigidbody",
-        "__guid": "b1bf7224-646e-48b4-99bd-a3938ccf7d18",
-        "AngularDamping": 0,
-        "Gravity": true,
-        "LinearDamping": 0,
-        "Locking": {},
-        "MassOverride": 0,
-        "MotionEnabled": false,
-        "RigidbodyFlags": 0,
-        "StartAsleep": false
       }
     ],
     "Children": []

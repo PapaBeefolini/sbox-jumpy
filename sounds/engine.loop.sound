@@ -2,12 +2,18 @@
   "UI": false,
   "Volume": "0.50,0.50,0",
   "Pitch": "0.50,0.50,0",
-  "Decibels": 70,
-  "SelectionMode": "Random",
+  "Decibels": 50,
+  "SelectionMode": "Forward",
   "Sounds": [
     "sounds/engine.loop.vsnd"
   ],
-  "MaximumDistance": 1143.9335,
-  "MinimumDistance": 57.196674,
+  "Occlusion": true,
+  "Reflections": true,
+  "AirAbsorption": true,
+  "Transmission": true,
+  "OcclusionRadius": 64,
+  "DistanceAttenuation": true,
+  "ResourceVersion": 0,
+  "__version": 0,
   "__references": []
 }

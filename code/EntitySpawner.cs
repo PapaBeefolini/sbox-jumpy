@@ -18,7 +18,7 @@ namespace Jumpy
 				{
 					movingEntity.Speed = -movingEntity.Speed;
 				}
-				entity.SetParent( GameObject );
+				entity.SetParent( GameObject.Parent );
 				entity.NetworkSpawn();
 
 				await Task.DelaySeconds( Game.Random.Float( delayMin, delayMax ) );

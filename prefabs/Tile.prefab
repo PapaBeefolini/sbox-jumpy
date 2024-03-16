@@ -1,13 +1,13 @@
 {
   "RootObject": {
-    "__guid": "beb2870b-39ce-4552-8c0e-c5bc9c1bb9af",
+    "__guid": "c667fe17-f6eb-45cb-8558-43acadaa8979",
     "Name": "tile",
     "Enabled": true,
     "NetworkMode": 1,
     "Components": [
       {
         "__type": "ModelRenderer",
-        "__guid": "b258b445-0e8f-4b3e-8674-5e03cd2d3c7b",
+        "__guid": "87462221-c1a7-4084-8702-ebdd415189ea",
         "BodyGroups": 18446744073709551615,
         "Model": "models/tile.vmdl",
         "RenderType": "On",
@@ -15,22 +15,10 @@
       },
       {
         "__type": "ModelCollider",
-        "__guid": "64529320-bf21-4657-86dc-d8e71749fed9",
+        "__guid": "24de1eef-5696-4b5f-918d-5c11ac723892",
         "IsTrigger": false,
         "Model": "models/tile.vmdl",
         "Static": true
-      },
-      {
-        "__type": "Rigidbody",
-        "__guid": "67162088-7418-4f4d-9b86-4483e769cf96",
-        "AngularDamping": 0,
-        "Gravity": true,
-        "LinearDamping": 0,
-        "Locking": {},
-        "MassOverride": 0,
-        "MotionEnabled": false,
-        "RigidbodyFlags": 0,
-        "StartAsleep": false
       }
     ],
     "Children": []

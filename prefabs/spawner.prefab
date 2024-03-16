@@ -1,0 +1,21 @@
+{
+  "RootObject": {
+    "__guid": "6b04f6ea-cac0-4555-9626-2dc8991b979c",
+    "Name": "spawner",
+    "Enabled": true,
+    "NetworkMode": 2,
+    "Components": [
+      {
+        "__type": "EntitySpawner",
+        "__guid": "7ad98b0f-21c5-4a99-a176-e328c4be8834"
+      }
+    ],
+    "Children": []
+  },
+  "ShowInMenu": false,
+  "MenuPath": null,
+  "MenuIcon": null,
+  "ResourceVersion": 1,
+  "__version": 1,
+  "__references": []
+}

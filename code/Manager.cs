@@ -1,18 +1,13 @@
 using Sandbox;
-using Sandbox.Diagnostics;
 using Sandbox.Network;
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Jumpy
 {
-	public sealed class GameManager : Component, Component.INetworkListener
+	public sealed class Manager : Component, Component.INetworkListener
 	{
-		[Property] public SoundEvent GameMusic { get; set; }
-
 		[Property] public GameObject PlayerPrefab { get; set; }
 		[Property] public GameObject TilePrefab { get; set; }
 
@@ -26,8 +21,10 @@ namespace Jumpy
 		[Property] public GameObject RockPrefab { get; set; }
 		[Property] public GameObject PebblesPrefab { get; set; }
 
-		public bool IsGameActive { get; set; } = false;
-		public bool IsGameOver { get; set; } = false;
+		[Property] public GameObject SpawnerPrefab { get; set; }
+
+		[Sync] public bool IsGameActive { get; set; } = false;
+		[Sync] public bool IsGameOver { get; set; } = false;
 
 		private int worldLength = 64;
 		private int worldWidth = 28;
@@ -58,23 +55,32 @@ namespace Jumpy
 				return;
 
 			var player = PlayerPrefab.Clone( new Transform(), name: $"Player - {connection.DisplayName}" );
-			player.Components.Get<Frog>().Jumpy = this;
 			player.NetworkSpawn( connection );
 		}
 
 
 		protected override void OnStart()
 		{
-			Sound.Play( GameMusic );
-
 			_ = StartNewGame();
 		}
 
 
 		protected override void OnUpdate()
 		{
-			if ( !IsGameActive )
+			if ( Input.EscapePressed )
+				Game.ActiveScene.LoadFromFile( "scenes/main.scene" );
+
+			if ( !Networking.IsHost || !IsGameActive )
 				return;
+
+			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
+			{
+				if ( frog.Transform.Position.x >= winTilePosition )
+				{
+					_ = EndGame();
+					return;
+				}
+			}
 		}
 
 
@@ -89,7 +95,7 @@ namespace Jumpy
 			GenerateWorld();
 			RespawnAllFrogs();
 
-			await Task.DelaySeconds( 1.5f );
+			await Task.DelayRealtimeSeconds( 1.5f );
 
 			IsGameActive = true;
 		}
@@ -103,7 +109,7 @@ namespace Jumpy
 			IsGameActive = false;
 			IsGameOver = true;
 
-			await Task.DelaySeconds( 3.0f );
+			await Task.DelayRealtimeSeconds( 3.0f );
 
 			_ = StartNewGame();
 		}
@@ -177,8 +183,9 @@ namespace Jumpy
 								offset = -offset;
 								flipped = true;
 							}
-							EntitySpawner spawner = CreateEntitySpawner();
-							spawner.Transform.Position = new Vector3( x * tileSize, offset, 0 );
+							GameObject root = SpawnerPrefab.Clone( new Vector3( x * tileSize, offset, 0 ) );
+							EntitySpawner spawner = root.Components.Get<EntitySpawner>();
+							root.SetParent( GameObject );
 							_ = spawner.SpawnEntities( LogPrefab, 3, 9, flipped );
 							x++;
 						}
@@ -191,8 +198,7 @@ namespace Jumpy
 					{
 						lastGenerationWasRoad = true;
 
-						var road = RoadPrefab.Clone();
-						road.Transform.Position = new Vector3( x * tileSize + 48, 0, 0 );
+						var road = RoadPrefab.Clone( new Vector3( x * tileSize + 48, 0, 0 ) );
 						road.SetParent( GameObject );
 						road.NetworkSpawn();
 						for ( int i = 0; i < 2; i++ )
@@ -206,9 +212,9 @@ namespace Jumpy
 								angle = 90;
 								flipped = true;
 							}
-							EntitySpawner spawner = CreateEntitySpawner();
-							spawner.Transform.Position = new Vector3( x * tileSize, offset, 30 );
-							spawner.Transform.Rotation = Rotation.FromYaw( angle );
+							GameObject root = SpawnerPrefab.Clone( new Vector3( x * tileSize, offset, 30 ), Rotation.FromYaw( angle ) );
+							EntitySpawner spawner = root.Components.Get<EntitySpawner>();
+							root.SetParent( GameObject );
 							_ = spawner.SpawnEntities( CarPrefab, 0.9f, 5, flipped );
 							x++;
 						}
@@ -220,8 +226,7 @@ namespace Jumpy
 					{
 						lastGenerationWasRoad = true;
 
-						var road = BigRoadPrefab.Clone();
-						road.Transform.Position = new Vector3( x * tileSize + 96, 0, 0 );
+						var road = BigRoadPrefab.Clone( new Vector3( x * tileSize + 96, 0, 0 ) );
 						road.SetParent( GameObject );
 						road.NetworkSpawn();
 						float offset = tileSize * 28;
@@ -235,9 +240,9 @@ namespace Jumpy
 						}
 						for ( int i = 0; i < 3; i++ )
 						{
-							EntitySpawner spawner = CreateEntitySpawner();
-							spawner.Transform.Position = new Vector3( x * tileSize, offset, 30 );
-							spawner.Transform.Rotation = Rotation.FromYaw( angle );
+							GameObject root = SpawnerPrefab.Clone( new Vector3( x * tileSize, offset, 30 ), Rotation.FromYaw( angle ) );
+							EntitySpawner spawner = root.Components.Get<EntitySpawner>();
+							root.SetParent( GameObject );
 							_ = spawner.SpawnEntities( CarPrefab, 0.9f, 5, flipped );
 							x++;
 						}
@@ -252,9 +257,7 @@ namespace Jumpy
 						{
 							if ( Game.Random.Int( 1 ) == 1 )
 								continue;
-							var lilly = LillyPrefab.Clone();
-							lilly.Transform.Position = new Vector3( x * tileSize, k * tileSize - tileSize * 14, 12 );
-							lilly.Transform.Rotation = Rotation.FromYaw( Game.Random.Float( 0, 360 ) );
+							var lilly = LillyPrefab.Clone( new Vector3( x * tileSize, k * tileSize - tileSize * 14, 12 ), Rotation.FromYaw( Game.Random.Float( 0, 360 ) ) );
 							lilly.SetParent( GameObject );
 							lilly.NetworkSpawn();
 						}
@@ -284,8 +287,7 @@ namespace Jumpy
 
 		private void CreateTile( Vector3 position, Color color )
 		{
-			var root = TilePrefab.Clone();
-			root.Transform.Position = position;
+			var root = TilePrefab.Clone( position );
 			root.Components.Get<ModelRenderer>().Tint = color;
 			root.SetParent( GameObject );
 			root.NetworkSpawn();
@@ -299,21 +301,9 @@ namespace Jumpy
 
 		private void CreateDecoration( GameObject prefab, Vector3 position )
 		{
-			var root = prefab.Clone();
-			root.Transform.Position = position;
-			root.Transform.Rotation = Rotation.FromYaw( Game.Random.Float( 0, 360 ) );
-			root.Transform.Scale = Game.Random.Float( 0.8f, 1.2f );
+			var root = prefab.Clone(position, Rotation.FromYaw( Game.Random.Float( 0, 360 ) ), Game.Random.Float( 0.8f, 1.2f ) );
 			root.SetParent( GameObject );
 			root.NetworkSpawn();
-		}
-
-
-		private EntitySpawner CreateEntitySpawner()
-		{
-			GameObject root = new GameObject(true, "Spawner");
-			EntitySpawner spawner = root.Components.Create<EntitySpawner>();
-			root.SetParent( GameObject );
-			return spawner;
 		}
 
 

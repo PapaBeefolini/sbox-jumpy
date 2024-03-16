@@ -1,6 +1,6 @@
 {
   "RootObject": {
-    "__guid": "e6d9aa41-68cc-4711-83e3-d64ddc59cb3f",
+    "__guid": "d3dda3c9-db28-4a8f-b73a-1362ea9d98fd",
     "Name": "log",
     "Tags": "log",
     "Enabled": true,
@@ -8,7 +8,7 @@
     "Components": [
       {
         "__type": "ModelRenderer",
-        "__guid": "0033dc64-9b29-4379-90c2-fa5a1ed3dc5b",
+        "__guid": "720b3e4d-df0d-4161-989b-3e80cf8f4f63",
         "BodyGroups": 18446744073709551615,
         "Model": "models/log.vmdl",
         "RenderType": "On",
@@ -16,27 +16,14 @@
       },
       {
         "__type": "ModelCollider",
-        "__guid": "a9d60b5d-7d98-42b4-ab7c-55694eac5fb1",
+        "__guid": "8e7e5fcd-d24e-4ad7-8afe-01fe1e013f2a",
         "IsTrigger": false,
         "Model": "models/log.vmdl",
         "Static": false
       },
       {
-        "__type": "Rigidbody",
-        "__guid": "7009cead-567f-4bff-a092-b9bd71dfbc5b",
-        "__enabled": false,
-        "AngularDamping": 0,
-        "Gravity": false,
-        "LinearDamping": 0,
-        "Locking": {},
-        "MassOverride": 0,
-        "MotionEnabled": true,
-        "RigidbodyFlags": 0,
-        "StartAsleep": false
-      },
-      {
         "__type": "MovingEntity",
-        "__guid": "e02d3635-cb07-441c-b3d6-1512a1aa3912",
+        "__guid": "f87230bc-a55e-4436-a744-0d2063024752",
         "MaxSpeed": 350,
         "MinSpeed": 350
       }

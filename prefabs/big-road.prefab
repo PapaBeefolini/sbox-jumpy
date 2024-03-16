@@ -1,13 +1,13 @@
 {
   "RootObject": {
-    "__guid": "edd5b55d-21b8-4f94-883b-e89238cb6a35",
+    "__guid": "b1944658-2349-4149-860c-e98a3d166d84",
     "Name": "big-road",
     "Enabled": true,
     "NetworkMode": 1,
     "Components": [
       {
         "__type": "ModelRenderer",
-        "__guid": "9ddeb77f-7ea2-4c2b-a7b6-f5a56146721b",
+        "__guid": "abbcac25-dfab-4b47-8e38-d8fec3bf746f",
         "BodyGroups": 18446744073709551615,
         "Model": "models/big-road.vmdl",
         "RenderType": "On",
@@ -15,22 +15,10 @@
       },
       {
         "__type": "ModelCollider",
-        "__guid": "1ad807a8-5aee-480c-9c4e-4475b147d403",
+        "__guid": "0e00401b-5293-43de-bff2-809df12927ee",
         "IsTrigger": false,
         "Model": "models/big-road.vmdl",
         "Static": true
-      },
-      {
-        "__type": "Rigidbody",
-        "__guid": "6298cb73-4b0b-4739-9f9f-fb881fffa394",
-        "AngularDamping": 0,
-        "Gravity": true,
-        "LinearDamping": 0,
-        "Locking": {},
-        "MassOverride": 0,
-        "MotionEnabled": false,
-        "RigidbodyFlags": 0,
-        "StartAsleep": false
       }
     ],
     "Children": []

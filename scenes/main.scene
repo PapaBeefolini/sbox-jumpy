@@ -2,68 +2,1995 @@
   "__guid": "41fec647-431c-40b5-8686-66f34a3f05d0",
   "GameObjects": [
     {
-      "__guid": "853183fb-778a-418e-becc-fbc58bf3e755",
-      "Name": "GameManager",
+      "__guid": "2407e551-6953-4b44-aaba-18f53b15aad1",
+      "Name": "MenuUI",
       "Enabled": true,
-      "NetworkMode": 1,
+      "NetworkMode": 2,
       "Components": [
         {
-          "__type": "GameManager",
-          "__guid": "ba27bea5-12a3-440c-86a5-4281175ec73f",
-          "BigRoadPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/big-road.prefab"
-          },
-          "CarPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/car.prefab"
-          },
-          "GameMusic": "sounds/jumpy.music.sound",
-          "LillyPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/lilly.prefab"
-          },
-          "LogPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/log.prefab"
-          },
-          "PebblesPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/pebbles.prefab"
-          },
-          "PlayerPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/frog.prefab"
-          },
-          "RoadPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/road.prefab"
-          },
-          "RockPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/rock.prefab"
-          },
-          "TilePrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/tile.prefab"
-          },
-          "TreePrefab": {
-            "_type": "gameobject",
-            "prefab": "prefabs/tree.prefab"
-          }
+          "__type": "ScreenPanel",
+          "__guid": "c46a6fa0-5fb1-4b03-ac95-5ae5ea1670ba",
+          "AutoScreenScale": true,
+          "Opacity": 1,
+          "Scale": 1,
+          "ZIndex": 100
+        },
+        {
+          "__type": "mainmenu",
+          "__guid": "9595fee9-f9f4-4c82-a0fc-0c45d1e6a35b"
+        },
+        {
+          "__type": "SoundPointComponent",
+          "__guid": "3e22fd2e-eca7-47e4-8c30-7ec985b43e77",
+          "DistanceAttenuation": false,
+          "DistanceAttenuationOverride": false,
+          "Force2d": false,
+          "MaxRepeatTime": 1,
+          "MinRepeatTime": 1,
+          "Occlusion": false,
+          "OcclusionOverride": false,
+          "OcclusionRadius": 32,
+          "Pitch": 1,
+          "PlayOnStart": true,
+          "ReflectionOverride": false,
+          "Reflections": false,
+          "Repeat": false,
+          "SoundEvent": "sounds/jumpy.music.sound",
+          "SoundOverride": false,
+          "StopOnNew": false,
+          "Volume": 1
         }
       ]
     },
     {
-      "__guid": "7b6b3e2f-a30d-4007-8ce3-e9024815a049",
+      "__guid": "548bbdff-2518-434b-8843-3ba3d3389166",
+      "Name": "World",
+      "Position": "243.3811,1106.802,150.5826",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Children": [
+        {
+          "__guid": "ccceeb0f-5cd8-45fe-b876-76e3b0778812",
+          "Name": "tile",
+          "Position": "-243.3811,-1106.802,-149.4602",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "__Prefab": "prefabs/tile.prefab"
+        },
+        {
+          "__guid": "5677a511-0985-4360-a3b5-629876dbdab0",
+          "Name": "tile (1)",
+          "Position": "-243.3811,-1010.802,-150.5826",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "__Prefab": "prefabs/tile.prefab"
+        },
+        {
+          "__guid": "853a1a7b-26c3-4e60-8667-f63fd52182c0",
+          "Name": "tile (2)",
+          "Position": "-243.3811,-1202.802,-151.7986",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "__Prefab": "prefabs/tile.prefab"
+        },
+        {
+          "__guid": "fbab1cac-fd2e-42e2-bfa9-6fc8a2ada46c",
+          "Name": "tile (56)",
+          "Position": "428.6188,-1298.802,-145.7877",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "fda604be-95b5-441d-a0b4-dfedbe4e3334",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "2f7c3063-bd4d-4a9b-8666-8e4323726c30",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "2cf56fe5-0763-4623-9919-02578a5cf2a5",
+          "Name": "tile (57)",
+          "Position": "428.6188,-1202.802,-148.1472",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "e4b9e2d8-597f-4ba9-9515-c31782c8df1a",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "dafd6507-c8f9-4d7b-b9a3-68a6635b86c2",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "dcc9f96b-4b1e-492d-84ba-e239e1ffca62",
+          "Name": "tile (58)",
+          "Position": "428.6188,-1106.802,-146.9023",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "c3be2469-eca9-492a-84d1-2409b05e1fcf",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "aa6c08e5-2a8b-4202-8db2-90ff0840be3a",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "9b80c0be-e3d6-4ab6-bf4f-5a9aec0db161",
+          "Name": "tile (55)",
+          "Position": "428.6188,-1394.802,-146.4412",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "fba6b7c0-17a4-4b3d-81ce-10d045cf3dd2",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "3e532332-4d28-4959-a1e8-d6b8514b2d06",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "43034268-e6a7-45d2-ae31-f34ee2ea933f",
+          "Name": "tile (54)",
+          "Position": "428.6188,-1490.802,-147.6348",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "5776d260-e600-44f6-8ea0-4ad42632281a",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "98e9a079-e050-45a9-83fe-de0e98a41c9c",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "623689fa-e494-4ffa-b776-394f7600308d",
+          "Name": "tile (53)",
+          "Position": "428.6188,-1586.802,-146.999",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "181384a2-d7ea-4951-a08c-a5bb075500ed",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "3ecbd84a-d9fa-4d73-ac54-44cc1bf287b5",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "92e94865-17a4-4d52-9785-188c76c1afd3",
+          "Name": "tile (52)",
+          "Position": "428.6188,-1682.802,-145.1551",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "237a4716-1190-46b2-9ee2-31fbed67af54",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "5fef9737-45ac-49df-a7dd-1f1fb7aace70",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "650a36bb-6465-4a91-a34f-dd3cc3bbbe82",
+          "Name": "tile (51)",
+          "Position": "428.6188,-1778.802,-144.0244",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "067c8902-5c07-4b6f-8b5e-dfcd98d40946",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "2092cb3f-4d2a-458b-93d4-b6ae1e392f89",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "1b59ff65-2d0d-46df-8885-067d5fddaf06",
+          "Name": "tile (50)",
+          "Position": "428.6188,-1874.802,-145.4238",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "636b84c3-69ac-4569-85ad-c8b4ecb9dda4",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "eed3ffbe-a650-4b16-b2ba-f51518bd400b",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "740b9dee-9cbc-4d35-80a6-54cbbae0f77b",
+          "Name": "tile (49)",
+          "Position": "428.6188,-1970.802,-147.665",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "7287018b-7d8e-493d-91d0-94b9c75a5fd4",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "39348684-da04-47a1-aba6-7bf139436677",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "ef3b5dce-9cdc-4eb3-bc04-f46a7eb68b94",
+          "Name": "tile (48)",
+          "Position": "428.6188,-2162.802,-147.1595",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "f7a51302-a46c-44bc-a2f1-1f1115913e79",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "0936df07-ff1d-478f-957f-15b415ae94ec",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "e50f0dc1-e7d1-4f4a-9d31-95a7d9dd210a",
+          "Name": "tile (47)",
+          "Position": "428.6188,-2066.802,-145.213",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "33094c8d-6c17-442b-9e39-83bfb3095663",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "a572fa8b-be8f-440d-abff-7108dec9052c",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "c311448c-40eb-4119-b6f3-08f756a3eff3",
+          "Name": "tile (46)",
+          "Position": "428.6188,-2258.802,-148.6235",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "941105ee-eba9-4099-be44-375b3b25f993",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "daddf9f6-8d50-4a6d-8c36-5ee799dd8e1f",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "7cf0d0bf-21ec-4fb7-858c-101bd0fe4039",
+          "Name": "tile (45)",
+          "Position": "428.6188,-2354.802,-145.8709",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "d807febd-4d3e-4901-9ceb-9454f46aaf2d",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "40692930-64b2-4ddb-861f-c3acab3fac7a",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "85473d27-82f9-45fd-8e0b-553c5bebd456",
+          "Name": "tile (44)",
+          "Position": "428.6188,-1010.802,-146.307",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "6a740fa8-2207-4f58-bc84-8f973b38458f",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "27bec237-c8f8-4f4c-ae47-b79271e61f19",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "55ea7647-3a85-42ce-8bfa-1e8479ddccfb",
+          "Name": "tile (43)",
+          "Position": "428.6188,-914.8025,-144.6533",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "7a2d4b22-2cb4-4f35-9c6f-f2737aa50d89",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "5568cbc8-034b-47cd-90fd-f1318d5dcf22",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "3d67781a-e747-4949-926b-ffaceb9625bb",
+          "Name": "tile (42)",
+          "Position": "428.6188,-818.8025,-146.7308",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "e134a6e0-abb3-4e26-95e3-5451495eec05",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "56ab3972-881a-4f91-9976-25ef0d42695c",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "ce47e5ce-c7ee-4571-9955-7325e811cc72",
+          "Name": "pebbles (1)",
+          "Position": "428.6188,-722.8025,-118.5826",
+          "Rotation": "0,0,0.9900401,0.1407855",
+          "Scale": "1.182597,1.182597,1.182597",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "9e397515-11ca-452a-9f56-059aa5a7bfe3",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/pebbles.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            }
+          ]
+        },
+        {
+          "__guid": "cbd0799f-d182-41f1-8580-7c543f157c1e",
+          "Name": "tile (41)",
+          "Position": "428.6188,-722.8025,-147.6647",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "739159d1-1be7-4b00-a69d-42c12f6e4d45",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "3ee2403c-2fde-4015-90f0-71110f1ca36c",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "78e6b432-1020-4088-a581-c8aa95e9ac1c",
+          "Name": "tile (40)",
+          "Position": "428.6188,-626.8025,-147.6049",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "af057995-eb9c-4eb1-a108-f8f07b6d18f2",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "54153943-de47-48c5-b831-20db7f08c73d",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "69ce3075-0b59-44ef-bc5a-2756cab18f6d",
+          "Name": "tile (39)",
+          "Position": "428.6188,-530.8025,-145.1766",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "d635ad71-e6f3-4a5f-9964-5124b790c1a4",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "9166542c-720e-4ca1-bae9-52e3e5534bd8",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "1bf3788c-ea90-4547-8dd6-3a9b646e901e",
+          "Name": "tile (38)",
+          "Position": "428.6188,-434.8025,-145.1029",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "a19dd960-f7d4-48af-a8cd-d3fac9917794",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "76b497a2-685e-4237-b606-4f83c912609c",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "fa4e3ec7-941d-4f4a-8688-9a1112d331e4",
+          "Name": "tile (37)",
+          "Position": "428.6188,-338.8025,-146.8629",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "7e10cb79-98a7-4915-9012-2f97555a6e72",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "04dac3ab-433b-4bd2-a3d1-1eed09fe6c41",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "0304bb16-f912-4ebd-a73d-161edc4e6c7b",
+          "Name": "tile (36)",
+          "Position": "428.6188,-242.8025,-144.6437",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "dab769a0-bb02-4e49-8f86-8c397906bec0",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "386f778b-b776-4705-a37e-627ff76eb75b",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "2788a1ad-3260-4042-9e6b-25f33bbbf375",
+          "Name": "tile (35)",
+          "Position": "428.6188,-146.8025,-145.4691",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "ed40583e-efea-4650-a9e2-acc66a30c024",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "9bfd1e20-5c55-4c12-bdc2-8c947a1aae57",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "eb8fe091-e757-44f0-8f00-7dca34ff1aa2",
+          "Name": "tile (34)",
+          "Position": "428.6188,-50.80249,-146.3769",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "1af3f042-ec12-4981-a113-36f86bb0e43a",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "748a0e2b-0e67-4ff0-99f0-6e98b94d7647",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "fe100d52-11e0-4df0-97f5-34ce1786e6d5",
+          "Name": "tile (33)",
+          "Position": "428.6188,45.19751,-147.6959",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "90f83f38-1a20-44e4-a689-bdc684316421",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "112ec2ca-e656-41f4-a14f-df2c1e445959",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "d258a473-8355-4eff-a9e0-3ba8c57ac058",
+          "Name": "tile (32)",
+          "Position": "140.6189,141.1975,-147.4297",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "915e0877-4696-4d67-a39c-bc328793d146",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "0997cf58-095f-4f34-87dd-390880a2ea45",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "3cf0f988-fda4-4cda-a2d6-786e33ec476e",
+          "Name": "lilly (11)",
+          "Position": "44.61885,-50.80249,-138.5826",
+          "Rotation": "0,0,0.8279393,0.5608178",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "f98b853f-f868-4cfe-8d29-2af22c827cae",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "012e72df-7fb3-4f38-bf23-a38f46438136",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "d45adb41-f3bf-4542-a188-57dadaf2b17a",
+          "Name": "tile (31)",
+          "Position": "140.6189,-50.80249,-145.5464",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "ab9bfbd4-0d87-4dbc-9f3b-bc7e6818e56a",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "84cd7524-0c6d-4f68-b237-5d863ef49acf",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "d26c9fce-fd61-4049-9b24-e3a031a23b2e",
+          "Name": "lilly (10)",
+          "Position": "44.61885,-146.8025,-138.5826",
+          "Rotation": "0,0,0.9316183,0.3634381",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "71e28872-9841-4b2b-84fd-2081974e061b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "db9f019d-7ca1-43de-96ee-93f980aa951a",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "818da54b-29e5-433a-a76a-5dfe05a1b842",
+          "Name": "tile (30)",
+          "Position": "140.6189,-146.8025,-147.2298",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "80f06ade-165e-4355-8397-da9bfffc77da",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "29314476-3b68-4fd9-8aa7-fbd26ae6dfb7",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "b8b98af3-cf97-468c-8e38-721a097f14ff",
+          "Name": "tile (29)",
+          "Position": "140.6189,-338.8025,-147.8463",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "dab03148-f670-416b-9385-73d660acfa0b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "0954366f-98ad-4c28-bde5-39e03078f8cb",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "c819f45a-d405-461d-85c4-091ff924712e",
+          "Name": "tile (28)",
+          "Position": "140.6189,-242.8025,-146.89",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "3f3e519f-424f-4fb9-a956-8c7907c6c224",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "0d0dd04e-701d-4a14-9155-a04e6fd91f57",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "b7eb3d78-10c2-4caa-8f40-db6f431e744a",
+          "Name": "lilly (9)",
+          "Position": "44.61885,-242.8025,-138.5826",
+          "Rotation": "0,0,0.7771879,-0.6292686",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "b56e9200-4b15-496e-8c4a-c9da89678a73",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "853a1a14-af5e-4d6e-8fc2-d66365c34ef7",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "144647c1-b420-4ad0-933a-4277a7d21709",
+          "Name": "lilly (8)",
+          "Position": "44.61885,-434.8025,-138.5826",
+          "Rotation": "0,0,0.8887622,0.4583685",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "a59113c1-595a-4aa8-9d33-2e0f6382a334",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "feef93f3-4f84-47a0-8421-b97e38b11e6c",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "6eea150c-a8b2-4ca6-8b90-b8239cffa0a9",
+          "Name": "tile (27)",
+          "Position": "140.6189,-434.8025,-146.048",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "8bd48aa7-67ab-4d1f-a697-509134687af4",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "99c98cd5-54d3-471d-8a2b-3d3fad8aae9b",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "9dcbb40c-99c5-4f72-a509-bf7b46ab0d63",
+          "Name": "tile (26)",
+          "Position": "140.6189,-530.8025,-145.5979",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "83dcaa4c-13d4-43c3-943f-dd23a55c65a8",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "bfb8786e-27be-485a-8d0e-1cfc58f49e12",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "9de126ec-9d27-4ecf-a9f9-29b8c243e12b",
+          "Name": "lilly (7)",
+          "Position": "44.61885,-530.8025,-138.5826",
+          "Rotation": "0,0,0.961889,0.2734401",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "39ab659c-cbb2-4d36-ab7c-22757bd8d10a",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "9e9837f5-8e98-4c6c-b658-1f727b2f7474",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "292d1d71-a102-40ec-b15c-444b4db995eb",
+          "Name": "lilly (6)",
+          "Position": "44.61885,-626.8025,-138.5826",
+          "Rotation": "0,0,0.7188631,-0.6951517",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "a0248577-803c-4a57-ac10-d7c04bf6540c",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "8752ff25-c8b3-4ead-9fcf-044819f11e9f",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "9477a628-7d0f-4c1c-8fde-b1e40c6a43c5",
+          "Name": "tile (25)",
+          "Position": "140.6189,-626.8025,-148.9896",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "3baeec26-4fc9-4f42-8cc4-d6835c25f328",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "ced3ec9c-f318-4fd8-ac8f-14878d7f1d99",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "01c0fc90-9ee9-457c-91ac-032c779c0361",
+          "Name": "tile (24)",
+          "Position": "140.6189,-722.8025,-147.6288",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "8b110de8-261f-430b-94e1-468effc8473b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "d196ed83-9215-4202-8c0a-f6b6abb8c282",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "59ef3196-1e2b-4ac1-862d-74d6318255af",
+          "Name": "tile (23)",
+          "Position": "140.6189,-818.8025,-148.5562",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "ab0b6a35-45eb-40d4-9cbf-cc646c1cd5ac",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "6a6c26fd-ff2b-4056-96fa-a9a1e7906094",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "e8054def-4616-4263-b391-a06cb44976e9",
+          "Name": "tile (22)",
+          "Position": "140.6189,-914.8025,-144.0872",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "28d27484-f0d6-4172-b068-8b54088334ba",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "42d4807e-7327-4258-baea-80cf75934a4b",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "1850e225-333c-4f3c-997d-326894c646d7",
+          "Name": "tile (21)",
+          "Position": "140.6189,-1010.802,-145.4052",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "01100c1f-a227-49e2-9c4e-8205e9c31559",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "93a6abbd-6878-4757-b51a-0c8dab28905e",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "5d8512f8-cf9a-499a-b48e-df5065445f17",
+          "Name": "tile (20)",
+          "Position": "140.6189,-1106.802,-148.4396",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "94d7d002-53b9-47c9-bd03-cfbbc28cd6b5",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "0e5a122f-3841-4a60-869a-f161dae160c6",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "ae9b0200-adb3-42fd-874d-31f98b0b38a3",
+          "Name": "lilly (5)",
+          "Position": "44.61885,-1202.802,-138.5826",
+          "Rotation": "0,0,0.7165574,-0.6975282",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "258524dd-b4fe-4bf0-8bd2-aa3a7b965fa9",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "acbf8031-d750-4c9b-978d-4a2492f07574",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "80ad6229-0fc2-4dd0-946d-daf567bb4711",
+          "Name": "tile (19)",
+          "Position": "140.6189,-1202.802,-147.0754",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "eb5cdd86-66de-49d2-9d8b-c590c04bfe7c",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "4788d458-27e5-475a-8fa2-ae98c532baa8",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "098888fa-c067-4d8e-8c85-1eaecf379bc5",
+          "Name": "lilly (4)",
+          "Position": "44.61885,-1298.802,-138.5826",
+          "Rotation": "0,0,0.9636459,-0.2671827",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "6f6a2ecf-7461-4490-9dd0-7d94bef6083b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "b195ad94-1d7b-4dec-938c-98c0e453ef1c",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "1e20f12a-6781-4b39-9d45-49f66f4dac90",
+          "Name": "tile (18)",
+          "Position": "140.6189,-1298.802,-145.6069",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "12703adf-efa4-42ce-8faa-91d6a8121fe4",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "6e46319f-a341-4d0f-af40-55d652e1e4e8",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "eca5c56f-9be1-40a4-8a1e-c85710c23496",
+          "Name": "tile (17)",
+          "Position": "140.6189,-1394.802,-148.0101",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "1296b4a1-1a3f-4b6c-ac9f-a30c511de9a0",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "aa49067f-be33-4f26-a249-e95467ef2ad1",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "5c382bc0-62c4-4c4b-b6af-145e275d39f9",
+          "Name": "rock (1)",
+          "Position": "140.6189,-434.8025,-118.5826",
+          "Rotation": "0,0,0.9945534,-0.1042281",
+          "Scale": "0.943753,0.943753,0.943753",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "dcfcf227-a49d-4b47-b11a-c3a56e2202d8",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/rock.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "348413ec-c5ff-4bbf-b05f-f61d50793034",
+              "IsTrigger": false,
+              "Model": "models/rock.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "624f0cf8-a8d9-4d96-9b7e-79435606c573",
+          "Name": "tile (16)",
+          "Position": "140.6189,-1490.802,-146.4003",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "7306d3a0-60b3-47e5-be78-04ae0e0e8f59",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "f400d3c3-4237-4505-b030-1ff7cf45373f",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "f231db16-4997-492f-83d6-11d7473bf5c2",
+          "Name": "tile (15)",
+          "Position": "140.6189,-1682.802,-146.9774",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "fff2e88d-dd3b-4c60-9d5b-be3dc824074d",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "75c079a1-92ab-421c-81fe-a31e0cb8475a",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "8890d8d0-9a70-464e-bb3c-b39bdf44a3e3",
+          "Name": "lilly (3)",
+          "Position": "44.61885,-1586.802,-138.5826",
+          "Rotation": "0,0,0.9902219,-0.1395009",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "fdc05ba8-da5c-4be2-94b5-f6f8ed5f4e6b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "fb1636c1-b5a4-4682-a8cb-bd0df66a6b4f",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "adc9df8c-33a9-4dc3-8a2d-5eeff422f96f",
+          "Name": "lilly (2)",
+          "Position": "44.61885,-2162.802,-138.5826",
+          "Rotation": "0,0,0.9381004,-0.3463635",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "69b66ea0-14f1-41b9-b1c1-4b3c8009da1f",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "c47e8043-1550-4a68-8e42-a1df10edb972",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "f3980d5d-cb0b-40a5-bf51-45dac7b24fe8",
+          "Name": "lilly (1)",
+          "Position": "44.61885,-2258.802,-138.5826",
+          "Rotation": "0,0,0.06958578,0.997576",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "9ec5b184-7472-468d-a3fe-20886dce6713",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "268bc7b1-f968-4e13-b893-3c73af699d81",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "cf9b1b6b-8933-483d-b3fa-de65e229ee00",
+          "Name": "lilly",
+          "Position": "44.61885,-1778.802,-138.5826",
+          "Rotation": "0,0,0.8225616,0.5686761",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "c1260fd4-fef7-4a8f-bea3-89bc765b2fb0",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/lilly.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "24b156c7-0b79-41e3-9139-2d64132bd6d6",
+              "IsTrigger": false,
+              "Model": "models/lilly.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "6b1520a2-60eb-4b7a-aa3d-9f76a25c918e",
+          "Name": "tile (14)",
+          "Position": "140.6189,-1778.802,-145.604",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "502ec83e-6099-4ef7-af9c-d0bf77fd6c89",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "c4c701bd-4b88-4949-9a7d-278f26e4cd00",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "403b969e-1125-4f8d-834d-222ebfae5d21",
+          "Name": "tile (13)",
+          "Position": "140.6189,-1874.802,-145.4882",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "01c7aedc-6a1e-41df-b83c-66d291d205fb",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "d1e6b9bc-f55c-4a48-8279-deb2aed1617d",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "d81ef252-4a9b-4c69-9149-f73c3dba361b",
+          "Name": "tile (12)",
+          "Position": "140.6189,-1970.802,-146.8062",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "5ccf4e81-a0b7-4d46-9a4f-f5ae698346b8",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "a8799aeb-428a-4e6a-af8f-c5646e7b5918",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "855cd7d7-c998-4f25-9d1e-63b0278537aa",
+          "Name": "tile (11)",
+          "Position": "140.6189,-2066.802,-146.9165",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "11c6880f-cc8c-45a8-8368-fa3ac53c5f37",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "6990a4c3-e2be-4786-82a3-6d518e7230e6",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "a9a555b7-e1b9-43ae-8170-3a1dde141f01",
+          "Name": "tile (10)",
+          "Position": "140.6189,-2162.802,-147.4026",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "ce7b3a82-5615-4087-8fb9-bb034cc234f9",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "0eeea623-a644-4277-ad2c-c456ce1de708",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "81382c16-5460-4a69-a7e7-94510af2618c",
+          "Name": "tile (9)",
+          "Position": "140.6189,-2258.802,-145.3753",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "6a52b3a7-963c-427c-95d7-7722911231e8",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "158bd409-41c4-424a-873a-9cd0f878f605",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "320fb0b3-62a2-480b-9d4e-972681edef50",
+          "Name": "road",
+          "Position": "284.6188,-1106.802,-150.5826",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "bb4dfb32-884e-457a-9ae3-558cb06b28b3",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/road.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "969d23d0-1b86-4899-81da-ca9fcd694535",
+              "IsTrigger": false,
+              "Model": "models/road.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "22ed15df-a057-4b9b-9041-99fa989614c8",
+          "Name": "tile (8)",
+          "Position": "-51.38115,-1106.802,-147.3638",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "20113142-de9d-4864-a99c-0f3dc5d007ea",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "1393a41d-7b16-41da-a6da-3b72c2ecf0cd",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "e9e13282-4b44-471c-8e5e-f16031f1d77c",
+          "Name": "tile (7)",
+          "Position": "-147.3811,-1106.802,-147.7677",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "4ac2241f-f3ad-4f67-8e9c-0b459adbe219",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "2fbd9a83-62b3-441d-8779-abc853df3608",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "3e2abcf8-169e-4398-8f33-943ad10f9c7e",
+          "Name": "tile (59)",
+          "Position": "-147.3811,-1202.802,-151.2547",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "386adcf9-ec81-403b-ba09-0b34186dfe6f",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "736e7f7e-b7e0-48cd-99ef-300bcdac55ff",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "9a30b21f-af3c-4be4-bccc-5bc422f6ebfd",
+          "Name": "tile (6)",
+          "Position": "-147.3811,-1010.802,-146.4624",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "0d96f8db-51d7-49a7-b189-ffcb6af7c0e6",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "353bb88f-7e86-4cec-8d14-9d501a7f2cdd",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "cfaf313e-3f82-442e-af93-acc61e743465",
+          "Name": "tile (5)",
+          "Position": "-147.3811,-914.8025,-145.3907",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "f7fc81e0-39da-49af-b1a4-0c04335562e3",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "a5329b12-071c-4cac-83fc-ab08794441ed",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "9b33bc74-4396-4150-81a8-0442d482464a",
+          "Name": "rock",
+          "Position": "-147.3811,-914.8025,-118.5826",
+          "Rotation": "0,0,0.413826,-0.910356",
+          "Scale": "0.9420913,0.9420913,0.9420913",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "b1a4f426-5dc0-4d46-bf9f-05c820ec9c7a",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/rock.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "bdf8e356-5d3d-457c-86c3-3918e05a4d6e",
+              "IsTrigger": false,
+              "Model": "models/rock.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "f8c42907-2789-47f2-9b6c-0d17a36c4fd8",
+          "Name": "tree",
+          "Position": "140.6189,-1106.802,-118.5826",
+          "Rotation": "0,0,0.9643689,-0.264561",
+          "Scale": "1.068453,1.068453,1.068453",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "d855a789-035c-490a-a773-e16fc403a37d",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "e9a81e5b-b066-48c1-93e1-02f2722fb538",
+              "IsTrigger": false,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "8d00d615-e474-4ad3-b38e-f17e3a1139d7",
+          "Name": "tree",
+          "Position": "428.6188,-914.8025,-118.5826",
+          "Rotation": "0,0,0.3881732,0.9215863",
+          "Scale": "1.068453,1.068453,1.068453",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "710cb18b-65d4-4596-877d-a85e8fe817d0",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "6761e37d-06e5-4168-bfab-c9c27a2a190c",
+              "IsTrigger": false,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "33b9f233-a91c-46d8-bea8-b68748b855b3",
+          "Name": "tree",
+          "Position": "428.6188,-434.8025,-118.5826",
+          "Rotation": "0,0,-0.6040305,0.7969611",
+          "Scale": "1.068453,1.068453,1.068453",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "37047528-b03e-42d1-b1e8-8365f866eebe",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "1d2a0077-70d7-48b2-8654-3d178983bc2c",
+              "IsTrigger": false,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "2ee6cba3-a93f-427b-b174-a0da879d8b4f",
+          "Name": "tree",
+          "Position": "428.6188,-242.8025,-118.5826",
+          "Rotation": "0,0,-0.92614,-0.37718",
+          "Scale": "1.068453,1.068453,1.068453",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "a49d8c56-756b-4486-bd7f-7de809efc746",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "9f1ae72e-d140-47ea-95e8-55ef0da10218",
+              "IsTrigger": false,
+              "Model": "models/tree-lowpoly-1.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "c4ad9d75-8fa8-4b05-876f-6004b369e9b6",
+          "Name": "pebbles",
+          "Position": "-51.38115,-1010.802,-118.5826",
+          "Rotation": "0,0,0.8335816,0.5523963",
+          "Scale": "1.144837,1.144837,1.144837",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "71c9d86f-a318-482d-8135-341a2f7477b1",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/pebbles.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            }
+          ]
+        },
+        {
+          "__guid": "4d7d31b6-7842-4a50-999c-6d838227b946",
+          "Name": "pebbles (2)",
+          "Position": "-51.38115,-1090.802,-118.5826",
+          "Rotation": "0,0,0.1988282,0.9800344",
+          "Scale": "1.144837,1.144837,1.144837",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "513a6f14-042e-43ff-bbd5-a3fcddd46cf6",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/pebbles.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            }
+          ]
+        },
+        {
+          "__guid": "50f86828-f560-4115-b910-9a43cf50fc0f",
+          "Name": "tile (4)",
+          "Position": "-51.38115,-1010.802,-148.2153",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "5fd82ec9-3914-4984-ae49-3e479559098b",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "a1978c12-46e3-42d7-9efc-c1d779ca0e99",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        },
+        {
+          "__guid": "82c6ce9a-4960-4697-a0c2-36c60421f409",
+          "Name": "tile (3)",
+          "Position": "-51.38115,-914.8025,-147.6628",
+          "Enabled": true,
+          "NetworkMode": 1,
+          "Components": [
+            {
+              "__type": "ModelRenderer",
+              "__guid": "adc7857f-8a63-4634-bece-5aaf1fb26567",
+              "BodyGroups": 18446744073709551615,
+              "Model": "models/tile.vmdl",
+              "RenderType": "On",
+              "Tint": "1,1,1,1"
+            },
+            {
+              "__type": "ModelCollider",
+              "__guid": "de7ee13f-4ab0-4449-ba5a-c20a4e6061f1",
+              "IsTrigger": false,
+              "Model": "models/tile.vmdl",
+              "Static": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "__guid": "d68ef85c-7dcd-498b-b6a9-4a033ba64762",
       "Name": "Camera",
-      "Position": "-300,0,100",
+      "Position": "-176.9262,-102.8512,88.50511",
+      "Rotation": "-0.01557569,0.04884393,0.3034143,0.9514786",
       "Enabled": true,
       "NetworkMode": 2,
       "Components": [
         {
           "__type": "CameraComponent",
-          "__guid": "96d1ce86-4acd-4fe3-a7ec-7f9e5a03ac05",
+          "__guid": "859045c4-6443-4842-a122-dc55f379c8c9",
           "BackgroundColor": "0.33333,0.46275,0.52157,1",
           "ClearFlags": "All",
           "FieldOfView": 60,
@@ -80,7 +2007,7 @@
         },
         {
           "__type": "Bloom",
-          "__guid": "e904e854-0077-4f3e-860e-67414701cd4c",
+          "__guid": "e0ff26cd-e1c0-42d8-83a9-479a78aa609a",
           "BloomColor": {
             "color": [
               {
@@ -109,7 +2036,7 @@
         },
         {
           "__type": "ColorAdjustments",
-          "__guid": "de806548-cee9-4f6c-95d5-78b24fcc590e",
+          "__guid": "1300182c-5a48-4117-8f53-e65ff2f57f81",
           "Brightness": 1.4,
           "Contrast": 1.05,
           "HueRotate": 0,
@@ -117,17 +2044,25 @@
         },
         {
           "__type": "Vignette",
-          "__guid": "860201c8-625e-492d-8e38-5195efbebb5f",
+          "__guid": "0b3cbd8b-af8f-4edd-b6b4-b2685fbaa6d6",
           "Center": "0.5,0.5",
           "Color": "0,0,0,1",
           "Intensity": 0.4,
           "Roundness": 0.7,
           "Smoothness": 1
+        },
+        {
+          "__type": "DepthOfField",
+          "__guid": "8b29f3f7-b611-4aed-839d-925a9a0d232f",
+          "BackBlur": true,
+          "BlurSize": 200,
+          "FocalDistance": 220,
+          "FrontBlur": false
         }
       ]
     },
     {
-      "__guid": "7c8250f2-e4d4-4fe3-80c0-4e516bd5e8c6",
+      "__guid": "32d2c47b-934b-4d7b-a202-92fc5244a5a6",
       "Name": "Lighting",
       "Position": "0,0,100",
       "Tags": "skybox",
@@ -136,14 +2071,14 @@
       "Components": [
         {
           "__type": "SkyBox2D",
-          "__guid": "29cf2268-8488-4cbc-acd1-ebc5b467a525",
+          "__guid": "f8b74a08-58a2-429a-964c-ea697beef87c",
           "SkyMaterial": "materials/skybox/light_test_sky_sunny03.vmat",
           "Tint": "1,1,1,1"
         }
       ],
       "Children": [
         {
-          "__guid": "c192ae82-23f4-4a49-943e-7a5f7305bde4",
+          "__guid": "9dc75145-49d1-4085-9302-c5a7257166ab",
           "Name": "Sun",
           "Position": "0,0,50",
           "Rotation": "0.4594657,0.6549615,0.1879589,0.5697264",
@@ -153,7 +2088,7 @@
           "Components": [
             {
               "__type": "DirectionalLight",
-              "__guid": "65b14dde-4766-494c-b61a-0df5460fe996",
+              "__guid": "0fd8eb82-03a1-4d7a-915d-5d10ce95355b",
               "FogMode": "Enabled",
               "FogStrength": 1,
               "LightColor": "1.5,1.5,1.5,1",
@@ -165,7 +2100,7 @@
       ]
     },
     {
-      "__guid": "50b401b6-5fa9-4850-9396-123876c6ce16",
+      "__guid": "d0bb4838-7def-458b-a48d-c8d9f06ecf69",
       "Name": "Water",
       "Position": "0,0,12",
       "Tags": "water",
@@ -174,7 +2109,7 @@
       "Components": [
         {
           "__type": "ModelRenderer",
-          "__guid": "e1f37804-d52e-4c8b-9090-70c9b410fa4b",
+          "__guid": "5ef5e491-41b1-4ebb-bdca-37d49e339884",
           "BodyGroups": 18446744073709551615,
           "Model": "models/water.vmdl",
           "RenderType": "On",
@@ -182,14 +2117,14 @@
         },
         {
           "__type": "ModelCollider",
-          "__guid": "fd565734-ac23-485c-8c42-8ce8ee441d31",
+          "__guid": "db3a83b4-8099-47e4-bb8b-01b2b7bcc77e",
           "IsTrigger": false,
           "Model": "models/water.vmdl",
           "Static": true
         },
         {
           "__type": "Rigidbody",
-          "__guid": "6879c36d-017f-4b56-97e1-75172073a14c",
+          "__guid": "b089e885-56c8-46a7-ba10-33491e8cbc3e",
           "AngularDamping": 0,
           "Gravity": false,
           "LinearDamping": 0,
@@ -202,7 +2137,7 @@
       ],
       "Children": [
         {
-          "__guid": "e4c767f1-649b-46a4-872e-c906c2f67054",
+          "__guid": "855ef4a3-766e-4b9d-960b-e9abe90cdfc0",
           "Name": "Seabed",
           "Position": "0,0,-4",
           "Rotation": "-0,0,1,-0.00000004371139",
@@ -211,13 +2146,79 @@
           "Components": [
             {
               "__type": "ModelRenderer",
-              "__guid": "f23f26f2-4f37-4bf7-94c8-c2758728a47b",
+              "__guid": "5b58f6db-c077-49bc-9da1-3fdafc56ae2a",
               "BodyGroups": 18446744073709551615,
               "Model": "models/water.vmdl",
               "RenderType": "Off",
               "Tint": "1,1,1,1"
             }
           ]
+        }
+      ]
+    },
+    {
+      "__guid": "8f3591d5-1966-45ff-b146-ea155bd83c76",
+      "Name": "frog",
+      "Position": "9.690449,-18.58796,33.41681",
+      "Rotation": "0,0,1,0.0000001947072",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "SkinnedModelRenderer",
+          "__guid": "71286b66-7f0f-40a1-a3f3-b919a6fd4358",
+          "AnimationGraph": "animgraphs/frog.vanmgrph",
+          "BodyGroups": 18446744073709551615,
+          "CreateBoneObjects": false,
+          "Model": "models/frog.vmdl",
+          "RenderType": "On",
+          "Tint": "1,1,1,1"
+        }
+      ]
+    },
+    {
+      "__guid": "f3ae977b-a48f-4866-b4e1-5a8a5d9282f4",
+      "Name": "car_spawner",
+      "Position": "476.0634,2618.789,31.34177",
+      "Rotation": "0,0,-0.7071067,0.7071068",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "EntitySpawner",
+          "__guid": "d03c1130-7483-4024-baa1-318c761e529d"
+        },
+        {
+          "__type": "AutoSpawner",
+          "__guid": "dd7a94af-e1fa-44e1-8790-ea0ee79f99d2",
+          "flipped": false,
+          "Prefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/car.prefab"
+          }
+        }
+      ]
+    },
+    {
+      "__guid": "01353f7a-e511-41bc-84c4-4938c0a4655d",
+      "Name": "car_spawner",
+      "Position": "577.188,-2620,31.34177",
+      "Rotation": "0,0,0.7071068,0.7071068",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "Components": [
+        {
+          "__type": "EntitySpawner",
+          "__guid": "e230bd3a-f344-4df7-9855-3f51afde4643"
+        },
+        {
+          "__type": "AutoSpawner",
+          "__guid": "5a1aa115-03da-4d0b-a3c6-958e2a6061ce",
+          "flipped": true,
+          "Prefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/car.prefab"
+          }
         }
       ]
     }
@@ -245,7 +2246,7 @@
   },
   "Title": "main",
   "Description": "",
-  "LastSaved": "2024-03-16T00:16:18.2846696-04:00",
+  "LastSaved": "2024-03-16T19:34:12.2337757-04:00",
   "ResourceVersion": 1,
   "__version": 1,
   "__references": []
