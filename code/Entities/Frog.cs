@@ -26,7 +26,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 	public GameObject Log { get; set; }
 	public Vector3 LogOffset { get; set; }
 
-	public bool IsDead { get; set; } = false;
+	[Sync] public bool IsDead { get; set; } = false;
 	private enum DeathType
 	{
 		Car,

@@ -1,0 +1,23 @@
+﻿@using Sandbox;
+@inherits PanelComponent
+@namespace Jumpy
+
+@if (frog.IsValid() && !frog.IsDead && Network.OwnerConnection is Connection owner && owner != Connection.Local)
+{
+	<root>
+		<div class="name">@owner.DisplayName</div>
+	</root>
+}
+
+@code
+{
+	private Frog frog { get; set; }
+
+	protected override void OnEnabled()
+	{
+		base.OnEnabled();
+		frog = GameObject.Components.GetInAncestorsOrSelf<Frog>();
+	}
+
+	protected override int BuildHash() => System.HashCode.Combine(Network.OwnerConnection, !frog?.IsDead);
+}

@@ -1,6 +1,6 @@
 {
   "RootObject": {
-    "__guid": "0a593ba3-0d05-4d06-b3b1-835b6da90e40",
+    "__guid": "cd36fb6f-d63e-4918-ba4a-fa75d5946ba7",
     "Name": "frog",
     "Tags": "player",
     "Enabled": true,
@@ -8,7 +8,7 @@
     "Components": [
       {
         "__type": "SkinnedModelRenderer",
-        "__guid": "60c2ba58-907a-445c-9623-5e34280ab53e",
+        "__guid": "6bd79a81-25b8-48fb-b44c-8e09ebebc091",
         "AnimationGraph": "animgraphs/frog.vanmgrph",
         "BodyGroups": 18446744073709551615,
         "CreateBoneObjects": false,
@@ -18,7 +18,7 @@
       },
       {
         "__type": "SphereCollider",
-        "__guid": "298082ad-b79f-4c47-8156-f83485a9d560",
+        "__guid": "e804fb5b-7023-405a-8abf-83c03c9e99ee",
         "Center": "0,0,2",
         "IsTrigger": false,
         "Radius": 8,
@@ -26,7 +26,7 @@
       },
       {
         "__type": "Frog",
-        "__guid": "644f7baf-5287-4d62-a70e-2b53c138d88a",
+        "__guid": "9ebe2e3d-e6e2-4c6c-9351-1b7e8a31a570",
         "DeathParticlesCar": {
           "_type": "gameobject",
           "prefab": "prefabs/particles_death.prefab"
@@ -44,7 +44,30 @@
         "RespawnSound": "sounds/jumpy.respawn.sound"
       }
     ],
-    "Children": []
+    "Children": [
+      {
+        "__guid": "2d24739e-b731-49fd-a901-f52470412fde",
+        "Name": "nametag",
+        "Position": "0,0,32",
+        "Enabled": true,
+        "NetworkMode": 2,
+        "Components": [
+          {
+            "__type": "WorldPanel",
+            "__guid": "da7888c1-7f6f-407c-8132-d8f07fdcbe4c",
+            "HorizontalAlign": "Center",
+            "LookAtCamera": true,
+            "PanelSize": "4096,1024",
+            "RenderScale": 5,
+            "VerticalAlign": "Center"
+          },
+          {
+            "__type": "nametag",
+            "__guid": "3b0ea605-20a5-4dbd-a7c6-65120a159a19"
+          }
+        ]
+      }
+    ]
   },
   "ShowInMenu": false,
   "MenuPath": null,

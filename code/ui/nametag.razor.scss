@@ -1,0 +1,18 @@
+﻿nametag {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	white-space: nowrap;
+	justify-content: center;
+	align-items: center;
+
+	.name {
+		font-family: Poppins;
+		font-size: 14px;
+		font-weight: bold;
+		color: #d5ff6b;
+		text-shadow: 2px 2px 0 black;
+	}
+}
