@@ -55,7 +55,6 @@ public sealed class Frog : Component, Component.ITriggerListener
 	protected override void OnUpdate()
 	{
 		UpdateCamera();
-
 		renderer.Tint = FrogColor;
 	}
 
@@ -75,8 +74,6 @@ public sealed class Frog : Component, Component.ITriggerListener
 				Move( Vector3.Left );
 			else if ( Input.Down( "Right" ) )
 				Move( Vector3.Right );
-			else if ( Input.Pressed( "Use" ) )
-				_ = Manager.EndGame();
 		}
 
 		if ( Log != null )
@@ -236,12 +233,14 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( dead )
 		{
 			collider.Enabled = false;
+			collider.IsTrigger = false;
 			renderer.Enabled = false;
 			Sound.Play( DeathSound, Transform.Position );
 		}
 		else
 		{
 			collider.Enabled = true;
+			collider.IsTrigger = true;
 			renderer.Enabled = true;
 			Sound.Play( RespawnSound, Transform.Position );
 		}

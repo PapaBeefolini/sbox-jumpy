@@ -1,6 +1,6 @@
 {
   "RootObject": {
-    "__guid": "50721eeb-8008-4ec3-8894-e96f4d712fe4",
+    "__guid": "0a593ba3-0d05-4d06-b3b1-835b6da90e40",
     "Name": "frog",
     "Tags": "player",
     "Enabled": true,
@@ -8,7 +8,7 @@
     "Components": [
       {
         "__type": "SkinnedModelRenderer",
-        "__guid": "12f43845-d848-4e95-9084-5ce28ba26099",
+        "__guid": "60c2ba58-907a-445c-9623-5e34280ab53e",
         "AnimationGraph": "animgraphs/frog.vanmgrph",
         "BodyGroups": 18446744073709551615,
         "CreateBoneObjects": false,
@@ -18,15 +18,15 @@
       },
       {
         "__type": "SphereCollider",
-        "__guid": "66c6e1a4-cdae-4ea3-8980-920eac4f99e7",
+        "__guid": "298082ad-b79f-4c47-8156-f83485a9d560",
         "Center": "0,0,2",
-        "IsTrigger": true,
+        "IsTrigger": false,
         "Radius": 8,
         "Static": false
       },
       {
         "__type": "Frog",
-        "__guid": "17c87859-4e13-4ef8-8197-c4ee77f341da",
+        "__guid": "644f7baf-5287-4d62-a70e-2b53c138d88a",
         "DeathParticlesCar": {
           "_type": "gameobject",
           "prefab": "prefabs/particles_death.prefab"
