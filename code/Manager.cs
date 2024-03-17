@@ -57,11 +57,10 @@ namespace Jumpy
 
 			var player = PlayerPrefab.Clone( new Transform(Vector3.Up * 100), name: $"Player - {connection.DisplayName}" );
 			player.NetworkSpawn( connection );
-			if ( !Networking.IsHost )
-			{
-				Frog frog = player.Components.Get<Frog>();
-				RespawnFrog( frog );
-			}	
+			if ( !IsGameActive )
+				return;
+			Frog frog = player.Components.Get<Frog>();
+			RespawnFrog( frog );
 		}
 
 

@@ -57,21 +57,25 @@
         {
           "Name": "Forward",
           "KeyboardCode": "W",
+          "GamepadCode": "DpadNorth",
           "GroupName": "Movement"
         },
         {
           "Name": "Backward",
           "KeyboardCode": "S",
+          "GamepadCode": "DpadSouth",
           "GroupName": "Movement"
         },
         {
           "Name": "Left",
           "KeyboardCode": "A",
+          "GamepadCode": "DpadEast",
           "GroupName": "Movement"
         },
         {
           "Name": "Right",
           "KeyboardCode": "D",
+          "GamepadCode": "DpadWest",
           "GroupName": "Movement"
         },
         {
@@ -225,7 +229,8 @@
           "KeyboardCode": "enter",
           "GroupName": "Other"
         }
-      ]
+      ],
+      "__guid": "2da5e603-45e7-4a6f-ac80-fd1d5fcc1a14"
     },
     "StartupScene": "scenes/main.scene",
     "LaunchMode": "Normal"
