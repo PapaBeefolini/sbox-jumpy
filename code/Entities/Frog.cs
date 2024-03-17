@@ -154,7 +154,6 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 				UpdateAnimation( false );
 				SpawnJumpParticles( Transform.Position );
-				Sound.Play( JumpSound, Transform.Position );
 			}
 		}
 	}
@@ -227,6 +226,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private void SpawnJumpParticles(Vector3 position)
 	{
 		JumpParticles.Clone( position, Rotation.FromPitch( -90 ) );
+		Sound.Play( JumpSound, position );
 	}
 
 

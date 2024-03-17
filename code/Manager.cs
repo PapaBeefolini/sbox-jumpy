@@ -3,6 +3,7 @@ using Sandbox.Network;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using static Sandbox.Gizmo;
 
 namespace Jumpy
 {
@@ -68,7 +69,10 @@ namespace Jumpy
 		protected override void OnUpdate()
 		{
 			if ( Input.EscapePressed )
+			{
+				IsGameActive = false;
 				Game.ActiveScene.LoadFromFile( "scenes/main.scene" );
+			}
 
 			if ( !Networking.IsHost || !IsGameActive )
 				return;

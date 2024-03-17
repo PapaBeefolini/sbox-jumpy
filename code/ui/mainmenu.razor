@@ -46,7 +46,7 @@
 
 							<div class="meta">
 								<div class="map">
-									@lobby.Map
+									Jumpy
 								</div>
 
 								<div class="count">
@@ -66,6 +66,7 @@
 	private bool IsRefreshing { get; set; }
 	private List<LobbyInformation> List { get; set; } = new();
 	protected override int BuildHash() => HashCode.Combine(RealTime.Now);
+	private bool IsJoining { get; set; } = false;
 
 
 	protected override void OnEnabled()
@@ -88,13 +89,18 @@
 			IsRefreshing = false;
 			StateHasChanged();
 
-			await Task.DelayRealtimeSeconds( 5f );
+			await Task.DelayRealtimeSeconds( 8.0f );
+
+			IsJoining = false;
 		}
 	}
 
 
 	private void OpenLobby( LobbyInformation lobby )
 	{
+		if ( IsJoining )
+            return;
+		IsJoining = true;
 		GameNetworkSystem.Connect( lobby.LobbyId );
 	}
 
