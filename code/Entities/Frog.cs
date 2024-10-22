@@ -2,10 +2,6 @@ using Sandbox;
 using System.Threading.Tasks;
 using System;
 using Jumpy;
-using System.Diagnostics;
-using System.Numerics;
-using Sandbox.Diagnostics;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 public sealed class Frog : Component, Component.ITriggerListener
@@ -21,7 +17,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 	[Sync] public Color FrogColor { get; set; } = Color.White;
 
 	public Manager Manager { get; set; }
-	public Vector3 WorldPosition { get; set; }
+	public Vector3 TilePosition { get; set; }
 	public bool IsGrounded { get; set; } = false;
 	public GameObject Log { get; set; }
 	public Vector3 LogOffset { get; set; }
@@ -77,15 +73,15 @@ public sealed class Frog : Component, Component.ITriggerListener
 		}
 
 		if ( Log != null )
-			WorldPosition = Log.Transform.Position.Round( 1 ) + LogOffset.Round( 1 );
+			TilePosition = Log.WorldPosition.Round( 1 ) + LogOffset.Round( 1 );
 
 		float elapsedTime = Time.Now - timeJumpStarted;
 		float jumpAmount = MathF.Pow( elapsedTime * 24.0f, 2.5f );
 
-		Transform.Position = Transform.Position.LerpTo( WorldPosition, Time.Delta * jumpAmount ) + jumpOffset;
+		WorldPosition = WorldPosition.LerpTo( TilePosition, Time.Delta * jumpAmount ) + jumpOffset;
 		jumpOffset = jumpOffset.LerpTo( Vector3.Zero, Time.Delta * 12 );
 
-		float distanceToLand = (Transform.Position - WorldPosition).Length;
+		float distanceToLand = (WorldPosition - TilePosition).Length;
 
 		if ( distanceToLand <= 16.0f )
 			UpdateAnimation( true );
@@ -94,7 +90,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 			IsGrounded = true;
 
 		float killBorder = (Manager.GetWorldWidthY() / 2) + Manager.GetTileSize();
-		if ( Transform.Position.y <= -killBorder || Transform.Position.y >= killBorder )
+		if ( WorldPosition.y <= -killBorder || WorldPosition.y >= killBorder )
 			_ = Die( DeathType.Car );
 	}
 
@@ -103,7 +99,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 	{
 		if ( IsProxy )
 			return;
-		Scene.Camera.Transform.Position = Vector3.Lerp( Scene.Camera.Transform.Position, Transform.Position + Scene.Camera.Transform.Rotation.Backward * 800, Time.Delta * 4 );
+		Scene.Camera.WorldPosition = Vector3.Lerp( Scene.Camera.WorldPosition, WorldPosition + Scene.Camera.WorldRotation.Backward * 800, Time.Delta * 4 );
 	}
 
 
@@ -111,8 +107,8 @@ public sealed class Frog : Component, Component.ITriggerListener
 	{
 		if ( IsProxy )
 			return;
-		Scene.Camera.Transform.Position = Transform.Position + Scene.Camera.Transform.Rotation.Backward * 800;
-		Scene.Camera.Transform.Rotation = new Angles( 30, 15, 0 ).ToRotation();
+		Scene.Camera.WorldPosition = WorldPosition + Scene.Camera.WorldRotation.Backward * 800;
+		Scene.Camera.WorldRotation = new Angles( 30, 15, 0 ).ToRotation();
 		Scene.Camera.FieldOfView = 65;
 	}
 
@@ -120,7 +116,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private void Move( Vector3 direction )
 	{
 		Vector3 jumpClearance = Vector3.Up * 33;
-		Vector3 requestedJump = SnapToGrid( WorldPosition ) + jumpClearance;
+		Vector3 requestedJump = SnapToGrid( TilePosition ) + jumpClearance;
 		String[] ignoreTags = { "player", "car" };
 
 		SceneTraceResult wallTraceResult = Scene.Trace.Ray( new Ray( requestedJump, direction ), jumpDistance ).WithoutTags( ignoreTags ).Run();
@@ -143,14 +139,14 @@ public sealed class Frog : Component, Component.ITriggerListener
 					LogOffset = Vector3.Zero;
 				}
 
-				WorldPosition = SnapToGrid( result.EndPosition );
+				TilePosition = SnapToGrid( result.EndPosition );
 				jumpOffset += Vector3.Up * jumpHeight;
 
 				if ( direction != Vector3.Up || direction != Vector3.Down )
-					Transform.Rotation = Rotation.LookAt( direction, Vector3.Up );
+					WorldRotation = Rotation.LookAt( direction, Vector3.Up );
 
 				UpdateAnimation( false );
-				SpawnJumpParticles( Transform.Position );
+				SpawnJumpParticles( WorldPosition );
 			}
 		}
 	}
@@ -177,9 +173,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 		IsDead = false;
 		Log = null;
 		IsGrounded = false;
+		TilePosition = position;
 		WorldPosition = position;
-		Transform.Position = position;
-		Transform.Rotation = Rotation.LookAt( Vector3.Forward, Vector3.Up );
+		WorldRotation = Rotation.LookAt( Vector3.Forward, Vector3.Up );
 		FrogColor = Color.Random;
 		UpdateAppearance( IsDead );
 		UpdateAnimation( true );
@@ -195,7 +191,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		IsDead = true;
 		Log = null;
 		UpdateAppearance( IsDead );
-		SpawnDeathParticles( deathType, Transform.Position );
+		SpawnDeathParticles( deathType, WorldPosition );
 
 		await Task.DelaySeconds( 5.0f );
 
@@ -235,14 +231,14 @@ public sealed class Frog : Component, Component.ITriggerListener
 			collider.Enabled = false;
 			collider.IsTrigger = false;
 			renderer.Enabled = false;
-			Sound.Play( DeathSound, Transform.Position );
+			Sound.Play( DeathSound, WorldPosition );
 		}
 		else
 		{
 			collider.Enabled = true;
 			collider.IsTrigger = true;
 			renderer.Enabled = true;
-			Sound.Play( RespawnSound, Transform.Position );
+			Sound.Play( RespawnSound, WorldPosition );
 		}
 	}
 

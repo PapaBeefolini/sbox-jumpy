@@ -26,9 +26,9 @@ namespace Jumpy
 			if ( !Networking.IsHost )
 				return;
 
-			Transform.Position += Vector3.Right * Speed * Time.Delta;
+			WorldPosition += Vector3.Right * Speed * Time.Delta;
 
-			if ( Transform.Position.y > 5000 || Transform.Position.y < -5000 )
+			if ( WorldPosition.y > 5000 || WorldPosition.y < -5000 )
 				GameObject.Destroy();
 		}
 	}

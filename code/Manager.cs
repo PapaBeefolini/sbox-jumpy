@@ -1,9 +1,7 @@
 using Sandbox;
-using Sandbox.Network;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static Sandbox.Gizmo;
 
 namespace Jumpy
 {
@@ -39,11 +37,11 @@ namespace Jumpy
 			if ( Scene.IsEditor )
 				return;
 
-			if ( !GameNetworkSystem.IsActive )
+			if ( !Networking.IsActive )
 			{
 				LoadingScreen.Title = "Creating Lobby";
 				await Task.DelayRealtimeSeconds( 0.1f );
-				GameNetworkSystem.CreateLobby();
+				Networking.CreateLobby();
 			}
 		}
 
@@ -57,8 +55,7 @@ namespace Jumpy
 
 			var player = PlayerPrefab.Clone( new Transform(Vector3.Up * 100), name: $"Player - {connection.DisplayName}" );
 			player.NetworkSpawn( connection );
-			if ( !IsGameActive )
-				return;
+
 			Frog frog = player.Components.Get<Frog>();
 			RespawnFrog( frog );
 		}
@@ -83,7 +80,7 @@ namespace Jumpy
 
 			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
 			{
-				if ( frog.Transform.Position.x >= winTilePosition )
+				if ( frog.WorldPosition.x >= winTilePosition )
 				{
 					_ = EndGame();
 					return;
@@ -158,7 +155,7 @@ namespace Jumpy
 						CreateTile( currentPosition, new Color( 0.75f, 1, 0.75f ) );
 						GameObject spawnPoint = new GameObject( true, "SpawnPoint" );
 						spawnPoint.Components.Create<SpawnPoint>();
-						spawnPoint.Transform.Position = currentPosition + Vector3.Up * 32;
+						spawnPoint.WorldPosition = currentPosition + Vector3.Up * 32;
 						spawnPoint.SetParent( GameObject );
 						spawnPoint.NetworkSpawn();
 						continue;
@@ -332,7 +329,7 @@ namespace Jumpy
 		{
 			var spawnPoint = Scene.GetAllComponents<SpawnPoint>().OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
 			if ( spawnPoint != null )
-				return spawnPoint.Transform.Position;
+				return spawnPoint.WorldPosition;
 			return Vector3.Zero;
 		}
 

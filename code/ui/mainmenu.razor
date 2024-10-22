@@ -101,7 +101,7 @@
 		if ( IsJoining )
             return;
 		IsJoining = true;
-		GameNetworkSystem.Connect( lobby.LobbyId );
+		Networking.Connect( lobby.LobbyId );
 	}
 
 
@@ -113,8 +113,6 @@
 
 	private void Quit()
 	{
-		if (Game.IsEditor)
-			return;
 		Game.Close();
 	}
 }

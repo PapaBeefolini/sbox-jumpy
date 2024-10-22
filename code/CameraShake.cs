@@ -14,14 +14,14 @@ namespace Jumpy
 		protected override void OnStart()
 		{
 			startTime = Time.Now;
-			startRotation = Transform.Rotation;
+			startRotation = WorldRotation;
 		}
 
 
 		protected override void OnUpdate()
 		{
 			float angle = MathF.Sin( (Time.Now - startTime) * Speed ) * Amount;
-			Transform.Rotation = startRotation * Rotation.From( angle / 4, angle, 0 );
+			WorldRotation = startRotation * Rotation.From( angle / 4, angle, 0 );
 		}
 	}
 }

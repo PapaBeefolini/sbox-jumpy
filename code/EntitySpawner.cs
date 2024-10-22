@@ -12,7 +12,7 @@ namespace Jumpy
 				if ( !Networking.IsHost )
 					return;
 
-				var entity = prefab.Clone( Transform.Position, Transform.Rotation );
+				var entity = prefab.Clone( WorldPosition, WorldRotation );
 				var movingEntity = entity.Components.Get<MovingEntity>();
 				if ( movingEntity is not null && flipped )
 				{
