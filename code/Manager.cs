@@ -69,11 +69,11 @@ namespace Jumpy
 
 		protected override void OnUpdate()
 		{
-			if ( Input.EscapePressed )
+			/*if ( Input.EscapePressed )
 			{
 				IsGameActive = false;
 				Game.ActiveScene.LoadFromFile( "scenes/main.scene" );
-			}
+			}*/
 
 			if ( !Networking.IsHost || !IsGameActive )
 				return;
