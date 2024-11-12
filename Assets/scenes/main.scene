@@ -38,8 +38,19 @@
         {
           "__type": "Sandbox.SoundPointComponent",
           "__guid": "3e22fd2e-eca7-47e4-8c30-7ec985b43e77",
+          "Distance": 512,
           "DistanceAttenuation": false,
           "DistanceAttenuationOverride": false,
+          "Falloff": [
+            {
+              "y": 1,
+              "in": 3.1415927,
+              "out": -3.1415927
+            },
+            {
+              "x": 1
+            }
+          ],
           "Force2d": false,
           "MaxRepeatTime": 1,
           "MinRepeatTime": 1,
@@ -111,6 +122,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "fda604be-95b5-441d-a0b4-dfedbe4e3334",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -143,6 +155,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "e4b9e2d8-597f-4ba9-9515-c31782c8df1a",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -175,6 +188,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "c3be2469-eca9-492a-84d1-2409b05e1fcf",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -207,6 +221,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "fba6b7c0-17a4-4b3d-81ce-10d045cf3dd2",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -239,6 +254,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "5776d260-e600-44f6-8ea0-4ad42632281a",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -271,6 +287,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "181384a2-d7ea-4951-a08c-a5bb075500ed",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -303,6 +320,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "237a4716-1190-46b2-9ee2-31fbed67af54",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -335,6 +353,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "067c8902-5c07-4b6f-8b5e-dfcd98d40946",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -367,6 +386,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "636b84c3-69ac-4569-85ad-c8b4ecb9dda4",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -399,6 +419,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "7287018b-7d8e-493d-91d0-94b9c75a5fd4",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -431,6 +452,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "f7a51302-a46c-44bc-a2f1-1f1115913e79",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -463,6 +485,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "33094c8d-6c17-442b-9e39-83bfb3095663",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -495,6 +518,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "941105ee-eba9-4099-be44-375b3b25f993",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -527,6 +551,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "d807febd-4d3e-4901-9ceb-9454f46aaf2d",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -559,6 +584,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "6a740fa8-2207-4f58-bc84-8f973b38458f",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -591,6 +617,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "7a2d4b22-2cb4-4f35-9c6f-f2737aa50d89",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -623,6 +650,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "e134a6e0-abb3-4e26-95e3-5451495eec05",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -657,6 +685,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "9e397515-11ca-452a-9f56-059aa5a7bfe3",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/pebbles.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -681,6 +710,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "739159d1-1be7-4b00-a69d-42c12f6e4d45",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -713,6 +743,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "af057995-eb9c-4eb1-a108-f8f07b6d18f2",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -745,6 +776,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "d635ad71-e6f3-4a5f-9964-5124b790c1a4",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -777,6 +809,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "a19dd960-f7d4-48af-a8cd-d3fac9917794",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -809,6 +842,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "7e10cb79-98a7-4915-9012-2f97555a6e72",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -841,6 +875,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "dab769a0-bb02-4e49-8f86-8c397906bec0",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -873,6 +908,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "ed40583e-efea-4650-a9e2-acc66a30c024",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -905,6 +941,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "1af3f042-ec12-4981-a113-36f86bb0e43a",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -937,6 +974,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "90f83f38-1a20-44e4-a689-bdc684316421",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -969,6 +1007,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "915e0877-4696-4d67-a39c-bc328793d146",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1002,6 +1041,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "f98b853f-f868-4cfe-8d29-2af22c827cae",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1034,6 +1074,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "ab9bfbd4-0d87-4dbc-9f3b-bc7e6818e56a",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1067,6 +1108,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "71e28872-9841-4b2b-84fd-2081974e061b",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1099,6 +1141,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "80f06ade-165e-4355-8397-da9bfffc77da",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1131,6 +1174,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "dab03148-f670-416b-9385-73d660acfa0b",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1163,6 +1207,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "3f3e519f-424f-4fb9-a956-8c7907c6c224",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1196,6 +1241,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "b56e9200-4b15-496e-8c4a-c9da89678a73",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1229,6 +1275,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "a59113c1-595a-4aa8-9d33-2e0f6382a334",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1261,6 +1308,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "8bd48aa7-67ab-4d1f-a697-509134687af4",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1293,6 +1341,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "83dcaa4c-13d4-43c3-943f-dd23a55c65a8",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1326,6 +1375,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "39ab659c-cbb2-4d36-ab7c-22757bd8d10a",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1359,6 +1409,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "a0248577-803c-4a57-ac10-d7c04bf6540c",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1391,6 +1442,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "3baeec26-4fc9-4f42-8cc4-d6835c25f328",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1423,6 +1475,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "8b110de8-261f-430b-94e1-468effc8473b",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1455,6 +1508,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "ab0b6a35-45eb-40d4-9cbf-cc646c1cd5ac",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1487,6 +1541,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "28d27484-f0d6-4172-b068-8b54088334ba",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1519,6 +1574,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "01100c1f-a227-49e2-9c4e-8205e9c31559",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1551,6 +1607,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "94d7d002-53b9-47c9-bd03-cfbbc28cd6b5",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1584,6 +1641,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "258524dd-b4fe-4bf0-8bd2-aa3a7b965fa9",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1616,6 +1674,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "eb5cdd86-66de-49d2-9d8b-c590c04bfe7c",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1649,6 +1708,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "6f6a2ecf-7461-4490-9dd0-7d94bef6083b",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1681,6 +1741,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "12703adf-efa4-42ce-8faa-91d6a8121fe4",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1713,6 +1774,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "1296b4a1-1a3f-4b6c-ac9f-a30c511de9a0",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1747,6 +1809,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "dcfcf227-a49d-4b47-b11a-c3a56e2202d8",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/rock.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1779,6 +1842,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "7306d3a0-60b3-47e5-be78-04ae0e0e8f59",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1811,6 +1875,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "fff2e88d-dd3b-4c60-9d5b-be3dc824074d",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1844,6 +1909,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "fdc05ba8-da5c-4be2-94b5-f6f8ed5f4e6b",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1877,6 +1943,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "69b66ea0-14f1-41b9-b1c1-4b3c8009da1f",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1910,6 +1977,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "9ec5b184-7472-468d-a3fe-20886dce6713",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1943,6 +2011,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "c1260fd4-fef7-4a8f-bea3-89bc765b2fb0",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/lilly.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -1975,6 +2044,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "502ec83e-6099-4ef7-af9c-d0bf77fd6c89",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2007,6 +2077,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "01c7aedc-6a1e-41df-b83c-66d291d205fb",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2039,6 +2110,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "5ccf4e81-a0b7-4d46-9a4f-f5ae698346b8",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2071,6 +2143,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "11c6880f-cc8c-45a8-8368-fa3ac53c5f37",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2103,6 +2176,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "ce7b3a82-5615-4087-8fb9-bb034cc234f9",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2135,6 +2209,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "6a52b3a7-963c-427c-95d7-7722911231e8",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2167,6 +2242,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "bb4dfb32-884e-457a-9ae3-558cb06b28b3",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/road.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2199,6 +2275,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "20113142-de9d-4864-a99c-0f3dc5d007ea",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2231,6 +2308,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "4ac2241f-f3ad-4f67-8e9c-0b459adbe219",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2263,6 +2341,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "386adcf9-ec81-403b-ba09-0b34186dfe6f",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2295,6 +2374,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "0d96f8db-51d7-49a7-b189-ffcb6af7c0e6",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2327,6 +2407,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "f7fc81e0-39da-49af-b1a4-0c04335562e3",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2361,6 +2442,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "b1a4f426-5dc0-4d46-bf9f-05c820ec9c7a",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/rock.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2395,6 +2477,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "d855a789-035c-490a-a773-e16fc403a37d",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tree-lowpoly-1.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2429,6 +2512,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "710cb18b-65d4-4596-877d-a85e8fe817d0",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tree-lowpoly-1.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2463,6 +2547,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "37047528-b03e-42d1-b1e8-8365f866eebe",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tree-lowpoly-1.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2497,6 +2582,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "a49d8c56-756b-4486-bd7f-7de809efc746",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tree-lowpoly-1.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2531,6 +2617,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "71c9d86f-a318-482d-8135-341a2f7477b1",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/pebbles.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2557,6 +2644,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "513a6f14-042e-43ff-bbd5-a3fcddd46cf6",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/pebbles.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2581,6 +2669,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "5fd82ec9-3914-4984-ae49-3e479559098b",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2613,6 +2702,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "adc7857f-8a63-4634-bece-5aaf1fb26567",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/tile.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2710,9 +2800,11 @@
           "__type": "Sandbox.DepthOfField",
           "__guid": "8b29f3f7-b611-4aed-839d-925a9a0d232f",
           "BackBlur": true,
-          "BlurSize": 200,
+          "BlurSize": 20,
           "FocalDistance": 220,
-          "FrontBlur": false
+          "FocusRange": 500,
+          "FrontBlur": false,
+          "QualityLevel": "High"
         }
       ]
     },
@@ -2767,6 +2859,7 @@
           "__type": "Sandbox.ModelRenderer",
           "__guid": "5ef5e491-41b1-4ebb-bdca-37d49e339884",
           "BodyGroups": 18446744073709551615,
+          "CreateAttachments": false,
           "Model": "models/water.vmdl",
           "RenderOptions": {
             "GameLayer": true,
@@ -2813,6 +2906,7 @@
               "__type": "Sandbox.ModelRenderer",
               "__guid": "5b58f6db-c077-49bc-9da1-3fdafc56ae2a",
               "BodyGroups": 18446744073709551615,
+              "CreateAttachments": false,
               "Model": "models/water.vmdl",
               "RenderOptions": {
                 "GameLayer": true,
@@ -2840,6 +2934,7 @@
           "__guid": "71286b66-7f0f-40a1-a3f3-b919a6fd4358",
           "AnimationGraph": "animgraphs/frog.vanmgrph",
           "BodyGroups": 18446744073709551615,
+          "CreateAttachments": false,
           "CreateBoneObjects": false,
           "Model": "models/frog.vmdl",
           "Morphs": {},
