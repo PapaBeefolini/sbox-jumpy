@@ -63,6 +63,7 @@ namespace Jumpy
 
 		protected override void OnStart()
 		{
+			Mouse.Visible = false;
 			_ = StartNewGame();
 		}
 
