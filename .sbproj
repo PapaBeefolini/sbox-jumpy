@@ -8,7 +8,8 @@
   "Resources": "ui/mainmenu/loadingpanel.razor.scss\nui/mainmenu/mainmenu.razor.scss\nui/frog.png\nui/*\nmaterials/*\nmodels/*\nsounds/*\nshaders/*\npostprocess/*\nparticles/*\nfonts/*",
   "PackageReferences": [],
   "EditorReferences": null,
-  "IsWhitelistDisabled": false,
+  "Mounts": null,
+  "IsStandaloneOnly": false,
   "Metadata": {
     "MapList": [],
     "MaxPlayers": 8,
@@ -41,7 +42,7 @@
       {
         "Name": "Jumpy",
         "GameIdent": "brick.jumpy#local",
-        "MapName": "\u003Cempty\u003E",
+        "MapName": "<empty>",
         "MaxPlayers": 16,
         "GameSettings": {},
         "Addons": "",

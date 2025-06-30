@@ -14,10 +14,12 @@
 		<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
 		<DefaultItemExcludes>$(DefaultItemExcludes);**\editor\**\*;**\unittest\**\*</DefaultItemExcludes>
 
+		<DesignTimeBuild Condition="'$(DesignTimeBuild)' == 'true'">true</DesignTimeBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
 		
+		<CompilerVisibleProperty Include="DesignTimeBuild" />
 		<None Update="**\*.cs.scss" DependentUpon="%(Filename)" />
 		<Compile Update="**\*.razor.cs" DependentUpon="%(Filename)" />
 		<None Update="**\*.razor.scss" DependentUpon="%(Filename)" />
@@ -32,6 +34,8 @@
 
 	<ItemGroup>
 		<Using Include="Sandbox.Internal.GlobalGameNamespace" Static="true" />
+		<Using Include="Microsoft.AspNetCore.Components" />
+		<Using Include="Microsoft.AspNetCore.Components.Rendering" />
 	</ItemGroup>
 
   <PropertyGroup>
@@ -43,12 +47,12 @@
 
 	<ItemGroup>
 		<Analyzer Include="..\..\..\bin\managed\Sandbox.CodeUpgrader.dll"/>
-		<Analyzer Include="..\..\..\bin\managed\Sandbox.Generator.dll"/>
+		<Analyzer Include="..\..\..\bin\managed\Sandbox.Generator.dll" Condition="$(DesignTimeBuild) != 'true'"/>
 		<Reference Include="..\..\..\bin\managed/Sandbox.System.dll" />
 		<Reference Include="..\..\..\bin\managed/Sandbox.Engine.dll" />
 		<Reference Include="..\..\..\bin\managed/Sandbox.Filesystem.dll" />
-		<Reference Include="..\..\..\bin\managed/Sandbox.Game.dll" />
 		<Reference Include="..\..\..\bin\managed/Sandbox.Reflection.dll" />
+		<Reference Include="..\..\..\bin\managed/Sandbox.Mounting.dll" />
 	</ItemGroup>
 
   <ItemGroup>

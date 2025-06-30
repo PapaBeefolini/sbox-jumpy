@@ -193,7 +193,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		UpdateAppearance( IsDead );
 		SpawnDeathParticles( deathType, WorldPosition );
 
-		await Task.DelaySeconds( 5.0f );
+		await Task.DelaySeconds( 3.0f );
 
 		if ( IsDead )
 			Manager.RespawnFrog( this );
