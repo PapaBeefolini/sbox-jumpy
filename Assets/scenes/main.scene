@@ -5488,7 +5488,7 @@
           "__enabled": true,
           "Center": "0.5,0.5",
           "Color": "0,0,0,1",
-          "Intensity": 0.4,
+          "Intensity": 0.1,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
