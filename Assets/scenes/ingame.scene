@@ -204,7 +204,7 @@
           "__guid": "027528a6-81f2-4de6-befd-5ecb5b1a644e",
           "__enabled": true,
           "__version": 1,
-          "Gamma": 2.2,
+          "Gamma": 1.5,
           "Mode": "Additive",
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
@@ -213,7 +213,7 @@
           "OnComponentStart": null,
           "OnComponentUpdate": null,
           "Strength": 0.3,
-          "Threshold": 1.05,
+          "Threshold": 1,
           "Tint": "1,1,1,1"
         },
         {
@@ -237,14 +237,14 @@
           "__enabled": true,
           "Center": "0.5,0.5",
           "Color": "0,0,0,1",
-          "Intensity": 0.1,
+          "Intensity": 0.4,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "Roundness": 0.7,
+          "Roundness": 0,
           "Smoothness": 1
         }
       ],

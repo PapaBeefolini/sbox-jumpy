@@ -19,30 +19,7 @@
         "__guid": "c6a3242c-2410-4d9d-bc19-afb17e4c4864",
         "__enabled": true,
         "__version": 2,
-        "Alpha": {
-          "Type": "Curve",
-          "Evaluation": "Life",
-          "CurveA": [
-            {
-              "x": 0,
-              "y": 1,
-              "in": 0,
-              "out": 0,
-              "mode": "Mirrored"
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "in": 0,
-              "out": 0,
-              "mode": "Mirrored"
-            }
-          ],
-          "CurveB": {
-            "rangex": "0,0",
-            "rangey": "0,0"
-          }
-        },
+        "Alpha": 1,
         "ApplyAlpha": true,
         "ApplyColor": true,
         "ApplyRotation": false,
@@ -170,10 +147,15 @@
               }
             ]
           },
-          "CurveB": {
-            "rangex": "0,0",
-            "rangey": "0,0"
-          }
+          "CurveB": [
+            {
+              "x": 0.5,
+              "y": 0.5,
+              "in": 0,
+              "out": 0,
+              "mode": "Mirrored"
+            }
+          ]
         },
         "SequenceId": 0,
         "SequenceSpeed": 1,
@@ -277,30 +259,7 @@
             "__guid": "8d1db0b4-bd53-41d3-968a-797c39ceb436",
             "__enabled": true,
             "__version": 2,
-            "Alpha": {
-              "Type": "Curve",
-              "Evaluation": "Life",
-              "CurveA": [
-                {
-                  "x": 0,
-                  "y": 0.7765958,
-                  "in": 0,
-                  "out": 0,
-                  "mode": "Mirrored"
-                },
-                {
-                  "x": 1,
-                  "y": 0,
-                  "in": 0,
-                  "out": 0,
-                  "mode": "Mirrored"
-                }
-              ],
-              "CurveB": {
-                "rangex": "0,0",
-                "rangey": "0,0"
-              }
-            },
+            "Alpha": 1,
             "ApplyAlpha": true,
             "ApplyColor": true,
             "ApplyRotation": false,
@@ -420,10 +379,15 @@
                   }
                 ]
               },
-              "CurveB": {
-                "rangex": "0,0",
-                "rangey": "0,0"
-              }
+              "CurveB": [
+                {
+                  "x": 0.5,
+                  "y": 0.5,
+                  "in": 0,
+                  "out": 0,
+                  "mode": "Mirrored"
+                }
+              ]
             },
             "SequenceId": 0,
             "SequenceSpeed": 1,
@@ -486,8 +450,8 @@
             "CenterBias": 0,
             "CenterBiasVelocity": 0,
             "ConeAngle": 89,
-            "ConeFar": 2,
-            "ConeNear": 1,
+            "ConeFar": 1,
+            "ConeNear": 0.1,
             "Delay": 0,
             "DestroyOnEnd": false,
             "Duration": 2,

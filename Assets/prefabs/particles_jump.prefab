@@ -19,30 +19,7 @@
         "__guid": "96ad0a2e-5c71-48c5-9c5e-83223f5ebed4",
         "__enabled": true,
         "__version": 2,
-        "Alpha": {
-          "Type": "Curve",
-          "Evaluation": "Life",
-          "CurveA": [
-            {
-              "x": 0,
-              "y": 0.3776596,
-              "in": 0,
-              "out": 0,
-              "mode": "Mirrored"
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "in": 0,
-              "out": 0,
-              "mode": "Mirrored"
-            }
-          ],
-          "CurveB": {
-            "rangex": "0,0",
-            "rangey": "0,0"
-          }
-        },
+        "Alpha": 1,
         "ApplyAlpha": true,
         "ApplyColor": true,
         "ApplyRotation": true,
@@ -162,10 +139,15 @@
               }
             ]
           },
-          "CurveB": {
-            "rangex": "0,0",
-            "rangey": "0,0"
-          }
+          "CurveB": [
+            {
+              "x": 0.5,
+              "y": 0.5,
+              "in": 0,
+              "out": 0,
+              "mode": "Mirrored"
+            }
+          ]
         },
         "SequenceId": 0,
         "SequenceSpeed": 1,
@@ -228,8 +210,8 @@
         "CenterBias": 0,
         "CenterBiasVelocity": 0,
         "ConeAngle": 85,
-        "ConeFar": 2,
-        "ConeNear": 1,
+        "ConeFar": 1,
+        "ConeNear": 0.1,
         "Delay": 0,
         "DestroyOnEnd": true,
         "Duration": 1,
