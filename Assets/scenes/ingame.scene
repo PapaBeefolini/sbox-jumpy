@@ -204,6 +204,7 @@
           "__guid": "027528a6-81f2-4de6-befd-5ecb5b1a644e",
           "__enabled": true,
           "__version": 1,
+          "Filter": "Bilinear",
           "Gamma": 1.5,
           "Mode": "Additive",
           "OnComponentDestroy": null,
@@ -220,7 +221,7 @@
           "__type": "Sandbox.ColorAdjustments",
           "__guid": "e761e10c-edb7-429b-b2fa-59ee5a208483",
           "__enabled": true,
-          "Brightness": 1.2,
+          "Brightness": 1.6,
           "Contrast": 1,
           "HueRotate": 0,
           "OnComponentDestroy": null,
@@ -229,7 +230,7 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "Saturation": 1.025
+          "Saturation": 1.075
         },
         {
           "__type": "Sandbox.Vignette",
@@ -338,6 +339,7 @@
           "__enabled": true,
           "BodyGroups": 18446744073709551615,
           "CreateAttachments": false,
+          "LodOverride": null,
           "MaterialGroup": null,
           "MaterialOverride": null,
           "Materials": null,
@@ -403,6 +405,7 @@
               "__enabled": true,
               "BodyGroups": 18446744073709551615,
               "CreateAttachments": false,
+              "LodOverride": null,
               "MaterialGroup": null,
               "MaterialOverride": null,
               "Materials": null,
