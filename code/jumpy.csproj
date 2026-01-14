@@ -10,7 +10,7 @@
 		<WarningsAsErrors></WarningsAsErrors>
 		<TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<DefineConstants>SANDBOX;ADDON;DEBUG</DefineConstants>
+		<DefineConstants>SANDBOX</DefineConstants>
 		<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
 		<OutputPath>..\..\../.vs/output/</OutputPath>
 		<DocumentationFile>..\..\../.vs/output/jumpy.xml</DocumentationFile>

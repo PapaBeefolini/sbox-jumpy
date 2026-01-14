@@ -51,6 +51,6 @@
       }
     ],
     "StartupScene": "scenes/main.scene",
-    "LaunchMode": "Normal"
+    "LaunchMode": "QuickPlay"
   }
 }
