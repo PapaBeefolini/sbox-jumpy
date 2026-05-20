@@ -22,6 +22,7 @@
     "GameCategory": "Racing",
     "ControlModes": {
       "Keyboard": true,
+      "VR": false,
       "Gamepad": true
     },
     "Physics": {
