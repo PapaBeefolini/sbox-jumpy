@@ -12,6 +12,7 @@ Properties/*
 code/obj/*
 code/Properties/*
 .sbox/*
+.mcp.json
 
 # Auto-generated asset related files
 *.generated.*
