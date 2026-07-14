@@ -24,13 +24,12 @@ namespace Jumpy
 
 		[Sync] public bool IsGameActive { get; set; } = false;
 		[Sync] public bool IsGameOver { get; set; } = false;
+		[Sync] public float WinTilePosition { get; set; } = 0;
 
 		private int worldLength = 64;
 		private int worldWidth = 28;
 		private int tileSize = 96;
-		private int winTilePosition = 0;
 		private bool lastGenerationWasRoad = false;
-
 
 		protected override async Task OnLoad()
 		{
@@ -44,7 +43,6 @@ namespace Jumpy
 				Networking.CreateLobby();
 			}
 		}
-
 
 		public void OnActive( Connection connection )
 		{
@@ -60,13 +58,11 @@ namespace Jumpy
 			RespawnFrog( frog );
 		}
 
-
 		protected override void OnStart()
 		{
 			Mouse.Visible = false;
 			_ = StartNewGame();
 		}
-
 
 		protected override void OnUpdate()
 		{
@@ -81,14 +77,13 @@ namespace Jumpy
 
 			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
 			{
-				if ( frog.WorldPosition.x >= winTilePosition )
+				if ( frog.WorldPosition.x >= WinTilePosition )
 				{
 					_ = EndGame();
 					return;
 				}
 			}
 		}
-
 
 		public async Task StartNewGame()
 		{
@@ -106,7 +101,6 @@ namespace Jumpy
 			IsGameActive = true;
 		}
 
-
 		public async Task EndGame()
 		{
 			if ( !Networking.IsHost )
@@ -120,13 +114,11 @@ namespace Jumpy
 			_ = StartNewGame();
 		}
 
-
 		private void ClearWorld()
 		{
 			foreach ( GameObject child in GameObject.Children )
 				child.Destroy();
 		}
-
 
 		private void GenerateWorld()
 		{
@@ -166,7 +158,7 @@ namespace Jumpy
 					if ( x >= worldLength - 1 )
 					{
 						CreateTile( currentPosition, new Color( 1, 0.75f, 0.75f ) );
-						winTilePosition = (int)currentPosition.x;
+						WinTilePosition = currentPosition.x;
 						continue;
 					}
 
@@ -290,7 +282,6 @@ namespace Jumpy
 			}
 		}
 
-
 		private void CreateTile( Vector3 position, Color color )
 		{
 			var root = TilePrefab.Clone( position );
@@ -298,7 +289,6 @@ namespace Jumpy
 			root.SetParent( GameObject );
 			root.NetworkSpawn();
 		}
-
 
 		private void CreateTile( Vector3 position )
 		{
@@ -312,19 +302,16 @@ namespace Jumpy
 			root.NetworkSpawn();
 		}
 
-
 		private void RespawnAllFrogs()
 		{
 			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
 				RespawnFrog( frog );
 		}
 
-
 		public void RespawnFrog( Frog frog )
 		{
 			frog.Respawn( GetSpawnPoint() );
 		}
-
 
 		public Vector3 GetSpawnPoint()
 		{
@@ -334,12 +321,10 @@ namespace Jumpy
 			return Vector3.Zero;
 		}
 
-
 		public float GetWorldWidthY()
 		{
 			return worldWidth * tileSize;
 		}
-
 
 		public float GetTileSize()
 		{

@@ -25,14 +25,12 @@ namespace Jumpy
 			new Color( 0.6f, 0.6f, 0.05f ),
 		};
 
-
 		protected override void OnStart()
 		{
 			SetAppearance( models[Game.Random.Int( models.Length - 1 )], colors[Game.Random.Int( colors.Length - 1 )] );
 		}
 
-
-		[Broadcast(NetPermission.HostOnly)]
+		[Rpc.Broadcast(NetFlags.OwnerOnly)]
 		private void SetAppearance( string modelPath, Color color )
 		{
 			var renderer = Components.Get<ModelRenderer>();

@@ -1,4 +1,4 @@
-﻿@using System
+@using System
 @using System.Collections.Generic
 @using System.Linq
 @using System.Threading.Tasks
@@ -10,8 +10,29 @@
 <root>
 	@if (IsGameOver)
 	{
-		<label>Game Over!</label>
+		<label class="gameover">Game Over!</label>
 	}
+
+	<div class="race-track">
+		<div class="cap finish">FINISH</div>
+		<div class="rail">
+			@foreach (var entry in BuildEntries())
+			{
+				var frog = entry.Frog;
+				var isLocal = !frog.IsProxy;
+				<div class="marker @(isLocal ? "local" : "") @(frog.IsDead ? "dead" : "")" style="bottom: @Percent(entry.Progress); left: @(entry.LaneIndex * LaneStep)px;">
+					<div class="badge" style="border-color: @ToCss(frog.FrogColor);">
+						<div class="frog-icon" style="background-image: url( @GetAvatarUrl(frog) );"></div>
+					</div>
+					@if (entry.ClusterSize == 1)
+					{
+						<div class="pname">@GetName(frog)</div>
+					}
+				</div>
+			}
+		</div>
+		<div class="cap start">START</div>
+	</div>
 </root>
 
 @code
@@ -20,6 +41,18 @@
 	private bool IsGameOver { get; set; }
 	protected override int BuildHash() => HashCode.Combine(RealTime.Now);
 
+	private IEnumerable<Frog> Frogs => Scene?.GetAllComponents<Frog>() ?? Enumerable.Empty<Frog>();
+
+	private const float ClusterEpsilon = 0.02f;
+	private const int LaneStep = 48;
+
+	private class FrogEntry
+	{
+		public Frog Frog { get; set; }
+		public float Progress { get; set; }
+		public int LaneIndex { get; set; }
+		public int ClusterSize { get; set; }
+	}
 
 	protected override void OnUpdate()
 	{
@@ -31,5 +64,65 @@
 		{
 			IsGameOver = Manager.IsGameOver;
 		}
+	}
+
+	private List<FrogEntry> BuildEntries()
+	{
+		var entries = Frogs
+			.Select(f => new FrogEntry { Frog = f, Progress = GetProgress(f) })
+			.OrderBy(e => e.Progress)
+			.ToList();
+
+		int i = 0;
+		while (i < entries.Count)
+		{
+			int j = i;
+			float anchor = entries[i].Progress;
+			while (j < entries.Count && entries[j].Progress - anchor <= ClusterEpsilon)
+				j++;
+
+			int size = j - i;
+			for (int k = i; k < j; k++)
+			{
+				entries[k].LaneIndex = k - i;
+				entries[k].ClusterSize = size;
+			}
+
+			i = j;
+		}
+
+		return entries;
+	}
+
+	private float GetProgress(Frog frog)
+	{
+		if (!Manager.IsValid() || Manager.WinTilePosition <= 0)
+			return 0;
+
+		return Math.Clamp(frog.WorldPosition.x / Manager.WinTilePosition, 0f, 1f);
+	}
+
+	private string Percent(float progress)
+	{
+		return (progress * 100f).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "%";
+	}
+
+	private string ToCss(Color color)
+	{
+		return $"rgb({(int)(color.r * 255)}, {(int)(color.g * 255)}, {(int)(color.b * 255)})";
+	}
+
+	private string GetName(Frog frog)
+	{
+		if (!frog.IsProxy)
+			return "You";
+
+		return frog.Network.Owner?.DisplayName ?? "Frog";
+	}
+
+	private string GetAvatarUrl(Frog frog)
+	{
+		var steamId = frog.Network.Owner?.SteamId ?? Connection.Local.SteamId;
+		return $"avatar:{steamId}";
 	}
 }

@@ -10,13 +10,11 @@ namespace Jumpy
 		private float startTime { get; set; }
 		private Rotation startRotation { get; set; }
 
-
 		protected override void OnStart()
 		{
 			startTime = Time.Now;
 			startRotation = WorldRotation;
 		}
-
 
 		protected override void OnUpdate()
 		{
