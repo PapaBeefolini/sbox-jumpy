@@ -6,6 +6,7 @@
 .vs/*
 .vscode/*
 *.csproj
+*.csproj.user
 obj
 bin
 Properties/*
@@ -18,6 +19,7 @@ code/Properties/*
 *.generated.*
 *.*_c
 !*.shader_c
+*.*_d
 *.los
 *.vpk
 *launchSettings.json

@@ -3,7 +3,7 @@
 	"shader"		"shaders/simple.shader"
 	"g_flModelTintAmount"		"1.000000"
 	"g_vColorTint"		"[1.000000 1.000000 1.000000 0.000000]"
-	"TextureColor"		"materials/imphenziapalette01.png"
+	"TextureColor"		"textures/imphenziapalette01.png"
 	"g_flFadeExponent"		"1.000000"
 	"g_bFogEnabled"		"1"
 	"g_flDirectionalLightmapMinZ"		"0.050000"

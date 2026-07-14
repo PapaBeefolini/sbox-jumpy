@@ -5,7 +5,7 @@
   "Ident": "jumpy",
   "Schema": 1,
   "IncludeSourceFiles": false,
-  "Resources": "ui/mainmenu/loadingpanel.razor.scss\nui/mainmenu/mainmenu.razor.scss\nui/frog.png\nui/*\nmaterials/*\nmodels/*\nsounds/*\nshaders/*\npostprocess/*\nparticles/*\nfonts/*",
+  "Resources": "ui/*\nmaterials/*\ntextures/*\nmodels/*\nsounds/*\nanimgraphs/*",
   "PackageReferences": [],
   "EditorReferences": null,
   "Mounts": null,

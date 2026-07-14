@@ -14,7 +14,7 @@
 						remaps = 
 						[
 							{
-								from = "materials/imphenziapalette01.vmat"
+								from = "car.001.vmat"
 								to = "materials/car.vmat"
 							},
 						]
