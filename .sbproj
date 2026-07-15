@@ -5,7 +5,7 @@
   "Ident": "jumpy",
   "Schema": 1,
   "IncludeSourceFiles": false,
-  "Resources": "ui/*\nmaterials/*\ntextures/*\nmodels/*\nsounds/*\nanimgraphs/*",
+  "Resources": "ui/*\nmaterials/*\ntextures/*\nmodels/*\nsounds/*\nanimgraphs/*\nshaders/*",
   "PackageReferences": [],
   "EditorReferences": null,
   "Mounts": null,

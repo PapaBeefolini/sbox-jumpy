@@ -1,0 +1,45 @@
+// THIS FILE IS AUTO-GENERATED
+
+Layer0
+{
+	shader "shaders/toonwater.shader"
+
+	//---- Colour ----
+	ColorBands "3.000"
+	DeepColor "[0.050980 0.200000 0.600000 0.000000]"
+	DeepOpacity "0.950"
+	DepthFadeDistance "20.000"
+	FoamColor "[1.000000 1.000000 1.000000 0.000000]"
+	ShallowColor "[0.250980 0.600000 0.921569 0.000000]"
+	ShallowOpacity "0.600"
+
+	//---- Foam ----
+	FoamCutoff "0.200"
+	FoamNoiseAmount "0.300"
+	FoamNoiseScale "24.000"
+	FoamOpacity "0.600"
+	FoamSoftness "0.001"
+	FoamSpeed "0.350"
+	FoamSpread "32.000"
+	FoamStrength "0.200"
+	FoamWidth "4.000"
+	SecondaryDistance "0.070"
+	SecondaryFoam "0.500"
+	SecondaryWidth "0.150"
+
+	//---- Fog ----
+	g_bFogEnabled "1"
+
+	//---- Surface ----
+	Flatness "0.800"
+	FresnelPower "5.000"
+	FresnelStrength "0.060"
+	RippleCutoff "0.550"
+	RippleScale "55.000"
+	RippleSpeed "0.100"
+	RippleStrength "0.100"
+	WaterRoughness "0.500"
+	WaveScale "60.000"
+	WaveSpeed "0.300"
+	WaveStrength "0.120"
+}

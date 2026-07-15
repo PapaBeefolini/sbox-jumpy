@@ -15,7 +15,7 @@
 						[
 							{
 								from = "palette.vmat"
-								to = "materials/sea.vmat"
+								to = "materials/toonwater.vmat"
 							},
 						]
 						use_global_default = false
