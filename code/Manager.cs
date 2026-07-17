@@ -8,6 +8,8 @@ namespace Jumpy
 {
 	public sealed class Manager : Component, Component.INetworkListener
 	{
+		public static Manager Instance { get; private set; }
+
 		private const int tileSize = 96;
 		private const float recentSpawnMemory = 5f;
 
@@ -77,6 +79,11 @@ namespace Jumpy
 					Name = $"{Connection.Local.DisplayName}'s Game"
 				} );
 			}
+		}
+
+		protected override void OnAwake()
+		{
+			Instance = this;
 		}
 
 		protected override void OnStart()
