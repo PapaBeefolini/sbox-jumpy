@@ -54,6 +54,7 @@
             "_type": "gameobject",
             "prefab": "prefabs/frog.prefab"
           },
+          "RestartDelaySeconds": 10,
           "RoadPrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/road.prefab"

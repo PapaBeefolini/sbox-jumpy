@@ -38,6 +38,8 @@ namespace Jumpy
 		[Property, Group( "Start Area" )] public int StartAreaDepth { get; set; } = 3;
 		[Property, Group( "Start Area" )] public float CountdownSeconds { get; set; } = 5f;
 
+		[Property, Group( "Rounds" )] public float RestartDelaySeconds { get; set; } = 10f;
+
 		// Measured in tiles. Width spans side-to-side (Y axis); height runs from start to finish (X axis).
 		[Property, Group( "World" )] public int WorldWidth { get; set; } = 28;
 		[Property, Group( "World" )] public int WorldHeight { get; set; } = 48;
@@ -46,6 +48,9 @@ namespace Jumpy
 		[Sync] public bool IsGameOver { get; set; } = false;
 		[Sync] public float WinTilePosition { get; set; } = 0;
 		[Sync] public int CountdownRemaining { get; set; } = 0;
+
+		// When the next round begins, set by the host the moment a race ends.
+		[Sync] public TimeUntil NextRoundStart { get; set; }
 
 		// Start-area pen bounds; frogs are confined inside these until the countdown ends.
 		[Sync] public float StartAreaMinX { get; set; }
@@ -135,8 +140,9 @@ namespace Jumpy
 
 			IsGameActive = false;
 			IsGameOver = true;
+			NextRoundStart = RestartDelaySeconds;
 
-			await Task.DelayRealtimeSeconds( 6.0f );
+			await Task.DelayRealtimeSeconds( RestartDelaySeconds );
 
 			_ = StartNewGame();
 		}
@@ -188,8 +194,8 @@ namespace Jumpy
 
 			int halfWidth = WorldWidth / 2;
 
-			int areaDepth = Math.Clamp( StartAreaDepth, 1, WorldHeight - 1 );
-			int areaWidth = Math.Clamp( StartAreaWidth, 1, WorldWidth );
+			int areaDepth = int.Clamp( StartAreaDepth, 1, WorldHeight - 1 );
+			int areaWidth = int.Clamp( StartAreaWidth, 1, WorldWidth );
 			int startColumn = (WorldWidth - areaWidth) / 2;
 
 			// Pen bounds with half-tile slack so frogs can stand on the edge tiles.
@@ -375,7 +381,7 @@ namespace Jumpy
 				return;
 
 			var bots = Scene.GetAllComponents<Frog>().Where( f => f.IsBot ).ToList();
-			int target = Math.Max( 0, BotCount );
+			int target = int.Max( 0, BotCount );
 
 			for ( int i = bots.Count; i < target; i++ )
 				SpawnBot( i );

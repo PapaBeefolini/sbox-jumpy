@@ -11,10 +11,17 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private const float jumpHeight = 6;
 	private const float maxJumpAngle = 35;
 
+	private const float stackHeight = 18;
+	private const float stackRadius = 16;
+
 	private const float botHopMin = 0.10f;
 	private const float botHopMax = 0.28f;
 	private const float idleHopMin = 0.5f;
 	private const float idleHopMax = 1.4f;
+
+	// Roughly how long a hop's landing lerp takes to settle. Bots use it to predict how far a
+	// moving log will drift mid-hop, so they don't leap onto a spot the log has floated away from.
+	private const float botJumpDuration = 0.22f;
 
 	private static readonly Vector3 jumpClearance = Vector3.Up * 33;
 	private static readonly string[] ignoreTags = { "player", "car" };
@@ -31,10 +38,11 @@ public sealed class Frog : Component, Component.ITriggerListener
 	[Sync] public bool IsDead { get; set; } = false;
 	[Sync] public bool IsBot { get; set; } = false;
 	[Sync] public string BotName { get; set; } = "";
+	[Sync] public bool IsGrounded { get; set; } = false;
+	[Sync] public float LastJumpTime { get; set; }
 
 	public Manager Manager { get; set; }
 	public Vector3 TilePosition { get; set; }
-	public bool IsGrounded { get; set; } = false;
 	public GameObject CurrentLog { get; set; }
 	public Vector3 LogOffset { get; set; }
 
@@ -42,10 +50,12 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private SphereCollider collider;
 
 	private Vector3 jumpOffset;
-	private float timeJumpStarted;
+	private float stackOffset;
+	private Vector3 colliderCenter;
 	private Vector3 landingTraceOrigin;
 	private float nextBotHopTime;
 	private float nextIdleHopTime;
+	private bool reroutingSideways;
 
 	private enum DeathType
 	{
@@ -58,6 +68,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		Manager = Scene.GetAllComponents<Manager>().FirstOrDefault();
 		renderer = Components.Get<SkinnedModelRenderer>();
 		collider = Components.Get<SphereCollider>();
+		colliderCenter = collider.Center;
 	}
 
 	protected override void OnUpdate()
@@ -87,14 +98,20 @@ public sealed class Frog : Component, Component.ITriggerListener
 				TilePosition = SnapToGrid( landing.EndPosition );
 		}
 
-		float elapsedTime = Time.Now - timeJumpStarted;
+		float elapsedTime = Time.Now - LastJumpTime;
 		float jumpAmount = float.Pow( elapsedTime * 24.0f, 2.5f );
 
+		// Frogs sharing a spot perch on top of each other. Visual only: the collider is
+		// pushed back down to ground level so cars still hit the whole stack.
+		stackOffset = stackOffset.LerpTo( GetStackIndex() * stackHeight, Time.Delta * 10 );
+		Vector3 stackBump = Vector3.Up * stackOffset;
+		collider.Center = colliderCenter - stackBump;
+
 		Vector3 hopBump = jumpOffset;
-		WorldPosition = WorldPosition.LerpTo( TilePosition, Time.Delta * jumpAmount ) + hopBump;
+		WorldPosition = WorldPosition.LerpTo( TilePosition + stackBump, Time.Delta * jumpAmount ) + hopBump;
 		jumpOffset = jumpOffset.LerpTo( Vector3.Zero, Time.Delta * 12 );
 
-		float distanceToLand = (WorldPosition - hopBump - TilePosition).Length;
+		float distanceToLand = (WorldPosition - hopBump - stackBump - TilePosition).Length;
 
 		if ( !IsGrounded )
 		{
@@ -131,6 +148,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 		IsDead = false;
 		CurrentLog = null;
 		IsGrounded = false;
+		LastJumpTime = Time.Now;
+		stackOffset = 0;
+		reroutingSideways = false;
 		TilePosition = position;
 		WorldPosition = position;
 		landingTraceOrigin = position + jumpClearance;
@@ -177,7 +197,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 			return;
 
 		IsGrounded = false;
-		timeJumpStarted = Time.Now;
+		LastJumpTime = Time.Now;
 		landingTraceOrigin = traceOrigin;
 
 		CurrentLog = null;
@@ -214,13 +234,22 @@ public sealed class Frog : Component, Component.ITriggerListener
 			return Vector3.Zero;
 
 		Vector3 sideFirst = Game.Random.Int( 1 ) == 0 ? Vector3.Left : Vector3.Right;
-		Vector3[] choices = { Vector3.Forward, sideFirst, -sideFirst };
+
+		// Normally push forward, using sideways hops to steer around obstacles, and fall back to a
+		// backward retreat only when boxed in (tree ahead, water or walls to both sides) so a frog
+		// never freezes for the whole round. Right after a retreat, try the sides first: this moves
+		// the frog to a new column before it re-advances, instead of hopping straight back into the
+		// same dead-end.
+		Vector3[] choices = reroutingSideways
+			? new[] { sideFirst, -sideFirst, Vector3.Forward, Vector3.Backward }
+			: new[] { Vector3.Forward, sideFirst, -sideFirst, Vector3.Backward };
 
 		foreach ( Vector3 direction in choices )
 		{
 			if ( IsHopSafe( direction ) )
 			{
 				nextBotHopTime = Time.Now + Game.Random.Float( botHopMin, botHopMax );
+				reroutingSideways = direction == Vector3.Backward;
 				return direction;
 			}
 		}
@@ -259,10 +288,32 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( landing.GameObject.Tags.Has( "water" ) )
 			return false;
 
+		// A log that's under the target right now keeps drifting during the ~botJumpDuration hop.
+		// Sideways hops against the current are lethal: the trailing edge recedes and the frog
+		// lands in the water the log left behind. Only commit if a log will still be there on landing.
+		if ( landing.GameObject.Tags.Has( "log" ) && !LogWillHoldLanding( landing, traceOrigin ) )
+			return false;
+
 		if ( IsTrafficDanger( SnapToGrid( landing.EndPosition ) ) )
 			return false;
 
 		return true;
+	}
+
+	// Will the target log still sit under the landing point once the hop settles? A log point that
+	// ends up under traceOrigin currently sits back along the log's travel by velocity * duration,
+	// so we trace there and confirm a log is present. Same-row logs share a velocity, so any log hit
+	// means one will be underneath at landing.
+	private bool LogWillHoldLanding( SceneTraceResult landing, Vector3 traceOrigin )
+	{
+		MovingEntity log = landing.GameObject.Components.Get<MovingEntity>();
+		if ( log is null )
+			return true;
+
+		Vector3 predictedOrigin = traceOrigin - Vector3.Right * log.Speed * botJumpDuration;
+		SceneTraceResult predicted = Scene.Trace.Ray( new Ray( predictedOrigin, Vector3.Down ), 500 ).WithoutTags( ignoreTags ).Run();
+
+		return predicted.Hit && predicted.GameObject.Tags.Has( "log" );
 	}
 
 	private bool IsTrafficDanger( Vector3 target )
@@ -296,6 +347,27 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private SceneTraceResult TraceLandingSurface()
 	{
 		return Scene.Trace.Ray( new Ray( landingTraceOrigin, Vector3.Down ), 500 ).WithoutTags( ignoreTags ).Run();
+	}
+
+	// How many frogs am I perched on? Whoever jumped most recently lands on top, so count
+	// settled frogs at my landing spot that jumped before me. Ties break on object id.
+	private int GetStackIndex()
+	{
+		int index = 0;
+
+		foreach ( Frog other in Scene.GetAllComponents<Frog>() )
+		{
+			if ( other == this || other.IsDead || !other.IsGrounded )
+				continue;
+
+			if ( (other.WorldPosition - TilePosition).WithZ( 0 ).Length > stackRadius )
+				continue;
+
+			if ( other.LastJumpTime < LastJumpTime || (other.LastJumpTime == LastJumpTime && other.GameObject.Id.CompareTo( GameObject.Id ) < 0) )
+				index++;
+		}
+
+		return index;
 	}
 
 	private void Land()

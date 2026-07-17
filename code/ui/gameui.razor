@@ -1,5 +1,6 @@
 @using System
 @using System.Collections.Generic
+@using System.Globalization
 @using System.Linq
 @using System.Threading.Tasks
 @using Sandbox;
@@ -25,13 +26,14 @@
 	@if (!IsGameOver)
 	{
 		<div class="race-track">
-			<div class="cap finish">FINISH</div>
+			<div class="cap start">START</div>
 			<div class="rail">
+				<div class="rail-fill" style="width: @Percent(LeaderProgress);"></div>
 				@foreach (var entry in BuildEntries())
 				{
 					var frog = entry.Frog;
-					var isLocal = !frog.IsProxy && !frog.IsBot;
-					<div class="marker @(isLocal ? "local" : "") @(frog.IsDead ? "dead" : "")" style="bottom: @Percent(entry.Progress); left: @(entry.LaneIndex * LaneStep)px;">
+					var isLocal = IsLocalPlayer( frog );
+					<div class="marker @(isLocal ? "local" : "") @(frog.IsDead ? "dead" : "")" style="left: @Percent(entry.Progress); top: @(entry.LaneIndex * LaneStep)px;">
 						<div class="badge" style="border-color: @ToCss(frog.FrogColor);">
 							<div class="frog-icon" style="background-image: url( @GetAvatarUrl(frog) );"></div>
 						</div>
@@ -42,7 +44,7 @@
 					</div>
 				}
 			</div>
-			<div class="cap start">START</div>
+			<div class="cap finish">FINISH</div>
 		</div>
 	}
 	else
@@ -50,15 +52,18 @@
 		var podium = PodiumOrder();
 		var rest = Ranking.Skip( 3 ).ToList();
 		var winner = Ranking.FirstOrDefault();
+		var localWin = winner != null && winner.IsLocal;
 
 		<div class="gameover">
 			<div class="go-header">
-				<div class="go-title">@(winner != null && winner.IsLocal ? "YOU WIN!" : "RACE OVER")</div>
+				<div class="go-title @(localWin ? "win" : "")" style="@Reveal(0.08f, 0.36f, 0f, -70f, 1.7f)">
+					<div class="ttext">@(localWin ? "YOU WIN!" : "RACE OVER")</div>
+				</div>
 				@if (winner != null)
 				{
 					<div class="go-winner">
-						<div class="crown">WINNER</div>
-						<div class="wname" style="color: @ToCss(winner.Color);">@winner.Name</div>
+						<div class="crown" style="@Reveal(0.36f, 0.28f, 0f, 0f, 0.2f)">WINNER</div>
+						<div class="wname" style="color: @ToCss(winner.Color); @Reveal(0.44f, 0.28f, 0f, 0f, 0.2f)">@winner.Name</div>
 					</div>
 				}
 			</div>
@@ -67,16 +72,17 @@
 				@foreach (var slot in podium)
 				{
 					var row = slot.Row;
-					<div class="slot rank-@slot.Rank @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")">
+					var delay = SlotDelay( slot.Rank );
+					<div class="slot rank-@slot.Rank @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")" style="@Reveal(delay, 0.4f, 0f, 120f, 0.8f)">
 						<div class="pillar-top">
 							<div class="avatar" style="border-color: @ToCss(row.Color);">
 								<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
 							</div>
 							<div class="sname">@row.Name</div>
-							<div class="sprog">@Percent(row.Progress)</div>
+							<div class="sprog">@RevealPercent(row.Progress, delay + 0.15f, 0.55f)</div>
 						</div>
 						<div class="pillar">
-							<div class="place">@Ordinal(slot.Rank)</div>
+							<div class="place" style="@Reveal(delay + 0.28f, 0.28f, 0f, 0f, 0.2f)">@Ordinal(slot.Rank)</div>
 						</div>
 					</div>
 				}
@@ -89,7 +95,7 @@
 					{
 						var row = rest[idx];
 						var rank = idx + 4;
-						<div class="orow @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")">
+						<div class="orow @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")" style="@Reveal(1.35f + idx * 0.07f, 0.34f, -80f, 0f, 1f)">
 							<div class="orank">@rank</div>
 							<div class="oavatar" style="border-color: @ToCss(row.Color);">
 								<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
@@ -100,49 +106,48 @@
 					}
 				</div>
 			}
+
+			<div class="next-round" style="@Reveal(1.6f, 0.36f, 0f, 26f, 0.4f)">
+				<div class="nr-label">NEXT ROUND IN</div>
+				<div class="nr-time" style="transform: scale( @TimerScale() );">@NextRoundSeconds</div>
+				<div class="nr-bar">
+					<div class="nr-fill" style="width: @NextRoundBarWidth;"></div>
+				</div>
+			</div>
 		</div>
 	}
 </root>
 
 @code
 {
+	private const float ClusterEpsilon = 0.02f;
+	// Vertical gap between stacked frogs that share (roughly) the same progress.
+	private const int LaneStep = 38;
+
 	private Manager Manager { get; set; }
 	private bool IsGameOver { get; set; }
-	protected override int BuildHash() => HashCode.Combine( RealTime.Now );
+	private int lastCountdown = 0;
+	private bool wasGameOver = false;
+	private RealTimeSince goShownAt = 1000f;
+	private List<RankRow> Ranking = new();
+
+	// Time since the race ended; the whole game-over reveal is a function of this, computed
+	// per frame in code rather than via CSS @keyframes (the panel rebuilds every frame, which
+	// doesn't reliably restart one-shot CSS animations - so we animate by hand instead).
+	private RealTimeSince gameOverAt = 1000f;
 
 	private IEnumerable<Frog> Frogs => Scene?.GetAllComponents<Frog>() ?? Enumerable.Empty<Frog>();
-
-	// Pre-race countdown, driven by the host via Manager.CountdownRemaining.
 	private int Countdown => Manager.IsValid() ? Manager.CountdownRemaining : 0;
 	private bool ShowGo => goShownAt < 1.0f;
-	private int lastCountdown = 0;
-	private RealTimeSince goShownAt = 1000f;
+	private float RestartDelay => Manager.IsValid() && Manager.RestartDelaySeconds > 0f ? Manager.RestartDelaySeconds : 6f;
+	private float NextRoundRemaining => Manager.IsValid() ? float.Max( 0f, Manager.NextRoundStart ) : 0f;
+	private int NextRoundSeconds => (int)float.Ceiling( NextRoundRemaining );
+	private string NextRoundBarWidth => Percent( float.Clamp( NextRoundRemaining / RestartDelay, 0f, 1f ) );
 
-	private const float ClusterEpsilon = 0.02f;
-	private const int LaneStep = 48;
+	// Furthest-along frog, used to fill the track up to the current race leader.
+	private float LeaderProgress => Frogs.Select( GetProgress ).DefaultIfEmpty( 0f ).Max();
 
-	private class FrogEntry
-	{
-		public Frog Frog { get; set; }
-		public float Progress { get; set; }
-		public int LaneIndex { get; set; }
-		public int ClusterSize { get; set; }
-	}
-
-	// A frozen snapshot of a player's standing, captured the moment the race ends
-	// so that respawns / restarts don't reshuffle the results while they're shown.
-	private class RankRow
-	{
-		public string Name;
-		public string Avatar;
-		public Color Color;
-		public float Progress;
-		public bool IsLocal;
-		public bool IsDead;
-	}
-
-	private bool wasGameOver = false;
-	private List<RankRow> Ranking = new();
+	protected override int BuildHash() => HashCode.Combine( RealTime.Now );
 
 	protected override void OnUpdate()
 	{
@@ -155,14 +160,17 @@
 		IsGameOver = Manager.IsGameOver;
 
 		// Flash "GO!" the moment the countdown ends.
-		int cd = Manager.CountdownRemaining;
-		if ( lastCountdown == 1 && cd == 0 && !IsGameOver )
+		int countdown = Manager.CountdownRemaining;
+		if ( lastCountdown == 1 && countdown == 0 && !IsGameOver )
 			goShownAt = 0f;
-		lastCountdown = cd;
+		lastCountdown = countdown;
 
-		// Freeze the final standings on the frame the race ends.
+		// Freeze the final standings on the frame the race ends and start the reveal clock.
 		if ( IsGameOver && !wasGameOver )
+		{
 			BuildRanking();
+			gameOverAt = 0f;
+		}
 
 		wasGameOver = IsGameOver;
 	}
@@ -170,17 +178,74 @@
 	private void BuildRanking()
 	{
 		Ranking = Frogs
-			.OrderByDescending( f => GetProgress( f ) )
 			.Select( f => new RankRow
 			{
 				Name = GetName( f ),
 				Avatar = GetAvatarUrl( f ),
 				Color = f.FrogColor,
 				Progress = GetProgress( f ),
-				IsLocal = !f.IsProxy && !f.IsBot,
+				IsLocal = IsLocalPlayer( f ),
 				IsDead = f.IsDead
 			} )
+			.OrderByDescending( r => r.Progress )
 			.ToList();
+	}
+
+	private float EaseOutBack( float t )
+	{
+		if ( t <= 0f ) return 0f;
+		if ( t >= 1f ) return 1f;
+		const float c1 = 1.70158f;
+		const float c3 = c1 + 1f;
+		float u = t - 1f;
+		return 1f + c3 * u * u * u + c1 * u * u;
+	}
+
+	private float EaseOutCubic( float t )
+	{
+		t = float.Clamp( t, 0f, 1f );
+		float u = 1f - t;
+		return 1f - u * u * u;
+	}
+
+	// Inline entrance style: eases an element from (fromX, fromY, fromScale) to its
+	// resting (0, 0, 1) over 'duration' seconds, starting 'delay' seconds after game over.
+	private string Reveal( float delay, float duration, float fromX = 0f, float fromY = 0f, float fromScale = 1f, bool overshoot = true )
+	{
+		float raw = ((float)gameOverAt - delay) / duration;
+		float e = overshoot ? EaseOutBack( raw ) : EaseOutCubic( raw );
+		float x = fromX * (1f - e);
+		float y = fromY * (1f - e);
+		float s = fromScale + (1f - fromScale) * e;
+		float o = float.Clamp( ((float)gameOverAt - delay) / (duration * 0.4f), 0f, 1f );
+		return $"opacity: {F(o)}; transform: translateX({F(x)}px) translateY({F(y)}px) scale({F(s)});";
+	}
+
+	// A percentage that counts up from 0 to its final value as the slot reveals.
+	private string RevealPercent( float target, float delay, float duration )
+	{
+		return Percent( target * EaseOutCubic( ((float)gameOverAt - delay) / duration ) );
+	}
+
+	// Podium reveals bottom-up: 3rd, then 2nd, then the winner last.
+	private float SlotDelay( int rank ) => rank switch
+	{
+		1 => 1.1f,
+		2 => 0.8f,
+		3 => 0.6f,
+		_ => 1.2f
+	};
+
+	// Pops the digit the instant it ticks down, then eases back to rest over the second.
+	private string TimerScale()
+	{
+		float frac = NextRoundRemaining - float.Floor( NextRoundRemaining );
+		return F( 1f + 0.25f * frac * frac * frac );
+	}
+
+	private string F( float value )
+	{
+		return value.ToString( "0.##", CultureInfo.InvariantCulture );
 	}
 
 	// Top three, reordered for display as 2nd - 1st - 3rd so the winner sits centre stage.
@@ -241,18 +306,21 @@
 		if ( span <= 0 )
 			return 0;
 
-		return Math.Clamp( (frog.WorldPosition.x - startLine) / span, 0f, 1f );
+		return float.Clamp( (frog.WorldPosition.x - startLine) / span, 0f, 1f );
 	}
 
 	private string Percent( float progress )
 	{
-		return (progress * 100f).ToString( "0.0", System.Globalization.CultureInfo.InvariantCulture ) + "%";
+		return (progress * 100f).ToString( "0.0", CultureInfo.InvariantCulture ) + "%";
 	}
 
 	private string ToCss( Color color )
 	{
 		return $"rgb({(int)(color.r * 255)}, {(int)(color.g * 255)}, {(int)(color.b * 255)})";
 	}
+
+	// The single human frog owned by this client, as opposed to a remote player or a bot.
+	private bool IsLocalPlayer( Frog frog ) => !frog.IsProxy && !frog.IsBot;
 
 	private string GetName( Frog frog )
 	{
@@ -263,7 +331,30 @@
 
 	private string GetAvatarUrl( Frog frog )
 	{
+		if ( frog.IsBot )
+			return "ui/frog.png";
+
 		var steamId = frog.Network.Owner?.SteamId ?? Connection.Local.SteamId;
 		return $"avatar:{steamId}";
+	}
+
+	private class FrogEntry
+	{
+		public Frog Frog { get; set; }
+		public float Progress { get; set; }
+		public int LaneIndex { get; set; }
+		public int ClusterSize { get; set; }
+	}
+
+	// A frozen snapshot of a player's standing, captured the moment the race ends
+	// so that respawns / restarts don't reshuffle the results while they're shown.
+	private class RankRow
+	{
+		public string Name;
+		public string Avatar;
+		public Color Color;
+		public float Progress;
+		public bool IsLocal;
+		public bool IsDead;
 	}
 }
