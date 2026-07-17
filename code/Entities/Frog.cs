@@ -177,7 +177,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 		Scene.Camera.WorldPosition = WorldPosition + Scene.Camera.WorldRotation.Backward * 800;
 		Scene.Camera.WorldRotation = new Angles( 30, 15, 0 ).ToRotation();
-		Scene.Camera.FieldOfView = 65;
+		Scene.Camera.FieldOfView = 75;
 	}
 
 	private void Move( Vector3 direction )
