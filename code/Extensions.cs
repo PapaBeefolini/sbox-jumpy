@@ -12,9 +12,9 @@ namespace Jumpy
 				multiplier *= 10f;
 			}
 			return new Vector3(
-				MathF.Round( vector3.x * multiplier ) / multiplier,
-				MathF.Round( vector3.y * multiplier ) / multiplier,
-				MathF.Round( vector3.z * multiplier ) / multiplier );
+				float.Round( vector3.x * multiplier ) / multiplier,
+				float.Round( vector3.y * multiplier ) / multiplier,
+				float.Round( vector3.z * multiplier ) / multiplier );
 		}
 	}
 }

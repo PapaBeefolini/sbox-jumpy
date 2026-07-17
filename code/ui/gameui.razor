@@ -8,40 +8,115 @@
 @namespace Jumpy
 
 <root>
-	@if (IsGameOver)
+	@if (!IsGameOver && Countdown > 0)
 	{
-		<label class="gameover">Game Over!</label>
+		<div class="countdown">
+			<div class="count-number">@Countdown</div>
+			<div class="count-label">GET READY</div>
+		</div>
+	}
+	else if (!IsGameOver && ShowGo)
+	{
+		<div class="countdown go">
+			<div class="count-number go-text">GO!</div>
+		</div>
 	}
 
-	<div class="race-track">
-		<div class="cap finish">FINISH</div>
-		<div class="rail">
-			@foreach (var entry in BuildEntries())
-			{
-				var frog = entry.Frog;
-				var isLocal = !frog.IsProxy;
-				<div class="marker @(isLocal ? "local" : "") @(frog.IsDead ? "dead" : "")" style="bottom: @Percent(entry.Progress); left: @(entry.LaneIndex * LaneStep)px;">
-					<div class="badge" style="border-color: @ToCss(frog.FrogColor);">
-						<div class="frog-icon" style="background-image: url( @GetAvatarUrl(frog) );"></div>
+	@if (!IsGameOver)
+	{
+		<div class="race-track">
+			<div class="cap finish">FINISH</div>
+			<div class="rail">
+				@foreach (var entry in BuildEntries())
+				{
+					var frog = entry.Frog;
+					var isLocal = !frog.IsProxy && !frog.IsBot;
+					<div class="marker @(isLocal ? "local" : "") @(frog.IsDead ? "dead" : "")" style="bottom: @Percent(entry.Progress); left: @(entry.LaneIndex * LaneStep)px;">
+						<div class="badge" style="border-color: @ToCss(frog.FrogColor);">
+							<div class="frog-icon" style="background-image: url( @GetAvatarUrl(frog) );"></div>
+						</div>
+						@if (entry.ClusterSize == 1)
+						{
+							<div class="pname">@GetName(frog)</div>
+						}
 					</div>
-					@if (entry.ClusterSize == 1)
+				}
+			</div>
+			<div class="cap start">START</div>
+		</div>
+	}
+	else
+	{
+		var podium = PodiumOrder();
+		var rest = Ranking.Skip( 3 ).ToList();
+		var winner = Ranking.FirstOrDefault();
+
+		<div class="gameover">
+			<div class="go-header">
+				<div class="go-title">@(winner != null && winner.IsLocal ? "YOU WIN!" : "RACE OVER")</div>
+				@if (winner != null)
+				{
+					<div class="go-winner">
+						<div class="crown">WINNER</div>
+						<div class="wname" style="color: @ToCss(winner.Color);">@winner.Name</div>
+					</div>
+				}
+			</div>
+
+			<div class="podium">
+				@foreach (var slot in podium)
+				{
+					var row = slot.Row;
+					<div class="slot rank-@slot.Rank @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")">
+						<div class="pillar-top">
+							<div class="avatar" style="border-color: @ToCss(row.Color);">
+								<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
+							</div>
+							<div class="sname">@row.Name</div>
+							<div class="sprog">@Percent(row.Progress)</div>
+						</div>
+						<div class="pillar">
+							<div class="place">@Ordinal(slot.Rank)</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			@if (rest.Count > 0)
+			{
+				<div class="others">
+					@for (int idx = 0; idx < rest.Count; idx++)
 					{
-						<div class="pname">@GetName(frog)</div>
+						var row = rest[idx];
+						var rank = idx + 4;
+						<div class="orow @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")">
+							<div class="orank">@rank</div>
+							<div class="oavatar" style="border-color: @ToCss(row.Color);">
+								<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
+							</div>
+							<div class="oname">@row.Name</div>
+							<div class="oprog">@Percent(row.Progress)</div>
+						</div>
 					}
 				</div>
 			}
 		</div>
-		<div class="cap start">START</div>
-	</div>
+	}
 </root>
 
 @code
 {
 	private Manager Manager { get; set; }
 	private bool IsGameOver { get; set; }
-	protected override int BuildHash() => HashCode.Combine(RealTime.Now);
+	protected override int BuildHash() => HashCode.Combine( RealTime.Now );
 
 	private IEnumerable<Frog> Frogs => Scene?.GetAllComponents<Frog>() ?? Enumerable.Empty<Frog>();
+
+	// Pre-race countdown, driven by the host via Manager.CountdownRemaining.
+	private int Countdown => Manager.IsValid() ? Manager.CountdownRemaining : 0;
+	private bool ShowGo => goShownAt < 1.0f;
+	private int lastCountdown = 0;
+	private RealTimeSince goShownAt = 1000f;
 
 	private const float ClusterEpsilon = 0.02f;
 	private const int LaneStep = 48;
@@ -54,35 +129,96 @@
 		public int ClusterSize { get; set; }
 	}
 
+	// A frozen snapshot of a player's standing, captured the moment the race ends
+	// so that respawns / restarts don't reshuffle the results while they're shown.
+	private class RankRow
+	{
+		public string Name;
+		public string Avatar;
+		public Color Color;
+		public float Progress;
+		public bool IsLocal;
+		public bool IsDead;
+	}
+
+	private bool wasGameOver = false;
+	private List<RankRow> Ranking = new();
+
 	protected override void OnUpdate()
 	{
-		if (!Manager.IsValid())
+		if ( !Manager.IsValid() )
 		{
 			Manager = Scene.GetAllComponents<Manager>().FirstOrDefault();
+			return;
 		}
-		else
+
+		IsGameOver = Manager.IsGameOver;
+
+		// Flash "GO!" the moment the countdown ends.
+		int cd = Manager.CountdownRemaining;
+		if ( lastCountdown == 1 && cd == 0 && !IsGameOver )
+			goShownAt = 0f;
+		lastCountdown = cd;
+
+		// Freeze the final standings on the frame the race ends.
+		if ( IsGameOver && !wasGameOver )
+			BuildRanking();
+
+		wasGameOver = IsGameOver;
+	}
+
+	private void BuildRanking()
+	{
+		Ranking = Frogs
+			.OrderByDescending( f => GetProgress( f ) )
+			.Select( f => new RankRow
+			{
+				Name = GetName( f ),
+				Avatar = GetAvatarUrl( f ),
+				Color = f.FrogColor,
+				Progress = GetProgress( f ),
+				IsLocal = !f.IsProxy && !f.IsBot,
+				IsDead = f.IsDead
+			} )
+			.ToList();
+	}
+
+	// Top three, reordered for display as 2nd - 1st - 3rd so the winner sits centre stage.
+	private List<(int Rank, RankRow Row)> PodiumOrder()
+	{
+		var top = Ranking.Take( 3 ).Select( ( r, i ) => (Rank: i + 1, Row: r) ).ToList();
+		var order = new int[] { 2, 1, 3 };
+		return top.OrderBy( t => Array.IndexOf( order, t.Rank ) ).ToList();
+	}
+
+	private string Ordinal( int n )
+	{
+		return n switch
 		{
-			IsGameOver = Manager.IsGameOver;
-		}
+			1 => "1ST",
+			2 => "2ND",
+			3 => "3RD",
+			_ => n + "TH"
+		};
 	}
 
 	private List<FrogEntry> BuildEntries()
 	{
 		var entries = Frogs
-			.Select(f => new FrogEntry { Frog = f, Progress = GetProgress(f) })
-			.OrderBy(e => e.Progress)
+			.Select( f => new FrogEntry { Frog = f, Progress = GetProgress( f ) } )
+			.OrderBy( e => e.Progress )
 			.ToList();
 
 		int i = 0;
-		while (i < entries.Count)
+		while ( i < entries.Count )
 		{
 			int j = i;
 			float anchor = entries[i].Progress;
-			while (j < entries.Count && entries[j].Progress - anchor <= ClusterEpsilon)
+			while ( j < entries.Count && entries[j].Progress - anchor <= ClusterEpsilon )
 				j++;
 
 			int size = j - i;
-			for (int k = i; k < j; k++)
+			for ( int k = i; k < j; k++ )
 			{
 				entries[k].LaneIndex = k - i;
 				entries[k].ClusterSize = size;
@@ -94,33 +230,38 @@
 		return entries;
 	}
 
-	private float GetProgress(Frog frog)
+	private float GetProgress( Frog frog )
 	{
-		if (!Manager.IsValid() || Manager.WinTilePosition <= 0)
+		if ( !Manager.IsValid() || Manager.WinTilePosition <= 0 )
 			return 0;
 
-		return Math.Clamp(frog.WorldPosition.x / Manager.WinTilePosition, 0f, 1f);
+		// Measure from the start line (front of the pen), so the whole start area reads 0%.
+		float startLine = Manager.StartAreaMaxX;
+		float span = Manager.WinTilePosition - startLine;
+		if ( span <= 0 )
+			return 0;
+
+		return Math.Clamp( (frog.WorldPosition.x - startLine) / span, 0f, 1f );
 	}
 
-	private string Percent(float progress)
+	private string Percent( float progress )
 	{
-		return (progress * 100f).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "%";
+		return (progress * 100f).ToString( "0.0", System.Globalization.CultureInfo.InvariantCulture ) + "%";
 	}
 
-	private string ToCss(Color color)
+	private string ToCss( Color color )
 	{
 		return $"rgb({(int)(color.r * 255)}, {(int)(color.g * 255)}, {(int)(color.b * 255)})";
 	}
 
-	private string GetName(Frog frog)
+	private string GetName( Frog frog )
 	{
-		if (!frog.IsProxy)
-			return "You";
-
+		if ( frog.IsBot )
+			return string.IsNullOrEmpty( frog.BotName ) ? "Bot" : frog.BotName;
 		return frog.Network.Owner?.DisplayName ?? "Frog";
 	}
 
-	private string GetAvatarUrl(Frog frog)
+	private string GetAvatarUrl( Frog frog )
 	{
 		var steamId = frog.Network.Owner?.SteamId ?? Connection.Local.SteamId;
 		return $"avatar:{steamId}";

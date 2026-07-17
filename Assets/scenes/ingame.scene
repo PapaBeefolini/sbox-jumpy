@@ -26,10 +26,12 @@
             "_type": "gameobject",
             "prefab": "prefabs/big-road.prefab"
           },
+          "BotCount": 3,
           "CarPrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/car.prefab"
           },
+          "CountdownSeconds": 5,
           "LillyPrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/lilly.prefab"
@@ -64,6 +66,8 @@
             "_type": "gameobject",
             "prefab": "prefabs/spawner.prefab"
           },
+          "StartAreaDepth": 3,
+          "StartAreaWidth": 8,
           "TilePrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/tile.prefab"
@@ -71,7 +75,9 @@
           "TreePrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/tree.prefab"
-          }
+          },
+          "WorldHeight": 48,
+          "WorldWidth": 28
         },
         {
           "__type": "Sandbox.SoundPointComponent",

@@ -18,7 +18,7 @@ namespace Jumpy
 
 		protected override void OnUpdate()
 		{
-			float angle = MathF.Sin( (Time.Now - startTime) * Speed ) * Amount;
+			float angle = float.Sin( (Time.Now - startTime) * Speed ) * Amount;
 			WorldRotation = startRotation * Rotation.From( angle / 4, angle, 0 );
 		}
 	}
