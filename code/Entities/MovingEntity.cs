@@ -20,7 +20,7 @@ namespace Jumpy
 
 		void Move()
 		{
-			if ( !Networking.IsHost || !Manager.Instance.IsGameActive )
+			if ( !Networking.IsHost || Manager.Instance.IsGameOver )
 				return;
 
 			WorldPosition += Vector3.Right * Speed * Time.Delta;
