@@ -30,6 +30,10 @@ public sealed class Frog : Component, Component.ITriggerListener
 	// moving log will drift mid-hop, so they don't leap onto a spot the log has floated away from.
 	private const float botJumpDuration = 0.22f;
 
+	// How close to being carried over the kill border a log rider gets before it stops waiting
+	// for the way forward to clear and takes whatever escape hop it can find.
+	private const float botDriftBailoutTime = 2.0f;
+
 	private static readonly Vector3 jumpClearance = Vector3.Up * 33;
 	private static readonly string[] ignoreTags = { "player", "car" };
 
@@ -137,7 +141,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 			}
 		}
 
-		float killBorder = (Manager.GetWorldWidthY() / 2) + Manager.GetTileSize();
+		float killBorder = GetKillBorder();
 		if ( WorldPosition.y <= -killBorder || WorldPosition.y >= killBorder )
 			_ = Die( DeathType.Car );
 	}
@@ -259,9 +263,18 @@ public sealed class Frog : Component, Component.ITriggerListener
 		// never freezes for the whole round. Right after a retreat, try the sides first: this moves
 		// the frog to a new column before it re-advances, instead of hopping straight back into the
 		// same dead-end.
-		Vector3[] choices = reroutingSideways
-			? new[] { sideFirst, -sideFirst, Vector3.Forward, Vector3.Backward }
-			: new[] { Vector3.Forward, sideFirst, -sideFirst, Vector3.Backward };
+		//
+		// Riding a log is the exception: sideways there just slides the frog along the log it's
+		// already on, and the gap ahead lines itself up as the rows drift past each other. So a
+		// rider only considers forward and otherwise waits, rather than twitching side to side.
+		Vector3[] choices;
+
+		if ( CurrentLog.IsValid() && !IsDriftingOffWorld() )
+			choices = new[] { Vector3.Forward };
+		else if ( reroutingSideways )
+			choices = new[] { sideFirst, -sideFirst, Vector3.Forward, Vector3.Backward };
+		else
+			choices = new[] { Vector3.Forward, sideFirst, -sideFirst, Vector3.Backward };
 
 		foreach ( Vector3 direction in choices )
 		{
@@ -288,6 +301,27 @@ public sealed class Frog : Component, Component.ITriggerListener
 		Vector3[] directions = { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right };
 		return directions[Game.Random.Int( directions.Length - 1 )];
 	}
+
+	// Logs never turn around or wrap, so a rider that waits forever gets carried over the kill
+	// border. True once the current log is within botDriftBailoutTime of taking the frog with it,
+	// which is the cue to stop holding out for the way forward and jump off while there's still
+	// map to jump onto.
+	private bool IsDriftingOffWorld()
+	{
+		MovingEntity log = CurrentLog.Components.Get<MovingEntity>();
+		if ( log is null )
+			return false;
+
+		// Logs travel along Y; Vector3.Right is -Y, so velocity.y = -Speed.
+		float velocityY = -log.Speed;
+		if ( float.Abs( velocityY ) < 1f )
+			return false;
+
+		float border = float.Sign( velocityY ) * GetKillBorder();
+		return (border - WorldPosition.y) / velocityY < botDriftBailoutTime;
+	}
+
+	private float GetKillBorder() => (Manager.GetWorldWidthY() / 2) + Manager.GetTileSize();
 
 	// Mirrors Move's traces to judge whether a hop is survivable. A reckless hop skips the traffic
 	// check only — terrain (water, walls, missing logs) is always fatal, so it stays a car gamble.
