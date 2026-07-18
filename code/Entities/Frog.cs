@@ -1,6 +1,7 @@
 using Sandbox;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using Jumpy;
 using System.Linq;
 
@@ -19,6 +20,12 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private const float idleHopMin = 0.5f;
 	private const float idleHopMax = 1.4f;
 
+	// Bots are otherwise perfect traffic dodgers, which reads as robotic. Each one gets a personal
+	// recklessness: the odds that a given hop decision mistimes and ignores oncoming cars (it still
+	// won't leap into water or a wall — that's not "getting hit by a car"). Some frogs are daredevils.
+	private const float botRecklessMin = 0.04f;
+	private const float botRecklessMax = 0.18f;
+
 	// Roughly how long a hop's landing lerp takes to settle. Bots use it to predict how far a
 	// moving log will drift mid-hop, so they don't leap onto a spot the log has floated away from.
 	private const float botJumpDuration = 0.22f;
@@ -36,6 +43,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	[Sync] public Color FrogColor { get; set; } = Color.White;
 	[Sync] public bool IsDead { get; set; } = false;
+	[Sync] public bool HasFinished { get; set; } = false;
 	[Sync] public bool IsBot { get; set; } = false;
 	[Sync] public string BotName { get; set; } = "";
 	[Sync] public bool IsGrounded { get; set; } = false;
@@ -56,6 +64,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private float nextBotHopTime;
 	private float nextIdleHopTime;
 	private bool reroutingSideways;
+	private float botRecklessness = -1f;
 
 	private enum DeathType
 	{
@@ -146,6 +155,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 			return;
 
 		IsDead = false;
+		HasFinished = false;
 		CurrentLog = null;
 		IsGrounded = false;
 		LastJumpTime = Time.Now;
@@ -233,6 +243,12 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( Time.Now < nextBotHopTime )
 			return Vector3.Zero;
 
+		if ( botRecklessness < 0f )
+			botRecklessness = Game.Random.Float( botRecklessMin, botRecklessMax );
+
+		// Occasionally the frog misjudges the gap and darts out without checking for cars.
+		bool reckless = Game.Random.Float() < botRecklessness;
+
 		Vector3 sideFirst = Game.Random.Int( 1 ) == 0 ? Vector3.Left : Vector3.Right;
 
 		// Normally push forward, using sideways hops to steer around obstacles, and fall back to a
@@ -246,7 +262,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 		foreach ( Vector3 direction in choices )
 		{
-			if ( IsHopSafe( direction ) )
+			if ( IsHopSafe( direction, reckless ) )
 			{
 				nextBotHopTime = Time.Now + Game.Random.Float( botHopMin, botHopMax );
 				reroutingSideways = direction == Vector3.Backward;
@@ -270,8 +286,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 		return directions[Game.Random.Int( directions.Length - 1 )];
 	}
 
-	// Mirrors Move's traces to judge whether a hop is survivable.
-	private bool IsHopSafe( Vector3 direction )
+	// Mirrors Move's traces to judge whether a hop is survivable. A reckless hop skips the traffic
+	// check only — terrain (water, walls, missing logs) is always fatal, so it stays a car gamble.
+	private bool IsHopSafe( Vector3 direction, bool ignoreTraffic = false )
 	{
 		Vector3 requestedJump = SnapToGrid( TilePosition ) + jumpClearance;
 
@@ -294,7 +311,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( landing.GameObject.Tags.Has( "log" ) && !LogWillHoldLanding( landing, traceOrigin ) )
 			return false;
 
-		if ( IsTrafficDanger( SnapToGrid( landing.EndPosition ) ) )
+		if ( !ignoreTraffic && IsTrafficDanger( SnapToGrid( landing.EndPosition ) ) )
 			return false;
 
 		return true;
@@ -431,7 +448,25 @@ public sealed class Frog : Component, Component.ITriggerListener
 		collider.Enabled = !dead;
 		collider.IsTrigger = !dead;
 		renderer.Enabled = !dead;
-		Sound.Play( dead ? DeathSound : RespawnSound, WorldPosition );
+		PlayCrowdSound( dead ? DeathSound : RespawnSound, WorldPosition );
+	}
+
+	// This RPC is broadcast per-frog, so a crowd spawning or dying at once (round start,
+	// a car wiping a stack) makes every client fire N identical positional sounds on the
+	// same frame. They stack constructively into an ear-splitting wall. Coalesce them:
+	// play at most one instance of a given sound per short window on this client.
+	private static readonly Dictionary<SoundEvent, RealTimeSince> lastCrowdSound = new();
+
+	private static void PlayCrowdSound( SoundEvent sound, Vector3 position, float minInterval = 0.1f )
+	{
+		if ( sound is null )
+			return;
+
+		if ( lastCrowdSound.TryGetValue( sound, out var since ) && since < minInterval )
+			return;
+
+		lastCrowdSound[sound] = 0;
+		Sound.Play( sound, position );
 	}
 
 	[Rpc.Broadcast]

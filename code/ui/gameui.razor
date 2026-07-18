@@ -297,6 +297,11 @@
 
 	private float GetProgress( Frog frog )
 	{
+		// The host flags whoever reached the finish; trust that over this client's lagging
+		// proxy position so the winner reads a clean 100% everywhere, not 99%.
+		if ( frog.HasFinished )
+			return 1f;
+
 		if ( !Manager.IsValid() || Manager.WinTilePosition <= 0 )
 			return 0;
 

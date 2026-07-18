@@ -97,8 +97,17 @@ namespace Jumpy
 			if ( !Networking.IsHost || !IsGameActive )
 				return;
 
-			if ( Scene.GetAllComponents<Frog>().Any( frog => frog.WorldPosition.x >= WinTilePosition ) )
+			// Flag everyone who crossed the line this frame. The flag is synced, so proxy
+			// clients show the winner at 100% instead of trusting their lagging interpolated
+			// position, which reads just short of the finish (99%) at the game-over snapshot.
+			var finishers = Scene.GetAllComponents<Frog>().Where( frog => frog.WorldPosition.x >= WinTilePosition ).ToList();
+			if ( finishers.Count > 0 )
+			{
+				foreach ( Frog frog in finishers )
+					frog.HasFinished = true;
+
 				_ = EndGame();
+			}
 		}
 
 		public void OnActive( Connection connection )
