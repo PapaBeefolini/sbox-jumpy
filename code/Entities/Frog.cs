@@ -49,6 +49,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 	[Sync] public bool IsGrounded { get; set; } = false;
 	[Sync] public float LastJumpTime { get; set; }
 
+	// Furthest checkpoint band reached this run; -1 means none yet (respawn back at the start pen).
+	[Sync] public int CheckpointIndex { get; set; } = -1;
+
 	public Manager Manager { get; set; }
 	public Vector3 TilePosition { get; set; }
 	public GameObject CurrentLog { get; set; }

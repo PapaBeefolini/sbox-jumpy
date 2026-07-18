@@ -44,7 +44,11 @@ namespace Jumpy
 
 		// Measured in tiles. Width spans side-to-side (Y axis); height runs from start to finish (X axis).
 		[Property, Group( "World" )] public int WorldWidth { get; set; } = 28;
-		[Property, Group( "World" )] public int WorldHeight { get; set; } = 48;
+		[Property, Group( "World" )] public int WorldHeight { get; set; } = 96;
+
+		// Safe checkpoint bands spaced evenly along the run. Reaching one becomes your respawn
+		// point, so death only costs the segment since your last checkpoint.
+		[Property, Group( "World" )] public int CheckpointCount { get; set; } = 2;
 
 		[Sync] public bool IsGameActive { get; set; } = false;
 		[Sync] public bool IsGameOver { get; set; } = false;
@@ -59,6 +63,14 @@ namespace Jumpy
 		[Sync] public float StartAreaMaxX { get; set; }
 		[Sync] public float StartAreaMinY { get; set; }
 		[Sync] public float StartAreaMaxY { get; set; }
+
+		// Every walkable tile on every checkpoint band, so a checkpoint respawn picks a random
+		// unoccupied spot on the reached row instead of always the centre. Host-set in GenerateWorld.
+		[Sync] public List<Vector3> CheckpointSpawns { get; set; } = new();
+
+		// The X threshold of each checkpoint band, ascending. Drives reach detection, the HUD ticks,
+		// and which row a frog respawns on (indexed by Frog.CheckpointIndex).
+		[Sync] public List<float> CheckpointXs { get; set; } = new();
 
 		// Spawn spots handed out recently. Respawn RPCs haven't round-tripped during a
 		// round-start burst, so this is what keeps two frogs from being dealt the same spot.
@@ -96,6 +108,20 @@ namespace Jumpy
 		{
 			if ( !Networking.IsHost || !IsGameActive )
 				return;
+
+			// Record the furthest checkpoint each frog has reached. CheckpointIndex is synced and
+			// monotonic, so it's up to date on the owning client by the time its delayed respawn fires.
+			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
+			{
+				for ( int i = CheckpointXs.Count - 1; i > frog.CheckpointIndex; i-- )
+				{
+					if ( frog.WorldPosition.x >= CheckpointXs[i] )
+					{
+						frog.CheckpointIndex = i;
+						break;
+					}
+				}
+			}
 
 			// Flag everyone who crossed the line this frame. The flag is synced, so proxy
 			// clients show the winner at 100% instead of trusting their lagging interpolated
@@ -165,7 +191,15 @@ namespace Jumpy
 
 		public void RespawnFrog( Frog frog )
 		{
-			frog.Respawn( GetSpawnPoint( frog ) );
+			// Respawn on a random unoccupied tile of the last checkpoint band reached, otherwise
+			// back in the start pen.
+			// Respawn on a random unoccupied tile of the last checkpoint band reached, otherwise
+			// back in the start pen.
+			Vector3 target = (frog.CheckpointIndex >= 0 && frog.CheckpointIndex < CheckpointXs.Count)
+				? GetCheckpointSpawn( frog )
+				: GetSpawnPoint( frog );
+
+			frog.Respawn( target );
 		}
 
 		public Vector3 GetSpawnPoint( Frog frog )
@@ -181,6 +215,29 @@ namespace Jumpy
 			recentSpawns.Add( (frog, chosen.WorldPosition, Time.Now) );
 
 			return chosen.WorldPosition;
+		}
+
+		public Vector3 GetCheckpointSpawn( Frog frog )
+		{
+			float rowX = CheckpointXs[frog.CheckpointIndex];
+
+			// Every tile on the reached band, shuffled, so respawns spread across the row.
+			var candidates = CheckpointSpawns
+				.Where( p => MathF.Abs( p.x - rowX ) < 1f )
+				.OrderBy( _ => Guid.NewGuid() )
+				.ToList();
+
+			if ( candidates.Count == 0 )
+				return new Vector3( rowX, 0, 40 );
+
+			recentSpawns.RemoveAll( entry => !entry.frog.IsValid() || entry.frog == frog || Time.Now - entry.time > recentSpawnMemory );
+
+			int index = candidates.FindIndex( p => !IsSpawnPointOccupied( p, frog ) );
+			Vector3 chosen = index >= 0 ? candidates[index] : candidates[0];
+
+			recentSpawns.Add( (frog, chosen, Time.Now) );
+
+			return chosen;
 		}
 
 		public bool IsWithinStartArea( Vector3 worldPos )
@@ -202,6 +259,8 @@ namespace Jumpy
 		private void GenerateWorld()
 		{
 			ClearWorld();
+			CheckpointSpawns.Clear();
+			CheckpointXs.Clear();
 
 			int roadFreq = Game.Random.Int( 8 );
 			int bigRoadFreq = Game.Random.Int( 12 );
@@ -219,6 +278,17 @@ namespace Jumpy
 			StartAreaMaxX = (areaDepth - 1) * tileSize + tileSize * 0.5f;
 			StartAreaMinY = (startColumn - halfWidth) * tileSize - tileSize * 0.5f;
 			StartAreaMaxY = (startColumn + areaWidth - 1 - halfWidth) * tileSize + tileSize * 0.5f;
+
+			// Reserve evenly-spaced rows (by progress fraction i/(N+1)) for safe checkpoint bands,
+			// snapped to a tile row and kept clear of the start pen and win row.
+			float finishX = (WorldHeight - 1) * tileSize;
+			var checkpointRows = new HashSet<int>();
+			for ( int i = 0; i < CheckpointCount; i++ )
+			{
+				float frac = (i + 1f) / (CheckpointCount + 1f);
+				int row = (int)MathF.Round( (StartAreaMaxX + frac * (finishX - StartAreaMaxX)) / tileSize );
+				checkpointRows.Add( int.Clamp( row, areaDepth, WorldHeight - 2 ) );
+			}
 
 			for ( int x = 0; x < WorldHeight; x++ )
 			{
@@ -256,12 +326,29 @@ namespace Jumpy
 						continue;
 					}
 
+					// Checkpoint row: a full-width safe band with a distinct tint. Handled before
+					// the lane rolls so no hazard ever spawns on it and its X is never mutated.
+					if ( checkpointRows.Contains( x ) )
+					{
+						CreateTile( currentPosition, new Color( 0.55f, 0.8f, 1f ) );
+						CheckpointSpawns.Add( currentPosition + Vector3.Up * 32 );
+						if ( y == 0 )
+							CheckpointXs.Add( currentPosition.x );
+						continue;
+					}
+
+					// A multi-row lane runs x++ internally, so it must not start within its span of
+					// a reserved checkpoint row or it would leap over it and swallow the band.
+					bool checkpointAhead = checkpointRows.Contains( x + 1 )
+						|| checkpointRows.Contains( x + 2 )
+						|| checkpointRows.Contains( x + 3 );
+
 					// Jagged edges
 					if ( (y <= 1 || y >= WorldWidth - 2) && Game.Random.Int( 1 ) == 1 )
 						continue;
 
 					// Rivers
-					if ( riverFreq <= 0 )
+					if ( riverFreq <= 0 && !checkpointAhead )
 					{
 						for ( int i = 0; i < 2; i++ )
 						{
@@ -283,7 +370,7 @@ namespace Jumpy
 					}
 
 					// Roads
-					if ( roadFreq <= 0 && !rowWasRoad )
+					if ( roadFreq <= 0 && !rowWasRoad && !checkpointAhead )
 					{
 						rowWasRoad = true;
 
@@ -312,7 +399,7 @@ namespace Jumpy
 					}
 
 					// Big roads
-					if ( bigRoadFreq <= 0 && !rowWasRoad )
+					if ( bigRoadFreq <= 0 && !rowWasRoad && !checkpointAhead )
 					{
 						rowWasRoad = true;
 
@@ -430,7 +517,11 @@ namespace Jumpy
 		private void RespawnAllFrogs()
 		{
 			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
+			{
+				// A fresh round wipes checkpoint progress so everyone starts back in the pen.
+				frog.CheckpointIndex = -1;
 				RespawnFrog( frog );
+			}
 		}
 
 		private bool IsSpawnPointOccupied( Vector3 spot, Frog ignore )

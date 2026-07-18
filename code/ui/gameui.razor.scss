@@ -451,6 +451,18 @@ gameui {
                 box-shadow: 0 0 12px rgba(182, 255, 0, 0.5);
             }
 
+            .checkpoint-tick {
+                position: absolute;
+                top: -6px;
+                bottom: -6px;
+                width: 8px;
+                margin-left: -4px;
+                border: 1px solid rgba(black, 0.6);
+                border-radius: 2px;
+                background-color: #b6ff00;
+                box-shadow: 0 0 16px black;
+            }
+
             .marker {
                 position: absolute;
                 top: 0px; // lane (cluster) offset added inline
