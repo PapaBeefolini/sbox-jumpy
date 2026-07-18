@@ -23,15 +23,23 @@
 		</div>
 	}
 
+	@if (!IsGameOver && ShowCheckpoint)
+	{
+		<div class="checkpoint-banner" style="@CheckpointStyle()">
+			<div class="cp-title">CHECKPOINT@(CheckpointTotal > 1 ? $" {shownCheckpoint + 1}/{CheckpointTotal}" : "")</div>
+			<div class="cp-sub">RESPAWN POINT SET</div>
+		</div>
+	}
+
 	@if (!IsGameOver)
 	{
 		<div class="race-track">
 			<div class="cap start">START</div>
 			<div class="rail">
 				<div class="rail-fill" style="width: @Percent(LeaderProgress);"></div>
-				@foreach (var frac in CheckpointFractions())
+				@foreach (var tick in CheckpointTicks())
 				{
-					<div class="checkpoint-tick" style="left: @Percent(frac);"></div>
+					<div class="checkpoint-tick @(tick.Reached ? "reached" : "")" style="left: @Percent(tick.Fraction);"></div>
 				}
 				@foreach (var entry in BuildEntries())
 				{
@@ -127,6 +135,8 @@
 	private const float ClusterEpsilon = 0.02f;
 	// Vertical gap between stacked frogs that share (roughly) the same progress.
 	private const int LaneStep = 38;
+	// How long the "checkpoint reached" banner stays up, fade-out included.
+	private const float CheckpointBannerTime = 2.5f;
 
 	private Manager Manager { get; set; }
 	private bool IsGameOver { get; set; }
@@ -135,14 +145,22 @@
 	private RealTimeSince goShownAt = 1000f;
 	private List<RankRow> Ranking = new();
 
+	// Local player's checkpoint progress, tracked so we can announce each new one exactly once.
+	private RealTimeSince checkpointShownAt = 1000f;
+	private int lastCheckpoint = -1;
+	private int shownCheckpoint = 0;
+
 	// Time since the race ended; the whole game-over reveal is a function of this, computed
 	// per frame in code rather than via CSS @keyframes (the panel rebuilds every frame, which
 	// doesn't reliably restart one-shot CSS animations - so we animate by hand instead).
 	private RealTimeSince gameOverAt = 1000f;
 
 	private IEnumerable<Frog> Frogs => Scene?.GetAllComponents<Frog>() ?? Enumerable.Empty<Frog>();
+	private Frog LocalFrog => Frogs.FirstOrDefault( IsLocalPlayer );
 	private int Countdown => Manager.IsValid() ? Manager.CountdownRemaining : 0;
 	private bool ShowGo => goShownAt < 1.0f;
+	private bool ShowCheckpoint => checkpointShownAt < CheckpointBannerTime;
+	private int CheckpointTotal => Manager.IsValid() ? Manager.CheckpointXs.Count : 0;
 	private float RestartDelay => Manager.IsValid() && Manager.RestartDelaySeconds > 0f ? Manager.RestartDelaySeconds : 6f;
 	private float NextRoundRemaining => Manager.IsValid() ? float.Max( 0f, Manager.NextRoundStart ) : 0f;
 	private int NextRoundSeconds => (int)float.Ceiling( NextRoundRemaining );
@@ -168,6 +186,17 @@
 		if ( lastCountdown == 1 && countdown == 0 && !IsGameOver )
 			goShownAt = 0f;
 		lastCountdown = countdown;
+
+		// Announce each checkpoint the local frog banks. A new round resets CheckpointIndex to
+		// -1, which drops the tracker back with it, so the next race announces its first one too.
+		var localFrog = LocalFrog;
+		int checkpoint = localFrog.IsValid() ? localFrog.CheckpointIndex : -1;
+		if ( checkpoint > lastCheckpoint )
+		{
+			checkpointShownAt = 0f;
+			shownCheckpoint = checkpoint;
+		}
+		lastCheckpoint = checkpoint;
 
 		// Freeze the final standings on the frame the race ends and start the reveal clock.
 		if ( IsGameOver && !wasGameOver )
@@ -318,7 +347,9 @@
 		return float.Clamp( (frog.WorldPosition.x - startLine) / span, 0f, 1f );
 	}
 
-	private IEnumerable<float> CheckpointFractions()
+	// Rail ticks for each checkpoint band, flagged with whether the local player has banked it,
+	// so the HUD keeps showing checkpoint state after the banner has gone.
+	private IEnumerable<(float Fraction, bool Reached)> CheckpointTicks()
 	{
 		if ( !Manager.IsValid() || Manager.WinTilePosition <= 0 )
 			yield break;
@@ -329,8 +360,29 @@
 		if ( span <= 0 )
 			yield break;
 
-		foreach ( var cpX in Manager.CheckpointXs )
-			yield return float.Clamp( (cpX - startLine) / span, 0f, 1f );
+		var localFrog = LocalFrog;
+		int reached = localFrog.IsValid() ? localFrog.CheckpointIndex : -1;
+
+		for ( int i = 0; i < Manager.CheckpointXs.Count; i++ )
+			yield return (float.Clamp( (Manager.CheckpointXs[i] - startLine) / span, 0f, 1f ), i <= reached);
+	}
+
+	// Banner entrance: pops down into place with an overshoot, holds, then fades out. Animated
+	// by hand for the same reason the game-over reveal is - the panel rebuilds every frame.
+	private string CheckpointStyle()
+	{
+		float t = checkpointShownAt;
+		float e = EaseOutBack( t / 0.34f );
+		float y = -34f * (1f - e);
+		float scale = 0.7f + 0.3f * e;
+
+		const float fadeTime = 0.5f;
+		float fadeStart = CheckpointBannerTime - fadeTime;
+		float o = t > fadeStart
+			? float.Clamp( 1f - (t - fadeStart) / fadeTime, 0f, 1f )
+			: float.Clamp( t / 0.15f, 0f, 1f );
+
+		return $"opacity: {F(o)}; transform: translateY({F(y)}px) scale({F(scale)});";
 	}
 
 	private string Percent( float progress )
