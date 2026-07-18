@@ -230,6 +230,22 @@
           "OnComponentUpdate": null,
           "Roundness": 0,
           "Smoothness": 1
+        },
+        {
+          "__type": "Jumpy.CameraShake",
+          "__guid": "e32f7567-c24f-4c7d-806f-b1ce7b381106",
+          "__enabled": true,
+          "Flags": 0,
+          "MaxPitch": 1.6,
+          "MaxRoll": 3,
+          "MaxYaw": 2.2,
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null,
+          "Scale": 1
         }
       ],
       "Children": []

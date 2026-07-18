@@ -34,6 +34,19 @@ public sealed class Frog : Component, Component.ITriggerListener
 	// for the way forward to clear and takes whatever escape hop it can find.
 	private const float botDriftBailoutTime = 2.0f;
 
+	private const float cameraDistance = 800f;
+	private const float cameraFollowRate = 4f;
+	private const float baseFieldOfView = 75f;
+
+	// The HUD's death card counts this exact value down, so it lives here rather than in both.
+	public const float DeathHoldSeconds = 3.0f;
+
+	private const float deathShakeTrauma = 0.9f;
+	private const float deathFovPunch = 12f;
+	private const float deathFovPunchTime = 0.35f;
+	private const float deathZoomIn = 260f;
+	private const float deathDriftHeight = 90f;
+
 	private static readonly Vector3 jumpClearance = Vector3.Up * 33;
 	private static readonly string[] ignoreTags = { "player", "car" };
 
@@ -56,6 +69,13 @@ public sealed class Frog : Component, Component.ITriggerListener
 	// Furthest checkpoint band reached this run; -1 means none yet (respawn back at the start pen).
 	[Sync] public int CheckpointIndex { get; set; } = -1;
 
+	[Sync] public DeathType LastDeathType { get; set; } = DeathType.Car;
+
+	// Bots have no owning connection, so on the host IsProxy is false for every one of them —
+	// IsProxy alone would let a bot death shake the host's camera and nobody else's. All
+	// local-only effects gate on this.
+	public bool IsLocalPlayer => !IsProxy && !IsBot;
+
 	public Manager Manager { get; set; }
 	public Vector3 TilePosition { get; set; }
 	public GameObject CurrentLog { get; set; }
@@ -73,11 +93,8 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private bool reroutingSideways;
 	private float botRecklessness = -1f;
 
-	private enum DeathType
-	{
-		Car,
-		Water
-	}
+	private RealTimeSince deathAt;
+	private int deathSequence;
 
 	protected override void OnAwake()
 	{
@@ -143,7 +160,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 		float killBorder = GetKillBorder();
 		if ( WorldPosition.y <= -killBorder || WorldPosition.y >= killBorder )
-			_ = Die( DeathType.Car );
+			_ = Die( DeathType.Drift );
 	}
 
 	public void OnTriggerEnter( Collider other )
@@ -178,23 +195,50 @@ public sealed class Frog : Component, Component.ITriggerListener
 		ResetCamera();
 	}
 
+	// Sole owner of the camera's position and FOV between respawns; anything written elsewhere
+	// gets overwritten next frame. Drift and punch are pure functions of IsDead and deathAt, so
+	// nothing accumulates and respawn needs no unwinding.
 	private void UpdateCamera()
 	{
-		// Bots run on the host so they aren't proxies, but they must never drive the local camera.
-		if ( IsProxy || IsBot )
+		if ( !IsLocalPlayer || !Scene.Camera.IsValid() )
 			return;
 
-		Scene.Camera.WorldPosition = Vector3.Lerp( Scene.Camera.WorldPosition, WorldPosition + Scene.Camera.WorldRotation.Backward * 800, Time.Delta * 4 );
+		float drift = IsDead
+			? float.Clamp( (float)deathAt / DeathHoldSeconds, 0f, 1f ).EaseOutCubic()
+			: 0f;
+
+		Vector3 target = WorldPosition
+			+ (Scene.Camera.WorldRotation.Backward * (cameraDistance - (deathZoomIn * drift)))
+			+ (Vector3.Up * deathDriftHeight * drift);
+
+		Scene.Camera.WorldPosition = Vector3.Lerp( Scene.Camera.WorldPosition, target, Time.Delta * cameraFollowRate );
+
+		float punch = IsDead
+			? 1f - float.Clamp( (float)deathAt / deathFovPunchTime, 0f, 1f )
+			: 0f;
+
+		Scene.Camera.FieldOfView = baseFieldOfView + (deathFovPunch * punch * punch);
 	}
 
 	private void ResetCamera()
 	{
-		if ( IsProxy || IsBot )
+		if ( !IsLocalPlayer || !Scene.Camera.IsValid() )
 			return;
 
-		Scene.Camera.WorldPosition = WorldPosition + Scene.Camera.WorldRotation.Backward * 800;
+		Scene.Camera.WorldPosition = WorldPosition + (Scene.Camera.WorldRotation.Backward * cameraDistance);
 		Scene.Camera.WorldRotation = new Angles( 30, 15, 0 ).ToRotation();
-		Scene.Camera.FieldOfView = 75;
+		Scene.Camera.FieldOfView = baseFieldOfView;
+
+		// Otherwise the tail of the death shake carries onto the fresh spawn.
+		Scene.Camera.GameObject.Components.GetOrCreate<CameraShake>().Clear();
+	}
+
+	private void AddCameraShake( float trauma )
+	{
+		if ( !IsLocalPlayer || !Scene.Camera.IsValid() )
+			return;
+
+		Scene.Camera.GameObject.Components.GetOrCreate<CameraShake>().AddTrauma( trauma );
 	}
 
 	private void Move( Vector3 direction )
@@ -447,15 +491,27 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( IsProxy || IsDead )
 			return;
 
+		// Both must land before IsDead flips: the camera and HUD react to IsDead next frame and
+		// would otherwise read the previous death's cause and clock.
+		deathAt = 0f;
+		LastDeathType = deathType;
 		IsDead = true;
 		CurrentLog = null;
+
 		UpdateAppearance( IsDead );
 		SpawnDeathParticles( deathType, WorldPosition );
+		AddCameraShake( deathShakeTrauma );
 
-		await Task.DelaySeconds( 3.0f );
+		// This is fired and forgotten, so a hold cut short by a round restart still wakes up later.
+		// Without the ticket it would respawn the frog out from under a newer death.
+		int sequence = ++deathSequence;
 
-		if ( IsDead )
-			Manager.RespawnFrog( this );
+		await Task.DelayRealtimeSeconds( DeathHoldSeconds );
+
+		if ( !this.IsValid() || !Manager.IsValid() || !IsDead || deathSequence != sequence )
+			return;
+
+		Manager.RespawnFrog( this );
 	}
 
 	[Rpc.Broadcast]
@@ -466,7 +522,10 @@ public sealed class Frog : Component, Component.ITriggerListener
 			case DeathType.Car:
 				DeathParticlesCar.Clone( position + Vector3.Up * 8 );
 				break;
+
+			// Drifting off the map happens out over open water, so it splashes.
 			case DeathType.Water:
+			case DeathType.Drift:
 				DeathParticlesWater.Clone( position + Vector3.Up * 2, Rotation.FromPitch( -90 ) );
 				break;
 		}

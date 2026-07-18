@@ -426,6 +426,84 @@ gameui {
         }
     }
 
+    // No transition/:intro here: opacity and transform are written inline every frame.
+    .death-card {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(black, 0.8);
+        pointer-events: none;
+
+        .dc-panel {
+            flex-direction: column;
+            align-items: center;
+            padding: 26px 64px 30px 64px;
+            border-radius: 20px;
+            background-color: rgba(black, 0.86);
+            border: 3px solid rgba(black, 0.5);
+        }
+
+        .dc-title {
+            font-size: 84px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-shadow: 5px 5px 0 black;
+
+            &.splat {
+                color: #ff4d4d;
+            }
+
+            &.splash {
+                color: #4ec3ff;
+            }
+        }
+
+        .dc-cause {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px 0 black;
+            margin-top: -4px;
+        }
+
+        .dc-timer {
+            flex-direction: column;
+            align-items: center;
+            margin-top: 26px;
+
+            .dc-label {
+                font-size: 14px;
+                font-weight: bold;
+                color: white;
+                letter-spacing: 5px;
+                text-shadow: 2px 2px 0 black;
+            }
+
+            .dc-time {
+                font-size: 52px;
+                font-weight: bold;
+                color: #b6ff00;
+                text-shadow: 3px 3px 0 black;
+                margin-top: -4px;
+            }
+        }
+
+        .dc-where {
+            font-size: 16px;
+            font-weight: bold;
+            color: #d5ff6b;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 0 black;
+            margin-top: 6px;
+        }
+    }
+
     .race-track {
         position: absolute;
         top: 16px;
