@@ -26,7 +26,7 @@
             "_type": "gameobject",
             "prefab": "prefabs/big-road.prefab"
           },
-          "BotCount": 0,
+          "BotCount": 3,
           "CarPrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/car.prefab"

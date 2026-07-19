@@ -7,15 +7,15 @@
   "Sounds": [
     "sounds/jumpy.death.vsnd"
   ],
-  "OcclusionEnabled": true,
-  "Occlusion": true,
+  "OcclusionEnabled": false,
+  "Occlusion": false,
   "ReverbEnabled": true,
   "Reflections": true,
   "AirAbsorption": true,
   "Transmission": true,
   "OcclusionRadius": 64,
   "DistanceAttenuation": true,
-  "Distance": 20000,
+  "Distance": 16000,
   "Falloff": [
     {
       "x": 0,

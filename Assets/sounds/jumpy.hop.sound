@@ -7,15 +7,15 @@
   "Sounds": [
     "sounds/jumpy.hop.vsnd"
   ],
-  "OcclusionEnabled": true,
-  "Occlusion": true,
+  "OcclusionEnabled": false,
+  "Occlusion": false,
   "ReverbEnabled": true,
   "Reflections": true,
   "AirAbsorption": true,
   "Transmission": true,
   "OcclusionRadius": 64,
   "DistanceAttenuation": true,
-  "Distance": 16000,
+  "Distance": 12000,
   "Falloff": [
     {
       "x": 0,
