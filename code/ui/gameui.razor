@@ -2,9 +2,7 @@
 @using System.Collections.Generic
 @using System.Globalization
 @using System.Linq
-@using System.Threading.Tasks
 @using Sandbox;
-@using Sandbox.Network
 @inherits PanelComponent
 @namespace Jumpy
 
@@ -44,8 +42,7 @@
 				@foreach (var entry in BuildEntries())
 				{
 					var frog = entry.Frog;
-					var isLocal = IsLocalPlayer( frog );
-					<div class="marker @(isLocal ? "local" : "") @(frog.IsDead ? "dead" : "")" style="left: @Percent(entry.Progress); top: @(entry.LaneIndex * LaneStep)px;">
+					<div class="marker @(frog.IsLocalPlayer ? "local" : "") @(frog.IsDead ? "dead" : "")" style="left: @Percent(entry.Progress); top: @(entry.LaneIndex * LaneStep)px;">
 						<div class="badge" style="border-color: @frog.FrogColor.Hex;">
 							<div class="frog-icon" style="background-image: url( @GetAvatarUrl(frog) );"></div>
 						</div>
@@ -121,7 +118,7 @@
 
 			<div class="next-round" style="@Reveal(1.6f, 0.36f, 0f, 26f, 0.4f)">
 				<div class="nr-label">NEXT WORLD IN</div>
-				<div class="nr-time" style="transform: scale( @TimerScale() );">@NextRoundSeconds</div>
+				<div class="nr-time" style="transform: scale( @DigitPop(NextRoundRemaining) );">@NextRoundSeconds</div>
 				<div class="nr-bar">
 					<div class="nr-fill" style="width: @NextRoundBarWidth;"></div>
 				</div>
@@ -138,7 +135,7 @@
 				<div class="dc-cause">@DeathCause</div>
 				<div class="dc-timer">
 					<div class="dc-label">RESPAWNING IN</div>
-					<div class="dc-time" style="transform: scale( @RespawnScale() );">@RespawnSeconds</div>
+					<div class="dc-time" style="transform: scale( @DigitPop(RespawnRemaining) );">@RespawnSeconds</div>
 				</div>
 				<div class="dc-where">@shownRespawnLabel</div>
 			</div>
@@ -151,7 +148,6 @@
 	private const float ClusterEpsilon = 0.02f;
 	// Vertical gap between stacked frogs that share (roughly) the same progress.
 	private const int LaneStep = 38;
-	// How long the "checkpoint reached" banner stays up, fade-out included.
 	private const float CheckpointBannerTime = 2.5f;
 
 	private const float DeathCardTime = Frog.DeathHoldSeconds;
@@ -176,26 +172,31 @@
 	private DeathType shownDeathType = DeathType.Car;
 	private string shownRespawnLabel = "";
 
-	// Time since the race ended; the whole game-over reveal is a function of this, computed
-	// per frame in code rather than via CSS @keyframes (the panel rebuilds every frame, which
-	// doesn't reliably restart one-shot CSS animations - so we animate by hand instead).
+	// Time since the race ended; the whole game-over reveal is a function of this, computed per
+	// frame in code rather than via CSS @keyframes (the panel rebuilds every frame, which doesn't
+	// reliably restart one-shot CSS animations - so we animate by hand instead).
 	private RealTimeSince gameOverAt = 1000f;
 
 	private IEnumerable<Frog> Frogs => Scene?.GetAllComponents<Frog>() ?? Enumerable.Empty<Frog>();
-	private Frog LocalFrog => Frogs.FirstOrDefault( IsLocalPlayer );
+	private Frog LocalFrog => Frogs.FirstOrDefault( f => f.IsLocalPlayer );
 	private int Countdown => Manager.IsValid() ? Manager.CountdownRemaining : 0;
 	private bool ShowGo => goShownAt < 1.0f;
 	private bool ShowCheckpoint => checkpointShownAt < CheckpointBannerTime;
 	private bool ShowDeath => deathShownAt < DeathCardTime;
-	private int RespawnSeconds => (int)float.Ceiling( float.Max( 0f, DeathCardTime - (float)deathShownAt ) );
+	private float RespawnRemaining => float.Max( 0f, DeathCardTime - (float)deathShownAt );
+	private int RespawnSeconds => (int)float.Ceiling( RespawnRemaining );
 	private int CheckpointTotal => Manager.IsValid() ? Manager.CheckpointXs.Count : 0;
 	private float RestartDelay => Manager.IsValid() && Manager.RestartDelaySeconds > 0f ? Manager.RestartDelaySeconds : 6f;
 	private float NextRoundRemaining => Manager.IsValid() ? float.Max( 0f, Manager.NextRoundStart ) : 0f;
 	private int NextRoundSeconds => (int)float.Ceiling( NextRoundRemaining );
-	private string NextRoundBarWidth => Percent( float.Clamp( NextRoundRemaining / RestartDelay, 0f, 1f ) );
+	private string NextRoundBarWidth => Percent( NextRoundRemaining.LerpInverse( 0f, RestartDelay ) );
 
 	// Furthest-along frog, used to fill the track up to the current race leader.
 	private float LeaderProgress => Frogs.Select( GetProgress ).DefaultIfEmpty( 0f ).Max();
+
+	// Start line is the front of the pen, so the whole start area reads 0%.
+	private float StartLine => Manager.StartAreaMaxX;
+	private bool HasTrack => Manager.IsValid() && Manager.WinTilePosition > 0 && Manager.WinTilePosition > StartLine;
 
 	protected override int BuildHash() => HashCode.Combine( RealTime.Now );
 
@@ -262,7 +263,7 @@
 				Color = f.FrogColor,
 				NameColor = f.NameColor,
 				Progress = GetProgress( f ),
-				IsLocal = IsLocalPlayer( f ),
+				IsLocal = f.IsLocalPlayer,
 				IsDead = f.IsDead
 			} )
 			.OrderByDescending( r => r.Progress )
@@ -278,7 +279,8 @@
 		float x = fromX * (1f - e);
 		float y = fromY * (1f - e);
 		float s = fromScale + (1f - fromScale) * e;
-		float o = float.Clamp( ((float)gameOverAt - delay) / (duration * 0.4f), 0f, 1f );
+		float o = ((float)gameOverAt - delay).LerpInverse( 0f, duration * 0.4f );
+
 		return $"opacity: {F(o)}; transform: translateX({F(x)}px) translateY({F(y)}px) scale({F(s)});";
 	}
 
@@ -298,10 +300,20 @@
 	};
 
 	// Pops the digit the instant it ticks down, then eases back to rest over the second.
-	private string TimerScale()
+	private string DigitPop( float remaining )
 	{
-		float frac = NextRoundRemaining - float.Floor( NextRoundRemaining );
-		return F( 1f + 0.25f * frac * frac * frac );
+		float frac = remaining - float.Floor( remaining );
+		return F( 1f + (0.25f * frac * frac * frac) );
+	}
+
+	// Ramps in over fadeIn, holds, then ramps back out over the last fadeOut of its lifetime.
+	private static float FadeOpacity( float elapsed, float lifetime, float fadeOut, float fadeIn )
+	{
+		float fadeStart = lifetime - fadeOut;
+
+		return elapsed > fadeStart
+			? elapsed.LerpInverse( lifetime, fadeStart )
+			: elapsed.LerpInverse( 0f, fadeIn );
 	}
 
 	private string F( float value )
@@ -314,6 +326,7 @@
 	{
 		var top = Ranking.Take( 3 ).Select( ( r, i ) => (Rank: i + 1, Row: r) ).ToList();
 		var order = new int[] { 2, 1, 3 };
+
 		return top.OrderBy( t => Array.IndexOf( order, t.Rank ) ).ToList();
 	}
 
@@ -363,52 +376,34 @@
 		if ( frog.HasFinished )
 			return 1f;
 
-		if ( !Manager.IsValid() || Manager.WinTilePosition <= 0 )
-			return 0;
+		if ( !HasTrack )
+			return 0f;
 
-		// Measure from the start line (front of the pen), so the whole start area reads 0%.
-		float startLine = Manager.StartAreaMaxX;
-		float span = Manager.WinTilePosition - startLine;
-		if ( span <= 0 )
-			return 0;
-
-		return float.Clamp( (frog.WorldPosition.x - startLine) / span, 0f, 1f );
+		return frog.WorldPosition.x.LerpInverse( StartLine, Manager.WinTilePosition );
 	}
 
 	// Rail ticks for each checkpoint band, flagged with whether the local player has banked it,
 	// so the HUD keeps showing checkpoint state after the banner has gone.
 	private IEnumerable<(float Fraction, bool Reached)> CheckpointTicks()
 	{
-		if ( !Manager.IsValid() || Manager.WinTilePosition <= 0 )
-			yield break;
-
-		// Same start-line -> finish span the progress markers use, so ticks line up with them.
-		float startLine = Manager.StartAreaMaxX;
-		float span = Manager.WinTilePosition - startLine;
-		if ( span <= 0 )
+		if ( !HasTrack )
 			yield break;
 
 		var localFrog = LocalFrog;
 		int reached = localFrog.IsValid() ? localFrog.CheckpointIndex : -1;
 
 		for ( int i = 0; i < Manager.CheckpointXs.Count; i++ )
-			yield return (float.Clamp( (Manager.CheckpointXs[i] - startLine) / span, 0f, 1f ), i <= reached);
+			yield return (Manager.CheckpointXs[i].LerpInverse( StartLine, Manager.WinTilePosition ), i <= reached);
 	}
 
-	// Banner entrance: pops down into place with an overshoot, holds, then fades out. Animated
-	// by hand for the same reason the game-over reveal is - the panel rebuilds every frame.
+	// Pops down into place with an overshoot, holds, then fades out. Animated by hand for the
+	// same reason the game-over reveal is - the panel rebuilds every frame.
 	private string CheckpointStyle()
 	{
-		float t = checkpointShownAt;
-		float e = (t / 0.34f).EaseOutBack();
+		float e = ((float)checkpointShownAt / 0.34f).EaseOutBack();
 		float y = -34f * (1f - e);
 		float scale = 0.7f + 0.3f * e;
-
-		const float fadeTime = 0.5f;
-		float fadeStart = CheckpointBannerTime - fadeTime;
-		float o = t > fadeStart
-			? float.Clamp( 1f - (t - fadeStart) / fadeTime, 0f, 1f )
-			: float.Clamp( t / 0.15f, 0f, 1f );
+		float o = FadeOpacity( checkpointShownAt, CheckpointBannerTime, 0.5f, 0.15f );
 
 		return $"opacity: {F(o)}; transform: translateY({F(y)}px) scale({F(scale)});";
 	}
@@ -447,13 +442,7 @@
 	// Opacity lives on the root only; setting it on the panel too would multiply the two.
 	private string DeathCardStyle()
 	{
-		float t = deathShownAt;
-		float fadeStart = DeathCardTime - DeathCardFadeTime;
-		float o = t > fadeStart
-			? float.Clamp( 1f - ((t - fadeStart) / DeathCardFadeTime), 0f, 1f )
-			: float.Clamp( t / 0.1f, 0f, 1f );
-
-		return $"opacity: {F(o)};";
+		return $"opacity: {F( FadeOpacity( deathShownAt, DeathCardTime, DeathCardFadeTime, 0.1f ) )};";
 	}
 
 	// Slams in from oversized; the overshoot is what sells the impact.
@@ -466,26 +455,16 @@
 		return $"transform: translateY({F(y)}px) scale({F(scale)});";
 	}
 
-	// Same digit pop as TimerScale, off the death clock.
-	private string RespawnScale()
-	{
-		float remaining = float.Max( 0f, DeathCardTime - (float)deathShownAt );
-		float frac = remaining - float.Floor( remaining );
-		return F( 1f + (0.25f * frac * frac * frac) );
-	}
-
 	private string Percent( float progress )
 	{
 		return (progress * 100f).ToString( "0.0", CultureInfo.InvariantCulture ) + "%";
 	}
 
-	// The single human frog owned by this client, as opposed to a remote player or a bot.
-	private bool IsLocalPlayer( Frog frog ) => frog.IsLocalPlayer;
-
 	private string GetName( Frog frog )
 	{
 		if ( frog.IsBot )
 			return string.IsNullOrEmpty( frog.BotName ) ? "Bot" : frog.BotName;
+
 		return frog.Network.Owner?.DisplayName ?? "Frog";
 	}
 
@@ -495,6 +474,7 @@
 			return "ui/frog.png";
 
 		var steamId = frog.Network.Owner?.SteamId ?? Connection.Local.SteamId;
+
 		return $"avatar:{steamId}";
 	}
 

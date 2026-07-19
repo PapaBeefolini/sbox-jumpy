@@ -1,14 +1,12 @@
 using Sandbox;
-using System.Threading.Tasks;
-using System;
 using System.Collections.Generic;
-using Jumpy;
 using System.Linq;
+using System.Threading.Tasks;
+using Jumpy;
 
 public sealed class Frog : Component, Component.ITriggerListener
 {
-	private const float tileSize = 96;
-	private const float jumpDistance = tileSize;
+	private const float jumpDistance = Manager.TileSize;
 	private const float jumpHeight = 6;
 	private const float maxJumpAngle = 35;
 
@@ -21,8 +19,8 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private const float idleHopMax = 1.4f;
 
 	// Bots are otherwise perfect traffic dodgers, which reads as robotic. Each one gets a personal
-	// recklessness: the odds that a given hop decision mistimes and ignores oncoming cars (it still
-	// won't leap into water or a wall — that's not "getting hit by a car"). Some frogs are daredevils.
+	// recklessness: the odds that a given hop ignores oncoming cars. It still won't leap into water
+	// or a wall — that's not "getting hit by a car".
 	private const float botRecklessMin = 0.04f;
 	private const float botRecklessMax = 0.18f;
 
@@ -49,6 +47,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	private static readonly Vector3 jumpClearance = Vector3.Up * 33;
 	private static readonly string[] ignoreTags = { "player", "car" };
+	private static readonly Vector3[] allDirections = { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right };
 
 	// How bright a name colour is forced to get, and how far it's then washed toward white.
 	private const float nameColorFloor = 0.85f;
@@ -56,7 +55,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	// Hand-picked instead of Color.Random so each frog reads as a distinct, saturated
 	// silhouette against the grass and water — random rolls muddy greys and near-blacks.
-	private static readonly Color[] frogColors = new Color[]
+	private static readonly Color[] frogColors =
 	{
 		new Color( 0.00f, 0.78f, 0.06f ), // green
 		new Color( 0.98f, 0.00f, 0.00f ), // red
@@ -85,27 +84,6 @@ public sealed class Frog : Component, Component.ITriggerListener
 	// floats that a sync round trip might not return bit-identical. -1 means not yet assigned.
 	[Sync] public int ColorIndex { get; set; } = -1;
 
-	public Color FrogColor => frogColors[Math.Clamp( ColorIndex, 0, frogColors.Length - 1 )];
-
-	// The same colour lifted to something that still reads as *text*. Tinting a model can afford
-	// dark green or navy; a name drawn in them disappears against the game-over panel and the
-	// world alike. Scales the darker slots up to a floor brightness, then pulls everything a
-	// little toward white - hue survives, legibility wins.
-	public Color NameColor
-	{
-		get
-		{
-			Color c = FrogColor;
-			float peak = MathF.Max( c.r, MathF.Max( c.g, c.b ) );
-			float scale = peak > 0.01f ? MathF.Max( 1f, nameColorFloor / peak ) : 1f;
-
-			return Color.Lerp( new Color(
-				MathF.Min( 1f, c.r * scale ),
-				MathF.Min( 1f, c.g * scale ),
-				MathF.Min( 1f, c.b * scale ) ), Color.White, nameColorWash );
-		}
-	}
-
 	[Sync] public bool IsDead { get; set; } = false;
 	[Sync] public bool HasFinished { get; set; } = false;
 	[Sync] public bool IsBot { get; set; } = false;
@@ -118,12 +96,21 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	[Sync] public DeathType LastDeathType { get; set; } = DeathType.Car;
 
-	// Bots have no owning connection, so on the host IsProxy is false for every one of them —
-	// IsProxy alone would let a bot death shake the host's camera and nobody else's. All
-	// local-only effects gate on this.
+	public Color FrogColor => frogColors[int.Clamp( ColorIndex, 0, frogColors.Length - 1 )];
+
+	public Color NameColor
+	{
+		get
+		{
+			ColorHsv hsv = FrogColor.ToHsv();
+			Color lifted = hsv.WithValue( float.Max( hsv.Value, nameColorFloor ) ).ToColor();
+
+			return Color.Lerp( lifted, Color.White, nameColorWash );
+		}
+	}
+
 	public bool IsLocalPlayer => !IsProxy && !IsBot;
 
-	public Manager Manager { get; set; }
 	public Vector3 TilePosition { get; set; }
 	public GameObject CurrentLog { get; set; }
 	public Vector3 LogOffset { get; set; }
@@ -145,7 +132,6 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	protected override void OnAwake()
 	{
-		Manager = Scene.GetAllComponents<Manager>().FirstOrDefault();
 		renderer = Components.Get<SkinnedModelRenderer>();
 		collider = Components.Get<SphereCollider>();
 		colliderCenter = collider.Center;
@@ -159,7 +145,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	protected override void OnFixedUpdate()
 	{
-		if ( IsProxy || IsDead || (!Manager.IsGameActive && Manager.CountdownRemaining <= 0) )
+		if ( IsProxy || IsDead || (!Manager.Instance.IsGameActive && Manager.Instance.CountdownRemaining <= 0) )
 			return;
 
 		if ( IsGrounded )
@@ -205,14 +191,13 @@ public sealed class Frog : Component, Component.ITriggerListener
 			}
 		}
 
-		float killBorder = GetKillBorder();
-		if ( WorldPosition.y <= -killBorder || WorldPosition.y >= killBorder )
+		if ( float.Abs( WorldPosition.y ) >= GetKillBorder() )
 			_ = Die( DeathType.Drift );
 	}
 
 	public void OnTriggerEnter( Collider other )
 	{
-		if ( IsProxy || !Manager.IsValid() || !Manager.IsGameActive )
+		if ( IsProxy || !Manager.Instance.IsValid() || !Manager.Instance.IsGameActive )
 			return;
 
 		if ( other.Tags.Has( "car" ) )
@@ -236,8 +221,10 @@ public sealed class Frog : Component, Component.ITriggerListener
 		WorldPosition = position;
 		landingTraceOrigin = position + jumpClearance;
 		WorldRotation = Rotation.LookAt( Vector3.Forward, Vector3.Up );
+
 		if ( ColorIndex < 0 )
 			ColorIndex = PickColorIndex();
+
 		UpdateAppearance( IsDead );
 		UpdateAnimation( true );
 		ResetCamera();
@@ -247,10 +234,10 @@ public sealed class Frog : Component, Component.ITriggerListener
 	// frogs. Past frogColors.Length frogs the palette is exhausted and duplicates are the only
 	// option left, so we stop being fussy and take any slot.
 	//
-	// Only ever called for a frog with no colour yet, and only on its owner, so the pool it sees
-	// is every other frog's synced slot. Two frogs spawning in the same tick on different clients
-	// can still land on the same colour - it settles into a duplicate rather than a broken state,
-	// which is a fine trade for not routing colour assignment through the host.
+	// Only ever called on the owner of a frog with no colour yet, so the pool it sees is every
+	// other frog's synced slot. Two frogs spawning in the same tick on different clients can still
+	// land on the same colour — it settles into a duplicate rather than a broken state, which is a
+	// fine trade for not routing colour assignment through the host.
 	private int PickColorIndex()
 	{
 		var taken = Scene.GetAllComponents<Frog>()
@@ -261,7 +248,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		var free = Enumerable.Range( 0, frogColors.Length ).Where( i => !taken.Contains( i ) ).ToList();
 
 		return free.Count > 0
-			? free[Game.Random.Int( free.Count - 1 )]
+			? Game.Random.FromList( free )
 			: Game.Random.Int( frogColors.Length - 1 );
 	}
 
@@ -273,9 +260,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( !IsLocalPlayer || !Scene.Camera.IsValid() )
 			return;
 
-		float drift = IsDead
-			? float.Clamp( (float)deathAt / DeathHoldSeconds, 0f, 1f ).EaseOutCubic()
-			: 0f;
+		float drift = IsDead ? ((float)deathAt / DeathHoldSeconds).EaseOutCubic() : 0f;
 
 		Vector3 target = WorldPosition
 			+ (Scene.Camera.WorldRotation.Backward * (cameraDistance - (deathZoomIn * drift)))
@@ -283,9 +268,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 		Scene.Camera.WorldPosition = Vector3.Lerp( Scene.Camera.WorldPosition, target, Time.Delta * cameraFollowRate );
 
-		float punch = IsDead
-			? 1f - float.Clamp( (float)deathAt / deathFovPunchTime, 0f, 1f )
-			: 0f;
+		float punch = IsDead ? 1f - float.Clamp( (float)deathAt / deathFovPunchTime, 0f, 1f ) : 0f;
 
 		Scene.Camera.FieldOfView = baseFieldOfView + (deathFovPunch * punch * punch);
 	}
@@ -313,18 +296,10 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	private void Move( Vector3 direction )
 	{
-		Vector3 requestedJump = SnapToGrid( TilePosition ) + jumpClearance;
-
-		SceneTraceResult wall = Scene.Trace.Ray( new Ray( requestedJump, direction ), jumpDistance ).WithoutTags( ignoreTags ).Run();
-		if ( wall.Hit && wall.Normal.Angle( Vector3.Up ) > maxJumpAngle )
+		if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 traceOrigin ) )
 			return;
 
-		Vector3 traceOrigin = requestedJump + (direction * jumpDistance);
-		SceneTraceResult landing = Scene.Trace.Ray( new Ray( traceOrigin, Vector3.Down ), 500 ).WithoutTags( ignoreTags ).Run();
-		if ( !landing.Hit )
-			return;
-
-		if ( !Manager.IsGameActive && !Manager.IsWithinStartArea( SnapToGrid( landing.EndPosition ) ) )
+		if ( !Manager.Instance.IsGameActive && !Manager.Instance.IsWithinStartArea( SnapToGrid( landing.EndPosition ) ) )
 			return;
 
 		IsGrounded = false;
@@ -340,6 +315,28 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 		UpdateAnimation( false );
 		SpawnJumpParticles( WorldPosition );
+	}
+
+	// Where a hop in this direction would put us: false when a wall blocks it or nothing is
+	// there to land on. Shared by Move and the bot's survivability check so they can't disagree.
+	private bool TryTraceHop( Vector3 direction, out SceneTraceResult landing, out Vector3 traceOrigin )
+	{
+		landing = default;
+		Vector3 requestedJump = SnapToGrid( TilePosition ) + jumpClearance;
+		traceOrigin = requestedJump + (direction * jumpDistance);
+
+		SceneTraceResult wall = Scene.Trace.Ray( new Ray( requestedJump, direction ), jumpDistance ).WithoutTags( ignoreTags ).Run();
+		if ( wall.Hit && wall.Normal.Angle( Vector3.Up ) > maxJumpAngle )
+			return false;
+
+		landing = TraceDown( traceOrigin );
+
+		return landing.Hit;
+	}
+
+	private SceneTraceResult TraceDown( Vector3 origin )
+	{
+		return Scene.Trace.Ray( new Ray( origin, Vector3.Down ), 500 ).WithoutTags( ignoreTags ).Run();
 	}
 
 	private Vector3 GetInputDirection()
@@ -358,7 +355,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	private Vector3 GetBotDirection()
 	{
-		if ( !Manager.IsGameActive )
+		if ( !Manager.Instance.IsGameActive )
 			return GetIdleShuffleDirection();
 
 		if ( Time.Now < nextBotHopTime )
@@ -367,16 +364,13 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( botRecklessness < 0f )
 			botRecklessness = Game.Random.Float( botRecklessMin, botRecklessMax );
 
-		// Occasionally the frog misjudges the gap and darts out without checking for cars.
 		bool reckless = Game.Random.Float() < botRecklessness;
-
 		Vector3 sideFirst = Game.Random.Int( 1 ) == 0 ? Vector3.Left : Vector3.Right;
 
 		// Normally push forward, using sideways hops to steer around obstacles, and fall back to a
-		// backward retreat only when boxed in (tree ahead, water or walls to both sides) so a frog
-		// never freezes for the whole round. Right after a retreat, try the sides first: this moves
-		// the frog to a new column before it re-advances, instead of hopping straight back into the
-		// same dead-end.
+		// backward retreat only when boxed in, so a frog never freezes for the whole round. Right
+		// after a retreat, try the sides first: that moves the frog to a new column before it
+		// re-advances instead of hopping straight back into the same dead-end.
 		//
 		// Riding a log is the exception: sideways there just slides the frog along the log it's
 		// already on, and the gap ahead lines itself up as the rows drift past each other. So a
@@ -412,14 +406,11 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 		nextIdleHopTime = Time.Now + Game.Random.Float( idleHopMin, idleHopMax );
 
-		Vector3[] directions = { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right };
-		return directions[Game.Random.Int( directions.Length - 1 )];
+		return Game.Random.FromArray( allDirections );
 	}
 
 	// Logs never turn around or wrap, so a rider that waits forever gets carried over the kill
-	// border. True once the current log is within botDriftBailoutTime of taking the frog with it,
-	// which is the cue to stop holding out for the way forward and jump off while there's still
-	// map to jump onto.
+	// border. True once the current log is within botDriftBailoutTime of taking the frog with it.
 	private bool IsDriftingOffWorld()
 	{
 		MovingEntity log = CurrentLog.Components.Get<MovingEntity>();
@@ -432,33 +423,22 @@ public sealed class Frog : Component, Component.ITriggerListener
 			return false;
 
 		float border = float.Sign( velocityY ) * GetKillBorder();
+
 		return (border - WorldPosition.y) / velocityY < botDriftBailoutTime;
 	}
 
-	private float GetKillBorder() => (Manager.GetWorldWidthY() / 2) + Manager.GetTileSize();
+	private float GetKillBorder() => (Manager.Instance.WorldWidthY / 2) + Manager.TileSize;
 
-	// Mirrors Move's traces to judge whether a hop is survivable. A reckless hop skips the traffic
-	// check only — terrain (water, walls, missing logs) is always fatal, so it stays a car gamble.
+	// A reckless hop skips the traffic check only — terrain (water, walls, missing logs) is
+	// always fatal, so it stays a car gamble rather than a suicide.
 	private bool IsHopSafe( Vector3 direction, bool ignoreTraffic = false )
 	{
-		Vector3 requestedJump = SnapToGrid( TilePosition ) + jumpClearance;
-
-		SceneTraceResult wall = Scene.Trace.Ray( new Ray( requestedJump, direction ), jumpDistance ).WithoutTags( ignoreTags ).Run();
-		if ( wall.Hit && wall.Normal.Angle( Vector3.Up ) > maxJumpAngle )
-			return false;
-
-		Vector3 traceOrigin = requestedJump + (direction * jumpDistance);
-		SceneTraceResult landing = Scene.Trace.Ray( new Ray( traceOrigin, Vector3.Down ), 500 ).WithoutTags( ignoreTags ).Run();
-
-		if ( !landing.Hit )
+		if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 traceOrigin ) )
 			return false;
 
 		if ( landing.GameObject.Tags.Has( "water" ) )
 			return false;
 
-		// A log that's under the target right now keeps drifting during the ~botJumpDuration hop.
-		// Sideways hops against the current are lethal: the trailing edge recedes and the frog
-		// lands in the water the log left behind. Only commit if a log will still be there on landing.
 		if ( landing.GameObject.Tags.Has( "log" ) && !LogWillHoldLanding( landing, traceOrigin ) )
 			return false;
 
@@ -468,18 +448,17 @@ public sealed class Frog : Component, Component.ITriggerListener
 		return true;
 	}
 
-	// Will the target log still sit under the landing point once the hop settles? A log point that
-	// ends up under traceOrigin currently sits back along the log's travel by velocity * duration,
-	// so we trace there and confirm a log is present. Same-row logs share a velocity, so any log hit
-	// means one will be underneath at landing.
+	// Will the target log still sit under the landing point once the hop settles? Sideways hops
+	// against the current are lethal: the trailing edge recedes and the frog lands in the water the
+	// log left behind. A log point that ends up under traceOrigin currently sits back along the
+	// log's travel by velocity * duration, so we trace there and confirm a log is present.
 	private bool LogWillHoldLanding( SceneTraceResult landing, Vector3 traceOrigin )
 	{
 		MovingEntity log = landing.GameObject.Components.Get<MovingEntity>();
 		if ( log is null )
 			return true;
 
-		Vector3 predictedOrigin = traceOrigin - Vector3.Right * log.Speed * botJumpDuration;
-		SceneTraceResult predicted = Scene.Trace.Ray( new Ray( predictedOrigin, Vector3.Down ), 500 ).WithoutTags( ignoreTags ).Run();
+		SceneTraceResult predicted = TraceDown( traceOrigin - Vector3.Right * log.Speed * botJumpDuration );
 
 		return predicted.Hit && predicted.GameObject.Tags.Has( "log" );
 	}
@@ -512,10 +491,7 @@ public sealed class Frog : Component, Component.ITriggerListener
 		return false;
 	}
 
-	private SceneTraceResult TraceLandingSurface()
-	{
-		return Scene.Trace.Ray( new Ray( landingTraceOrigin, Vector3.Down ), 500 ).WithoutTags( ignoreTags ).Run();
-	}
+	private SceneTraceResult TraceLandingSurface() => TraceDown( landingTraceOrigin );
 
 	// How many frogs am I perched on? Whoever jumped most recently lands on top, so count
 	// settled frogs at my landing spot that jumped before me. Ties break on object id.
@@ -578,10 +554,10 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 		await Task.DelayRealtimeSeconds( DeathHoldSeconds );
 
-		if ( !this.IsValid() || !Manager.IsValid() || !IsDead || deathSequence != sequence )
+		if ( !this.IsValid() || !Manager.Instance.IsValid() || !IsDead || deathSequence != sequence )
 			return;
 
-		Manager.RespawnFrog( this );
+		Manager.Instance.RespawnFrog( this );
 	}
 
 	[Rpc.Broadcast]
@@ -617,10 +593,9 @@ public sealed class Frog : Component, Component.ITriggerListener
 		PlayCrowdSound( dead ? DeathSound : RespawnSound, WorldPosition );
 	}
 
-	// This RPC is broadcast per-frog, so a crowd spawning or dying at once (round start,
-	// a car wiping a stack) makes every client fire N identical positional sounds on the
-	// same frame. They stack constructively into an ear-splitting wall. Coalesce them:
-	// play at most one instance of a given sound per short window on this client.
+	// These RPCs are broadcast per-frog, so a crowd spawning or dying at once (round start, a car
+	// wiping a stack) makes every client fire N identical positional sounds on the same frame, and
+	// they stack constructively into a wall of noise. Play at most one per short window instead.
 	private static readonly Dictionary<SoundEvent, RealTimeSince> lastCrowdSound = new();
 
 	private static void PlayCrowdSound( SoundEvent sound, Vector3 position, float minInterval = 0.1f )
@@ -641,11 +616,11 @@ public sealed class Frog : Component, Component.ITriggerListener
 		renderer.Set( "Grounded", grounded );
 	}
 
-	private Vector3 SnapToGrid( Vector3 position )
+	private static Vector3 SnapToGrid( Vector3 position )
 	{
 		return new Vector3(
-			float.Round( position.x / tileSize ) * tileSize,
-			float.Round( position.y / tileSize ) * tileSize,
+			position.x.SnapToGrid( Manager.TileSize ),
+			position.y.SnapToGrid( Manager.TileSize ),
 			float.Round( position.z, 1 ) );
 	}
 }

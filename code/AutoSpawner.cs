@@ -1,12 +1,12 @@
 using Sandbox;
-using System.Threading.Tasks;
 
 namespace Jumpy
 {
 	public sealed class AutoSpawner : Component
 	{
 		[Property] public GameObject Prefab { get; set; }
-		[Property] public bool flipped { get; set; } = false;
+
+		[Property] public bool flipped { get; set; }
 
 		protected override void OnStart()
 		{

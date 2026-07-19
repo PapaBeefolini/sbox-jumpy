@@ -1,4 +1,4 @@
-﻿using Sandbox;
+using Sandbox;
 using System.Threading.Tasks;
 
 namespace Jumpy
@@ -12,12 +12,11 @@ namespace Jumpy
 				if ( !Networking.IsHost )
 					return;
 
-				var entity = prefab.Clone( WorldPosition, WorldRotation );
-				var movingEntity = entity.Components.Get<MovingEntity>();
-				if ( movingEntity is not null && flipped )
-				{
-					movingEntity.Speed = -movingEntity.Speed;
-				}
+				GameObject entity = prefab.Clone( WorldPosition, WorldRotation );
+
+				if ( flipped && entity.Components.Get<MovingEntity>() is MovingEntity moving )
+					moving.Speed = -moving.Speed;
+
 				entity.SetParent( GameObject.Parent );
 				entity.NetworkSpawn();
 

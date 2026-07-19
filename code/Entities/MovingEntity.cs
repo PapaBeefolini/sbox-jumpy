@@ -1,4 +1,4 @@
-﻿using Sandbox;
+using Sandbox;
 
 namespace Jumpy
 {
@@ -6,6 +6,7 @@ namespace Jumpy
 	{
 		[Property] public float MinSpeed = 350;
 		[Property] public float MaxSpeed = 350;
+
 		public float Speed { get; set; }
 
 		protected override void OnAwake()
@@ -15,17 +16,12 @@ namespace Jumpy
 
 		protected override void OnFixedUpdate()
 		{
-			Move();
-		}
-
-		void Move()
-		{
 			if ( !Networking.IsHost || Manager.Instance.IsGameOver )
 				return;
 
 			WorldPosition += Vector3.Right * Speed * Time.Delta;
 
-			if ( WorldPosition.y > 5000 || WorldPosition.y < -5000 )
+			if ( float.Abs( WorldPosition.y ) > 5000 )
 				GameObject.Destroy();
 		}
 	}

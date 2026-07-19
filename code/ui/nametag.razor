@@ -1,4 +1,5 @@
-﻿@using Sandbox;
+@using System
+@using Sandbox;
 @inherits PanelComponent
 @namespace Jumpy
 
@@ -16,6 +17,7 @@
 	protected override void OnEnabled()
 	{
 		base.OnEnabled();
+
 		frog = GameObject.Components.GetInAncestorsOrSelf<Frog>();
 	}
 
@@ -24,10 +26,12 @@
 	{
 		if ( frog.IsBot )
 			return string.IsNullOrEmpty( frog.BotName ) ? "Bot" : frog.BotName;
+
 		if ( Network.Owner is Connection owner && owner != Connection.Local )
 			return owner.DisplayName;
+
 		return null;
 	}
 
-	protected override int BuildHash() => System.HashCode.Combine(Network.Owner, frog?.IsBot, frog?.BotName, !frog?.IsDead, frog?.ColorIndex);
+	protected override int BuildHash() => HashCode.Combine( Network.Owner, frog?.IsBot, frog?.BotName, !frog?.IsDead, frog?.ColorIndex );
 }
