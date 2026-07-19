@@ -5,7 +5,7 @@
 @if (frog.IsValid() && !frog.IsDead && Label() is string label)
 {
 	<root>
-		<div class="name">@label</div>
+		<div class="name" style="color: @frog.NameColor.Hex;">@label</div>
 	</root>
 }
 
@@ -29,5 +29,5 @@
 		return null;
 	}
 
-	protected override int BuildHash() => System.HashCode.Combine(Network.Owner, frog?.IsBot, frog?.BotName, !frog?.IsDead);
+	protected override int BuildHash() => System.HashCode.Combine(Network.Owner, frog?.IsBot, frog?.BotName, !frog?.IsDead, frog?.ColorIndex);
 }

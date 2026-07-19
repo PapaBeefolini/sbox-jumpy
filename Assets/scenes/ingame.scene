@@ -31,7 +31,7 @@
             "_type": "gameobject",
             "prefab": "prefabs/car.prefab"
           },
-          "CheckpointCount": 2,
+          "CheckpointCount": 3,
           "CountdownSeconds": 5,
           "LillyPrefab": {
             "_type": "gameobject",

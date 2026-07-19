@@ -105,6 +105,7 @@ gameui {
                 margin-top: 8px;
                 font-size: 22px;
                 font-weight: bold;
+                // Overridden inline with the frog's own colour; this is only the fallback.
                 color: white;
                 text-shadow: 2px 2px 0 black;
                 white-space: nowrap;
@@ -149,9 +150,10 @@ gameui {
                 }
             }
 
+            // Gold used to mark the winner's name; the frog's own colour does that job now,
+            // and the gold pillar below still reads as first place.
             .sname {
                 font-size: 28px;
-                color: #ffe27a;
             }
 
             .sprog {
@@ -179,8 +181,10 @@ gameui {
             }
         }
 
+        // The name itself now carries the frog's colour, so "this one is you" needs its own
+        // cue - a lime glow behind the letters, echoing the lime border on the .orow rows.
         &.local .sname {
-            color: #b6ff00;
+            text-shadow: 2px 2px 0 black, 0 0 14px #b6ff00;
         }
 
         &.dead .pillar-top {
@@ -248,12 +252,10 @@ gameui {
                 text-shadow: 1px 1px 0 black;
             }
 
+            // The lime border carries "this one is you" on its own now that .oname is tinted
+            // with the frog's colour inline.
             &.local {
                 border: 2px solid #b6ff00;
-
-                .oname {
-                    color: #b6ff00;
-                }
             }
 
             &.dead {
@@ -442,17 +444,17 @@ gameui {
         .dc-panel {
             flex-direction: column;
             align-items: center;
-            padding: 26px 64px 30px 64px;
-            border-radius: 20px;
-            background-color: rgba(black, 0.86);
-            border: 3px solid rgba(black, 0.5);
+            padding: 64px 128px;
+            border-radius: 12px;
+            background-color: rgba(black, 0.8);
+            border: 2px solid rgba(black, 0.6);
         }
 
         .dc-title {
-            font-size: 84px;
+            font-size: 64px;
             font-weight: bold;
             letter-spacing: 4px;
-            text-shadow: 5px 5px 0 black;
+            text-shadow: 4px 4px 0 black;
 
             &.splat {
                 color: #ff4d4d;
@@ -464,11 +466,11 @@ gameui {
         }
 
         .dc-cause {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: bold;
             color: white;
             letter-spacing: 5px;
-            text-shadow: 2px 2px 0 black;
+            text-shadow: 3px 3px 0 black;
             margin-top: -4px;
         }
 
@@ -478,7 +480,7 @@ gameui {
             margin-top: 26px;
 
             .dc-label {
-                font-size: 14px;
+                font-size: 12px;
                 font-weight: bold;
                 color: white;
                 letter-spacing: 5px;
@@ -495,7 +497,7 @@ gameui {
         }
 
         .dc-where {
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
             color: #d5ff6b;
             letter-spacing: 3px;
@@ -609,8 +611,9 @@ gameui {
                     text-align: center;
                     font-size: 12px;
                     font-weight: bold;
+                    // Overridden inline with the frog's own colour; this is only the fallback.
                     color: white;
-                    text-shadow: 2px 2px 0 black;
+                    text-shadow: 1px 1px 0 black;
                     white-space: nowrap;
                 }
 
@@ -631,9 +634,8 @@ gameui {
                         }
                     }
 
-                    .pname {
-                        color: #b6ff00;
-                    }
+                    // No lime override here - the oversized badge above already marks the local
+                    // player, so the name is free to carry the frog's own colour.
                 }
 
                 &.dead {

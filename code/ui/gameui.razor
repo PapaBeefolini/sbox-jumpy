@@ -46,12 +46,12 @@
 					var frog = entry.Frog;
 					var isLocal = IsLocalPlayer( frog );
 					<div class="marker @(isLocal ? "local" : "") @(frog.IsDead ? "dead" : "")" style="left: @Percent(entry.Progress); top: @(entry.LaneIndex * LaneStep)px;">
-						<div class="badge" style="border-color: @ToCss(frog.FrogColor);">
+						<div class="badge" style="border-color: @frog.FrogColor.Hex;">
 							<div class="frog-icon" style="background-image: url( @GetAvatarUrl(frog) );"></div>
 						</div>
 						@if (entry.ClusterSize == 1)
 						{
-							<div class="pname">@GetName(frog)</div>
+							<div class="pname" style="color: @frog.NameColor.Hex;">@GetName(frog)</div>
 						}
 					</div>
 				}
@@ -75,7 +75,7 @@
 				{
 					<div class="go-winner">
 						<div class="crown" style="@Reveal(0.36f, 0.28f, 0f, 0f, 0.2f)">WINNER</div>
-						<div class="wname" style="color: @ToCss(winner.Color); @Reveal(0.44f, 0.28f, 0f, 0f, 0.2f)">@winner.Name</div>
+						<div class="wname" style="color: @winner.NameColor.Hex; @Reveal(0.44f, 0.28f, 0f, 0f, 0.2f)">@winner.Name</div>
 					</div>
 				}
 			</div>
@@ -87,10 +87,10 @@
 					var delay = SlotDelay( slot.Rank );
 					<div class="slot rank-@slot.Rank @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")" style="@Reveal(delay, 0.4f, 0f, 120f, 0.8f)">
 						<div class="pillar-top">
-							<div class="avatar" style="border-color: @ToCss(row.Color);">
+							<div class="avatar" style="border-color: @row.Color.Hex;">
 								<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
 							</div>
-							<div class="sname">@row.Name</div>
+							<div class="sname" style="color: @row.NameColor.Hex;">@row.Name</div>
 							<div class="sprog">@RevealPercent(row.Progress, delay + 0.15f, 0.55f)</div>
 						</div>
 						<div class="pillar">
@@ -109,10 +109,10 @@
 						var rank = idx + 4;
 						<div class="orow @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")" style="@Reveal(1.35f + idx * 0.07f, 0.34f, -80f, 0f, 1f)">
 							<div class="orank">@rank</div>
-							<div class="oavatar" style="border-color: @ToCss(row.Color);">
+							<div class="oavatar" style="border-color: @row.Color.Hex;">
 								<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
 							</div>
-							<div class="oname">@row.Name</div>
+							<div class="oname" style="color: @row.NameColor.Hex;">@row.Name</div>
 							<div class="oprog">@Percent(row.Progress)</div>
 						</div>
 					}
@@ -260,6 +260,7 @@
 				Name = GetName( f ),
 				Avatar = GetAvatarUrl( f ),
 				Color = f.FrogColor,
+				NameColor = f.NameColor,
 				Progress = GetProgress( f ),
 				IsLocal = IsLocalPlayer( f ),
 				IsDead = f.IsDead
@@ -478,11 +479,6 @@
 		return (progress * 100f).ToString( "0.0", CultureInfo.InvariantCulture ) + "%";
 	}
 
-	private string ToCss( Color color )
-	{
-		return $"rgb({(int)(color.r * 255)}, {(int)(color.g * 255)}, {(int)(color.b * 255)})";
-	}
-
 	// The single human frog owned by this client, as opposed to a remote player or a bot.
 	private bool IsLocalPlayer( Frog frog ) => frog.IsLocalPlayer;
 
@@ -517,6 +513,7 @@
 		public string Name;
 		public string Avatar;
 		public Color Color;
+		public Color NameColor;
 		public float Progress;
 		public bool IsLocal;
 		public bool IsDead;

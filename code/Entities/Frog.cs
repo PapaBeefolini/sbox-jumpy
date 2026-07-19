@@ -50,6 +50,29 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private static readonly Vector3 jumpClearance = Vector3.Up * 33;
 	private static readonly string[] ignoreTags = { "player", "car" };
 
+	// How bright a name colour is forced to get, and how far it's then washed toward white.
+	private const float nameColorFloor = 0.85f;
+	private const float nameColorWash = 0.25f;
+
+	// Hand-picked instead of Color.Random so each frog reads as a distinct, saturated
+	// silhouette against the grass and water — random rolls muddy greys and near-blacks.
+	private static readonly Color[] frogColors = new Color[]
+	{
+		new Color( 0.00f, 0.78f, 0.06f ), // green
+		new Color( 0.98f, 0.00f, 0.00f ), // red
+		new Color( 0.00f, 0.88f, 1.00f ), // cyan
+		new Color( 0.00f, 0.14f, 1.00f ), // blue
+		new Color( 1.00f, 0.88f, 0.00f ), // yellow
+		new Color( 0.50f, 1.00f, 0.00f ), // lime
+		new Color( 0.00f, 0.42f, 0.02f ), // dark green
+		new Color( 0.60f, 0.24f, 0.00f ), // brown
+		new Color( 1.00f, 0.40f, 0.00f ), // orange
+		new Color( 0.60f, 0.00f, 1.00f ), // purple
+		new Color( 1.00f, 0.16f, 0.62f ), // pink
+		new Color( 0.00f, 0.64f, 0.50f ), // teal
+		new Color( 1.00f, 0.90f, 0.42f ), // cream
+	};
+
 	[Property] public GameObject JumpParticles { get; set; }
 	[Property] public GameObject DeathParticlesCar { get; set; }
 	[Property] public GameObject DeathParticlesWater { get; set; }
@@ -58,7 +81,31 @@ public sealed class Frog : Component, Component.ITriggerListener
 	[Property] public SoundEvent RespawnSound { get; set; }
 	[Property] public SoundEvent DeathSound { get; set; }
 
-	[Sync] public Color FrogColor { get; set; } = Color.White;
+	// The palette slot rather than the colour itself, so uniqueness compares ints instead of
+	// floats that a sync round trip might not return bit-identical. -1 means not yet assigned.
+	[Sync] public int ColorIndex { get; set; } = -1;
+
+	public Color FrogColor => frogColors[Math.Clamp( ColorIndex, 0, frogColors.Length - 1 )];
+
+	// The same colour lifted to something that still reads as *text*. Tinting a model can afford
+	// dark green or navy; a name drawn in them disappears against the game-over panel and the
+	// world alike. Scales the darker slots up to a floor brightness, then pulls everything a
+	// little toward white - hue survives, legibility wins.
+	public Color NameColor
+	{
+		get
+		{
+			Color c = FrogColor;
+			float peak = MathF.Max( c.r, MathF.Max( c.g, c.b ) );
+			float scale = peak > 0.01f ? MathF.Max( 1f, nameColorFloor / peak ) : 1f;
+
+			return Color.Lerp( new Color(
+				MathF.Min( 1f, c.r * scale ),
+				MathF.Min( 1f, c.g * scale ),
+				MathF.Min( 1f, c.b * scale ) ), Color.White, nameColorWash );
+		}
+	}
+
 	[Sync] public bool IsDead { get; set; } = false;
 	[Sync] public bool HasFinished { get; set; } = false;
 	[Sync] public bool IsBot { get; set; } = false;
@@ -189,10 +236,33 @@ public sealed class Frog : Component, Component.ITriggerListener
 		WorldPosition = position;
 		landingTraceOrigin = position + jumpClearance;
 		WorldRotation = Rotation.LookAt( Vector3.Forward, Vector3.Up );
-		FrogColor = Color.Random;
+		if ( ColorIndex < 0 )
+			ColorIndex = PickColorIndex();
 		UpdateAppearance( IsDead );
 		UpdateAnimation( true );
 		ResetCamera();
+	}
+
+	// Claims a palette slot nobody else is wearing, so a full lobby reads as a row of distinct
+	// frogs. Past frogColors.Length frogs the palette is exhausted and duplicates are the only
+	// option left, so we stop being fussy and take any slot.
+	//
+	// Only ever called for a frog with no colour yet, and only on its owner, so the pool it sees
+	// is every other frog's synced slot. Two frogs spawning in the same tick on different clients
+	// can still land on the same colour - it settles into a duplicate rather than a broken state,
+	// which is a fine trade for not routing colour assignment through the host.
+	private int PickColorIndex()
+	{
+		var taken = Scene.GetAllComponents<Frog>()
+			.Where( other => other != this )
+			.Select( other => other.ColorIndex )
+			.ToHashSet();
+
+		var free = Enumerable.Range( 0, frogColors.Length ).Where( i => !taken.Contains( i ) ).ToList();
+
+		return free.Count > 0
+			? free[Game.Random.Int( free.Count - 1 )]
+			: Game.Random.Int( frogColors.Length - 1 );
 	}
 
 	// Sole owner of the camera's position and FOV between respawns; anything written elsewhere
