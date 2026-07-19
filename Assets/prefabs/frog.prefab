@@ -104,7 +104,7 @@
           "_type": "gameobject",
           "prefab": "prefabs/particles_jump.prefab"
         },
-        "JumpSound": "sounds/jumpy.hop.sound",
+        "JumpSound": "sounds/jump.sound",
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,
