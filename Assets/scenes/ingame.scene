@@ -26,12 +26,12 @@
             "_type": "gameobject",
             "prefab": "prefabs/big-road.prefab"
           },
-          "BotCount": 3,
+          "BotCount": 0,
           "CarPrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/car.prefab"
           },
-          "CheckpointCount": 3,
+          "CheckpointCount": 2,
           "CountdownSeconds": 5,
           "LillyPrefab": {
             "_type": "gameobject",

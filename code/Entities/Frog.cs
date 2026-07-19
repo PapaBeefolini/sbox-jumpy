@@ -131,6 +131,8 @@ public sealed class Frog : Component, Component.ITriggerListener
 		renderer = Components.Get<SkinnedModelRenderer>();
 		collider = Components.Get<SphereCollider>();
 		colliderCenter = collider.Center;
+		if ( IsLocalPlayer )
+			AddComponent<AudioListener>();
 	}
 
 	protected override void OnUpdate()

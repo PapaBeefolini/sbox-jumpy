@@ -1,13 +1,55 @@
 {
   "UI": true,
-  "Volume": "0.20,0.20,0",
-  "Pitch": "1.00,1.00,0",
+  "Volume": "0.200000003",
+  "Pitch": "1",
   "Decibels": 70,
   "SelectionMode": "Random",
   "Sounds": [
     "sounds/music.vsnd"
   ],
-  "MaximumDistance": 1143.9335,
-  "MinimumDistance": 57.196674,
-  "__references": []
+  "OcclusionEnabled": true,
+  "Occlusion": true,
+  "ReverbEnabled": true,
+  "Reflections": true,
+  "AirAbsorption": true,
+  "Transmission": true,
+  "OcclusionRadius": 64,
+  "DistanceAttenuation": true,
+  "Distance": 15000,
+  "Falloff": [
+    {
+      "x": 0,
+      "y": 1,
+      "in": 0,
+      "out": -1.8,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.05,
+      "y": 0.22,
+      "in": 3.5,
+      "out": -3.5,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.2,
+      "y": 0.04,
+      "in": 0.16,
+      "out": -0.16,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "in": 0,
+      "out": 0,
+      "mode": "Mirrored"
+    }
+  ],
+  "DefaultMixer": {
+    "Name": "music",
+    "Id": "7b1f7f11-2b56-470e-9893-8420bccabb48"
+  },
+  "__references": [],
+  "__version": 1
 }
