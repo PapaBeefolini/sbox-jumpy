@@ -24,10 +24,6 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private const float botRecklessMin = 0.04f;
 	private const float botRecklessMax = 0.18f;
 
-	// Roughly how long a hop's landing lerp takes to settle. Bots use it to predict how far a
-	// moving log will drift mid-hop, so they don't leap onto a spot the log has floated away from.
-	private const float botJumpDuration = 0.22f;
-
 	// How close to being carried over the kill border a log rider gets before it stops waiting
 	// for the way forward to clear and takes whatever escape hop it can find.
 	private const float botDriftBailoutTime = 2.0f;
@@ -148,20 +144,25 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( IsProxy || IsDead || (!Manager.Instance.IsGameActive && Manager.Instance.CountdownRemaining <= 0) )
 			return;
 
-		if ( IsGrounded )
+		// A hop aimed at a log stays locked to that log for the whole flight, so the target drifts
+		// along with it. Pinned to the water it was floating over instead, a hop chasing a fast log
+		// would spend most of its distance just catching back up to where the frog started.
+		if ( CurrentLog.IsValid() )
 		{
-			if ( CurrentLog.IsValid() )
-				TilePosition = CurrentLog.WorldPosition.Round( 1 ) + LogOffset.Round( 1 );
-
-			Vector3 moveDirection = IsBot ? GetBotDirection() : GetInputDirection();
-			if ( moveDirection != Vector3.Zero )
-				Move( moveDirection );
+			TilePosition = CurrentLog.WorldPosition.Round( 1 ) + LogOffset.Round( 1 );
 		}
-		else
+		else if ( !IsGrounded )
 		{
 			SceneTraceResult landing = TraceLandingSurface();
 			if ( landing.Hit )
 				TilePosition = SnapToGrid( landing.EndPosition );
+		}
+
+		if ( IsGrounded )
+		{
+			Vector3 moveDirection = IsBot ? GetBotDirection() : GetInputDirection();
+			if ( moveDirection != Vector3.Zero )
+				Move( moveDirection );
 		}
 
 		float elapsedTime = Time.Now - LastJumpTime;
@@ -299,17 +300,22 @@ public sealed class Frog : Component, Component.ITriggerListener
 		if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 traceOrigin ) )
 			return;
 
-		if ( !Manager.Instance.IsGameActive && !Manager.Instance.IsWithinStartArea( SnapToGrid( landing.EndPosition ) ) )
+		// Tiles only mean anything on solid ground; a spot on a log is wherever the log currently
+		// happens to be, so snapping it would drag the landing back onto a grid the frog isn't on.
+		bool landingOnLog = landing.GameObject.Tags.Has( "log" );
+		Vector3 target = landingOnLog ? landing.EndPosition.Round( 1 ) : SnapToGrid( landing.EndPosition );
+
+		if ( !Manager.Instance.IsGameActive && !Manager.Instance.IsWithinStartArea( target ) )
 			return;
 
 		IsGrounded = false;
 		LastJumpTime = Time.Now;
 		landingTraceOrigin = traceOrigin;
 
-		CurrentLog = null;
-		LogOffset = Vector3.Zero;
+		CurrentLog = landingOnLog ? landing.GameObject : null;
+		LogOffset = landingOnLog ? CurrentLog.Transform.World.PointToLocal( target ).Round( 1 ) : Vector3.Zero;
 
-		TilePosition = SnapToGrid( landing.EndPosition );
+		TilePosition = target;
 		jumpOffset += Vector3.Up * jumpHeight;
 		WorldRotation = Rotation.LookAt( direction, Vector3.Up );
 
@@ -322,7 +328,13 @@ public sealed class Frog : Component, Component.ITriggerListener
 	private bool TryTraceHop( Vector3 direction, out SceneTraceResult landing, out Vector3 traceOrigin )
 	{
 		landing = default;
-		Vector3 requestedJump = SnapToGrid( TilePosition ) + jumpClearance;
+
+		// Hops run tile to tile on solid ground, but a log rider sits wherever the log has carried
+		// it, off the grid entirely — snapping there first would quietly shorten or stretch the hop
+		// by up to half a tile depending on where the log happened to have drifted to.
+		Vector3 origin = CurrentLog.IsValid() ? TilePosition : SnapToGrid( TilePosition );
+
+		Vector3 requestedJump = origin + jumpClearance;
 		traceOrigin = requestedJump + (direction * jumpDistance);
 
 		SceneTraceResult wall = Scene.Trace.Ray( new Ray( requestedJump, direction ), jumpDistance ).WithoutTags( ignoreTags ).Run();
@@ -433,34 +445,16 @@ public sealed class Frog : Component, Component.ITriggerListener
 	// always fatal, so it stays a car gamble rather than a suicide.
 	private bool IsHopSafe( Vector3 direction, bool ignoreTraffic = false )
 	{
-		if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 traceOrigin ) )
+		if ( !TryTraceHop( direction, out SceneTraceResult landing, out _ ) )
 			return false;
 
 		if ( landing.GameObject.Tags.Has( "water" ) )
-			return false;
-
-		if ( landing.GameObject.Tags.Has( "log" ) && !LogWillHoldLanding( landing, traceOrigin ) )
 			return false;
 
 		if ( !ignoreTraffic && IsTrafficDanger( SnapToGrid( landing.EndPosition ) ) )
 			return false;
 
 		return true;
-	}
-
-	// Will the target log still sit under the landing point once the hop settles? Sideways hops
-	// against the current are lethal: the trailing edge recedes and the frog lands in the water the
-	// log left behind. A log point that ends up under traceOrigin currently sits back along the
-	// log's travel by velocity * duration, so we trace there and confirm a log is present.
-	private bool LogWillHoldLanding( SceneTraceResult landing, Vector3 traceOrigin )
-	{
-		MovingEntity log = landing.GameObject.Components.Get<MovingEntity>();
-		if ( log is null )
-			return true;
-
-		SceneTraceResult predicted = TraceDown( traceOrigin - Vector3.Right * log.Speed * botJumpDuration );
-
-		return predicted.Hit && predicted.GameObject.Tags.Has( "log" );
 	}
 
 	private bool IsTrafficDanger( Vector3 target )
@@ -516,6 +510,12 @@ public sealed class Frog : Component, Component.ITriggerListener
 
 	private void Land()
 	{
+		// A hop that aimed at a log rode it down and is already attached. Only a hop that aimed
+		// somewhere else has to find out what it actually came down on — which may still be a log
+		// that drifted underneath and saved it.
+		if ( CurrentLog.IsValid() )
+			return;
+
 		SceneTraceResult result = TraceLandingSurface();
 
 		if ( result.Hit && result.GameObject.Tags.Has( "log" ) )
