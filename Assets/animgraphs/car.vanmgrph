@@ -15,7 +15,7 @@
 				{
 					_class = "CSequenceAnimNode"
 					m_sName = "driving"
-					m_vecPosition = [ -240.0, 32.0 ]
+					m_vecPosition = [ -256.0, 32.0 ]
 					m_nNodeID = 
 					{
 						m_id = 942912458
