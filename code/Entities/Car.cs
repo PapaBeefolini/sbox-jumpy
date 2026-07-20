@@ -33,11 +33,15 @@ namespace Jumpy
 		[Rpc.Broadcast( NetFlags.OwnerOnly )]
 		private void SetAppearance( string modelPath, Color color )
 		{
-			var renderer = Components.Get<ModelRenderer>();
+			ModelRenderer renderer = Components.Get<ModelRenderer>();
+			ModelCollider modelCollider = Components.Get<ModelCollider>();
+			if ( !renderer.IsValid() || !modelCollider.IsValid() )
+				return;
+
 			renderer.Model = Model.Load( modelPath );
 			renderer.Tint = color;
 
-			Components.Get<ModelCollider>().Model = renderer.Model;
+			modelCollider.Model = renderer.Model;
 		}
 	}
 }
