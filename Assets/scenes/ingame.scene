@@ -185,20 +185,20 @@
         {
           "__type": "Sandbox.Bloom",
           "__guid": "027528a6-81f2-4de6-befd-5ecb5b1a644e",
-          "__enabled": false,
+          "__enabled": true,
           "Flags": 0,
           "__version": 1,
           "Filter": "Bilinear",
           "Gamma": 1.5,
-          "Mode": "Additive",
+          "Mode": "Screen",
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "Strength": 0.3,
-          "Threshold": 1,
+          "Strength": 1.8,
+          "Threshold": 0.2,
           "Tint": "1,1,1,1"
         },
         {
@@ -234,6 +234,18 @@
           "OnComponentUpdate": null,
           "Roundness": 0,
           "Smoothness": 1
+        },
+        {
+          "__type": "Sandbox.ScreenSpaceReflections",
+          "__guid": "a1398f9b-037e-48e0-9c17-a93e53bd7e43",
+          "__enabled": true,
+          "Flags": 0,
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null
         },
         {
           "__type": "Jumpy.CameraShake",
