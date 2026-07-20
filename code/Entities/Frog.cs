@@ -345,7 +345,7 @@ namespace Jumpy
 			Vector3 requestedJump = origin + jumpClearance;
 			traceOrigin = requestedJump + (direction * jumpDistance);
 
-			SceneTraceResult wall = Scene.Trace.Ray( new Ray( requestedJump, direction ), jumpDistance ).WithoutTags( ignoreTags ).Run();
+			SceneTraceResult wall = Scene.Trace.Sphere( collider.Radius, requestedJump, traceOrigin ).WithoutTags( ignoreTags ).Run();
 			if ( wall.Hit && wall.Normal.Angle( Vector3.Up ) > maxJumpAngle )
 				return false;
 
@@ -564,6 +564,9 @@ namespace Jumpy
 			await Task.DelayRealtimeSeconds( DeathHoldSeconds );
 
 			if ( !this.IsValid() || !Manager.Instance.IsValid() || !IsDead || deathSequence != sequence )
+				return;
+
+			if ( Manager.Instance.IsGameOver )
 				return;
 
 			Manager.Instance.RespawnFrog( this );
