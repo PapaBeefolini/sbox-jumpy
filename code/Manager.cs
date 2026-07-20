@@ -296,6 +296,9 @@ namespace Jumpy
 						{
 							CreateTile( currentPosition, new Color( 0.75f, 1, 0.75f ) );
 							CreateSpawnPoint( currentPosition + Vector3.Up * 32 );
+
+							if ( x == areaDepth - 1 )
+								CreateFence( currentPosition.WithX( StartAreaMaxX - 8.0f ) + Vector3.Up * 32.0f );
 						}
 						continue;
 					}
@@ -393,6 +396,16 @@ namespace Jumpy
 			root.Components.Get<ModelRenderer>().Tint = color;
 			root.SetParent( GameObject );
 			root.NetworkSpawn();
+		}
+
+		private void CreateFence( Vector3 position )
+		{
+			if ( !FencePrefab.IsValid() )
+				return;
+
+			GameObject fence = FencePrefab.Clone( position );
+			fence.SetParent( GameObject );
+			fence.NetworkSpawn();
 		}
 
 		private void CreateSpawnPoint( Vector3 position )
