@@ -45,6 +45,7 @@ namespace Jumpy
 
 		private static readonly Vector3 jumpClearance = Vector3.Up * 33;
 		private static readonly string[] ignoreTags = { "player", "car" };
+		private static readonly string[] wallIgnoreTags = { "player", "car", "log" };
 		private static readonly Vector3[] allDirections = { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right };
 
 		// How bright a name colour is forced to get, and how far it's then washed toward white.
@@ -345,7 +346,7 @@ namespace Jumpy
 			Vector3 requestedJump = origin + jumpClearance;
 			traceOrigin = requestedJump + (direction * jumpDistance);
 
-			SceneTraceResult wall = Scene.Trace.Sphere( collider.Radius, requestedJump, traceOrigin ).WithoutTags( ignoreTags ).Run();
+			SceneTraceResult wall = Scene.Trace.Sphere( collider.Radius, requestedJump, traceOrigin ).WithoutTags( wallIgnoreTags ).Run();
 			if ( wall.Hit && wall.Normal.Angle( Vector3.Up ) > maxJumpAngle )
 				return false;
 
