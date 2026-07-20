@@ -7,6 +7,9 @@ Layer0
 	//---- Color ----
 	F_TINT_MASK 1
 
+	//---- PBR ----
+	F_SPECULAR 1
+
 	//---- Rendering ----
 	F_RENDER_BACKFACES 1
 
@@ -34,12 +37,10 @@ Layer0
 	TextureNormal "materials/default/default_normal.tga"
 
 	//---- Roughness ----
-	g_flRoughnessScaleFactor "1.000"
+	g_flRoughnessScaleFactor "2.000"
 	TextureRoughness "materials/default/default_rough.tga"
 
 	//---- Texture Coordinates ----
-	g_nScaleTexCoordUByModelScaleAxis "0"
-	g_nScaleTexCoordVByModelScaleAxis "0"
 	g_vTexCoordOffset "[0.000 0.000]"
 	g_vTexCoordScale "[1.000 1.000]"
 	g_vTexCoordScrollSpeed "[0.000 0.000]"
