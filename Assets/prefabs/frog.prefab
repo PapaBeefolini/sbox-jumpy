@@ -87,8 +87,8 @@
         "SurfaceVelocity": "0,0,0"
       },
       {
-        "__type": "Frog",
-        "__guid": "9ebe2e3d-e6e2-4c6c-9351-1b7e8a31a570",
+        "__type": "Jumpy.Frog",
+        "__guid": "978c6455-ac2e-4c31-8b85-ba3b783eb306",
         "__enabled": true,
         "Flags": 0,
         "DeathParticlesCar": {
