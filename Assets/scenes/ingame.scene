@@ -33,6 +33,10 @@
           },
           "CheckpointCount": 2,
           "CountdownSeconds": 5,
+          "FencePrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/fence.prefab"
+          },
           "LillyPrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/lilly.prefab"

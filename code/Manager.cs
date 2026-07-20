@@ -21,6 +21,8 @@ namespace Jumpy
 		[Property] public GameObject PlayerPrefab { get; set; }
 		[Property] public GameObject TilePrefab { get; set; }
 
+		[Property] public GameObject FencePrefab { get; set; }
+
 		[Property] public GameObject CarPrefab { get; set; }
 		[Property] public GameObject RoadPrefab { get; set; }
 		[Property] public GameObject BigRoadPrefab { get; set; }
