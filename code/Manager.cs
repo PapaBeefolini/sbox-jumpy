@@ -35,7 +35,7 @@ namespace Jumpy
 
 		[Property] public GameObject SpawnerPrefab { get; set; }
 
-		[Property, Group( "Bots" )] public int BotCount { get; set; } = 1;
+		[Property, Group( "Bots" )] public int BotCount { get; set; } = 3;
 
 		[Property, Group( "Start Area" )] public int StartAreaWidth { get; set; } = 8;
 		[Property, Group( "Start Area" )] public int StartAreaDepth { get; set; } = 3;
