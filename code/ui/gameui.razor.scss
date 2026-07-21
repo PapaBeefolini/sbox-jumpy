@@ -184,7 +184,7 @@ gameui {
         // The name itself now carries the frog's colour, so "this one is you" needs its own
         // cue - a lime glow behind the letters, echoing the lime border on the .orow rows.
         &.local .sname {
-            text-shadow: 2px 2px 0 black, 0 0 14px #b6ff00;
+            text-shadow: 2px 2px 0 black, 0 0 14px;
         }
 
         &.dead .pillar-top {
@@ -192,43 +192,56 @@ gameui {
         }
     }
 
+    // Never scrolls - there's no pointer during a round, so anything out of view is unreachable.
+    // Rows are sized to fit instead, and the list splits into two columns once there are enough
+    // of them (the split itself is decided in code, see OtherColumns).
     .others {
-        flex-direction: column;
-        width: 480px;
-        max-height: 224px;
-        margin-top: 32px;
-        overflow: scroll;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 24px;
+
+        .ocol {
+            flex-direction: column;
+            width: 480px;
+        }
+
+        &.two-col .ocol {
+            width: 372px;
+            margin: 0 6px;
+        }
+
         // Rows slide in one after another; the stagger is set inline per row (Reveal).
         .orow {
             flex-direction: row;
             align-items: center;
-            padding: 6px 14px;
-            margin-bottom: 6px;
-            border-radius: 9px;
+            flex-shrink: 0;
+            padding: 4px 12px;
+            margin-bottom: 5px;
+            border-radius: 8px;
             background-color: rgba(0, 0, 0, 0.42);
             border: 2px solid rgba(255, 255, 255, 0.06);
 
             .orank {
-                width: 36px;
-                font-size: 20px;
+                width: 28px;
+                font-size: 16px;
                 font-weight: bold;
                 color: #d5ff6b;
                 text-shadow: 2px 2px 0 black;
             }
 
             .oavatar {
-                width: 40px;
-                height: 40px;
-                border-radius: 22px;
-                border: 3px solid white;
+                width: 30px;
+                height: 30px;
+                border-radius: 16px;
+                border: 2px solid white;
                 background-color: rgba(0, 0, 0, 0.55);
                 align-items: center;
                 justify-content: center;
 
                 .frog-icon {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 16px;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 12px;
                     background-size: cover;
                     background-repeat: no-repeat;
                     background-position: center;
@@ -237,16 +250,19 @@ gameui {
 
             .oname {
                 flex-grow: 1;
-                margin-left: 14px;
-                font-size: 18px;
+                margin-left: 10px;
+                font-size: 15px;
                 font-weight: bold;
                 color: white;
                 text-shadow: 2px 2px 0 black;
                 white-space: nowrap;
+                // Long names truncate rather than shoving the percentage out of the row.
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .oprog {
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: bold;
                 color: #b6ff00;
                 text-shadow: 1px 1px 0 black;
@@ -508,7 +524,10 @@ gameui {
 
     .race-track {
         position: absolute;
-        top: 16px;
+        // The rail line lands 21px below this, and a cluster can fan MaxFanUp above that with a
+        // half a badge on top of it again - low enough that the highest badge stays on screen.
+        // Keep in step with MaxFanUp and LocalBadge in the razor.
+        top: 30px;
         left: 20%;
         right: 20%;
         height: 42px;
@@ -575,67 +594,57 @@ gameui {
                 }
             }
 
+            // Size, radius, ring colour and the cluster's vertical offset all arrive inline - a
+            // badge shrinks as its cluster grows, so only what holds still lives here. The negative
+            // margins that centre it on left: progress% are written inline too, since they depend
+            // on whatever size it's drawing at this frame.
             .marker {
                 position: absolute;
-                top: 0px; // lane (cluster) offset added inline
-                width: 42px;
-                margin-top: -16px; // vertically centre the 42px badge on the 16px rail
-                margin-left: -20px; // horizontally centre the badge on left: progress%
-                flex-direction: column;
+                top: 50%;
+                border: 3px solid black; // colour overridden inline with the frog's own
+                background-color: rgba(black, 0.55);
+                box-shadow: 0 2px 6px rgba(black, 0.75);
                 align-items: center;
+                justify-content: center;
 
-                .badge {
-                    width: 42px;
-                    height: 42px;
-                    border-radius: 21px;
-                    border: 3px solid black;
-                    background-color: rgba(0, 0, 0, 0.55);
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
-
-                    .frog-icon {
-                        width: 31px;
-                        height: 31px;
-                        border-radius: 16px;
-                        background-size: cover;
-                        background-repeat: no-repeat;
-                        background-position: center;
-                    }
+                .frog-icon {
+                    // Sized inline to match the badge it sits in.
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    background-position: center;
                 }
 
+                // The badge it hangs under has no fixed width to centre against, so the name sits in
+                // a generous box of its own, centred on the badge with a negative margin. The box is
+                // wider than any name will draw - it's a centring frame, not a bound - and the label
+                // is centred inside it by flex, since text-align doesn't do it here. Opacity is
+                // written inline, ramping with how much clear air the badge has.
                 .pname {
                     position: absolute;
                     top: 100%;
-                    margin-top: 2px;
-                    text-align: center;
-                    font-size: 12px;
-                    font-weight: bold;
-                    // Overridden inline with the frog's own colour; this is only the fallback.
-                    color: white;
-                    text-shadow: 1px 1px 0 black;
-                    white-space: nowrap;
+                    left: 50%;
+                    width: 140px;
+                    margin-left: -70px;
+                    margin-top: 3px;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+
+                    .ptext {
+                        font-size: 12px;
+                        font-weight: bold;
+                        // Overridden inline with the frog's own colour; this is only the fallback.
+                        color: white;
+                        text-shadow: 1px 1px 0 black;
+                        white-space: nowrap;
+                    }
                 }
 
                 &.local {
-                    width: 54px;
-                    margin-top: -20px;
-                    margin-left: -26px;
-
-                    .badge {
-                        width: 54px;
-                        height: 54px;
-                        border-radius: 32px;
-
-                        .frog-icon {
-                            width: 40px;
-                            height: 40px;
-                            border-radius: 32px;
-                        }
-                    }
-
-                    // No lime override here - the oversized badge above already marks the local
-                    // player, so the name is free to carry the frog's own colour.
+                    // Held on the rail line while its cluster fans around it, so it has to draw
+                    // over the badges that slide past it.
+                    z-index: 10;
+                    box-shadow: 0 0 10px rgba(white, 0.55);
                 }
 
                 &.dead {

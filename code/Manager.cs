@@ -51,10 +51,10 @@ namespace Jumpy
 		// death only costs the segment since your last checkpoint.
 		[Property, Group( "World" )] public int CheckpointCount { get; set; } = 2;
 
-		[Sync] public bool IsGameActive { get; set; } = false;
-		[Sync] public bool IsGameOver { get; set; } = false;
-		[Sync] public float WinTilePosition { get; set; } = 0;
-		[Sync] public int CountdownRemaining { get; set; } = 0;
+		[Sync] public bool IsGameActive { get; set; }
+		[Sync] public bool IsGameOver { get; set; }
+		[Sync] public float WinTilePosition { get; set; }
+		[Sync] public int CountdownRemaining { get; set; }
 
 		[Sync] public TimeUntil NextRoundStart { get; set; }
 
@@ -111,9 +111,11 @@ namespace Jumpy
 			if ( !Networking.IsHost || !IsGameActive )
 				return;
 
+			var frogs = Scene.GetAllComponents<Frog>().ToList();
+
 			// CheckpointIndex is synced and monotonic, so it's up to date on the owning client by
 			// the time its delayed respawn fires.
-			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
+			foreach ( Frog frog in frogs )
 			{
 				for ( int i = CheckpointXs.Count - 1; i > frog.CheckpointIndex; i-- )
 				{
@@ -127,7 +129,7 @@ namespace Jumpy
 
 			// The flag is synced, so proxy clients show the winner at 100% instead of trusting
 			// their lagging interpolated position, which reads just short of the finish.
-			var finishers = Scene.GetAllComponents<Frog>().Where( frog => frog.WorldPosition.x >= WinTilePosition ).ToList();
+			var finishers = frogs.Where( frog => frog.WorldPosition.x >= WinTilePosition ).ToList();
 			if ( finishers.Count > 0 )
 			{
 				foreach ( Frog frog in finishers )
@@ -199,28 +201,28 @@ namespace Jumpy
 
 		public Vector3 GetSpawnPoint( Frog frog )
 		{
-			var spawnPoints = Scene.GetAllComponents<SpawnPoint>().ToList();
-			if ( spawnPoints.Count == 0 )
-				return Vector3.Zero;
+			var spawnPoints = Scene.GetAllComponents<SpawnPoint>().Select( sp => sp.WorldPosition ).ToList();
 
-			ForgetStaleSpawns( frog );
-
-			var free = spawnPoints.Where( sp => !IsSpawnPointOccupied( sp.WorldPosition, frog ) ).ToList();
-			Vector3 chosen = Game.Random.FromList( free.Count > 0 ? free : spawnPoints ).WorldPosition;
-
-			recentSpawns.Add( (frog, chosen, Time.Now) );
-
-			return chosen;
+			return spawnPoints.Count > 0 ? ClaimSpawn( frog, spawnPoints ) : Vector3.Zero;
 		}
 
 		public Vector3 GetCheckpointSpawn( Frog frog )
 		{
 			float rowX = CheckpointXs[frog.CheckpointIndex];
-
 			var candidates = CheckpointSpawns.Where( p => float.Abs( p.x - rowX ) < 1f ).ToList();
-			if ( candidates.Count == 0 )
-				return new Vector3( rowX, 0, 40 );
 
+			return candidates.Count > 0 ? ClaimSpawn( frog, candidates ) : new Vector3( rowX, 0, 40 );
+		}
+
+		public bool IsWithinStartArea( Vector3 worldPos )
+		{
+			return worldPos.x >= StartAreaMinX && worldPos.x <= StartAreaMaxX
+				&& worldPos.y >= StartAreaMinY && worldPos.y <= StartAreaMaxY;
+		}
+
+		// Prefers a spot nobody is standing on or was just sent to, and remembers what it handed out.
+		private Vector3 ClaimSpawn( Frog frog, List<Vector3> candidates )
+		{
 			ForgetStaleSpawns( frog );
 
 			var free = candidates.Where( p => !IsSpawnPointOccupied( p, frog ) ).ToList();
@@ -229,12 +231,6 @@ namespace Jumpy
 			recentSpawns.Add( (frog, chosen, Time.Now) );
 
 			return chosen;
-		}
-
-		public bool IsWithinStartArea( Vector3 worldPos )
-		{
-			return worldPos.x >= StartAreaMinX && worldPos.x <= StartAreaMaxX
-				&& worldPos.y >= StartAreaMinY && worldPos.y <= StartAreaMaxY;
 		}
 
 		private void ClearWorld()
@@ -266,16 +262,7 @@ namespace Jumpy
 			StartAreaMinY = (startColumn - halfWidth) * TileSize - TileSize * 0.5f;
 			StartAreaMaxY = (startColumn + areaWidth - 1 - halfWidth) * TileSize + TileSize * 0.5f;
 
-			// Evenly-spaced rows (by progress fraction i/(N+1)) reserved for checkpoint bands,
-			// snapped to a tile row and kept clear of the start pen and win row.
-			float finishX = (WorldHeight - 1) * TileSize;
-			var checkpointRows = new HashSet<int>();
-			for ( int i = 0; i < CheckpointCount; i++ )
-			{
-				float frac = (i + 1f) / (CheckpointCount + 1f);
-				int row = (int)float.Round( (StartAreaMaxX + frac * (finishX - StartAreaMaxX)) / TileSize );
-				checkpointRows.Add( int.Clamp( row, areaDepth, WorldHeight - 2 ) );
-			}
+			var checkpointRows = ReserveCheckpointRows( areaDepth );
 
 			for ( int x = 0; x < WorldHeight; x++ )
 			{
@@ -388,6 +375,24 @@ namespace Jumpy
 						CreateDecoration( PebblesPrefab, new Vector3( currentPosition, 32 ), Game.Random.Float( 0.8f, 1.2f ) );
 				}
 			}
+		}
+
+		// Rows reserved for checkpoint bands, evenly spaced by progress fraction i/(N+1), snapped to a
+		// tile row and kept clear of the start pen and the win row.
+		private HashSet<int> ReserveCheckpointRows( int areaDepth )
+		{
+			float finishX = (WorldHeight - 1) * TileSize;
+			var rows = new HashSet<int>();
+
+			for ( int i = 0; i < CheckpointCount; i++ )
+			{
+				float frac = (i + 1f) / (CheckpointCount + 1f);
+				int row = (int)float.Round( (StartAreaMaxX + frac * (finishX - StartAreaMaxX)) / TileSize );
+
+				rows.Add( int.Clamp( row, areaDepth, WorldHeight - 2 ) );
+			}
+
+			return rows;
 		}
 
 		private void CreateTile( Vector3 position, Color color )

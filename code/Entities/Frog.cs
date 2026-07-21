@@ -20,15 +20,17 @@ namespace Jumpy
 		private const float idleHopMin = 0.5f;
 		private const float idleHopMax = 1.4f;
 
-		// Bots are otherwise perfect traffic dodgers, which reads as robotic. Each one gets a personal
-		// recklessness: the odds that a given hop ignores oncoming cars. It still won't leap into water
-		// or a wall — that's not "getting hit by a car".
+		// Odds that a given hop ignores oncoming cars — perfect dodging reads as robotic. A bot still
+		// won't leap into water or a wall; that's not "getting hit by a car".
 		private const float botRecklessMin = 0.04f;
 		private const float botRecklessMax = 0.18f;
 
-		// How close to being carried over the kill border a log rider gets before it stops waiting
-		// for the way forward to clear and takes whatever escape hop it can find.
+		// How close to the kill border a log rider gets before it stops waiting for the way forward to
+		// clear and takes whatever escape hop it can find.
 		private const float botDriftBailoutTime = 2.0f;
+
+		// How long a bot remembers the spot it last backed out of.
+		private const float abandonedTileMemory = 3.0f;
 
 		private const float cameraDistance = 800f;
 		private const float cameraFollowRate = 4f;
@@ -48,28 +50,27 @@ namespace Jumpy
 		private static readonly string[] wallIgnoreTags = { "player", "car", "log" };
 		private static readonly Vector3[] allDirections = { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right };
 
-		// How bright a name colour is forced to get, and how far it's then washed toward white.
 		private const float nameColorFloor = 0.85f;
 		private const float nameColorWash = 0.25f;
 
-		// Hand-picked instead of Color.Random so each frog reads as a distinct, saturated
-		// silhouette against the grass and water — random rolls muddy greys and near-blacks.
+		// Hand-picked rather than random so each frog reads as a distinct, saturated silhouette against
+		// the grass and water — random rolls muddy greys and near-blacks.
 		private static readonly Color[] frogColors =
 		{
-		new Color( 0.00f, 0.78f, 0.06f ), // green
-		new Color( 0.98f, 0.00f, 0.00f ), // red
-		new Color( 0.00f, 0.88f, 1.00f ), // cyan
-		new Color( 0.00f, 0.14f, 1.00f ), // blue
-		new Color( 1.00f, 0.88f, 0.00f ), // yellow
-		new Color( 0.50f, 1.00f, 0.00f ), // lime
-		new Color( 0.00f, 0.42f, 0.02f ), // dark green
-		new Color( 0.60f, 0.24f, 0.00f ), // brown
-		new Color( 1.00f, 0.40f, 0.00f ), // orange
-		new Color( 0.60f, 0.00f, 1.00f ), // purple
-		new Color( 1.00f, 0.16f, 0.62f ), // pink
-		new Color( 0.00f, 0.64f, 0.50f ), // teal
-		new Color( 1.00f, 0.90f, 0.42f ), // cream
-	};
+			new Color( 0.00f, 0.78f, 0.06f ), // green
+			new Color( 0.98f, 0.00f, 0.00f ), // red
+			new Color( 0.00f, 0.88f, 1.00f ), // cyan
+			new Color( 0.00f, 0.14f, 1.00f ), // blue
+			new Color( 1.00f, 0.88f, 0.00f ), // yellow
+			new Color( 0.50f, 1.00f, 0.00f ), // lime
+			new Color( 0.00f, 0.42f, 0.02f ), // dark green
+			new Color( 0.60f, 0.24f, 0.00f ), // brown
+			new Color( 1.00f, 0.40f, 0.00f ), // orange
+			new Color( 0.60f, 0.00f, 1.00f ), // purple
+			new Color( 1.00f, 0.16f, 0.62f ), // pink
+			new Color( 0.00f, 0.64f, 0.50f ), // teal
+			new Color( 1.00f, 0.90f, 0.42f ), // cream
+		};
 
 		[Property] public GameObject JumpParticles { get; set; }
 		[Property] public GameObject DeathParticlesCar { get; set; }
@@ -83,11 +84,11 @@ namespace Jumpy
 		// floats that a sync round trip might not return bit-identical. -1 means not yet assigned.
 		[Sync] public int ColorIndex { get; set; } = -1;
 
-		[Sync] public bool IsDead { get; set; } = false;
-		[Sync] public bool HasFinished { get; set; } = false;
-		[Sync] public bool IsBot { get; set; } = false;
+		[Sync] public bool IsDead { get; set; }
+		[Sync] public bool HasFinished { get; set; }
+		[Sync] public bool IsBot { get; set; }
 		[Sync] public string BotName { get; set; } = "";
-		[Sync] public bool IsGrounded { get; set; } = false;
+		[Sync] public bool IsGrounded { get; set; }
 		[Sync] public float LastJumpTime { get; set; }
 
 		// Furthest checkpoint band reached this run; -1 means none yet (respawn back at the start pen).
@@ -125,6 +126,8 @@ namespace Jumpy
 		private float nextIdleHopTime;
 		private bool reroutingSideways;
 		private float botRecklessness = -1f;
+		private Vector3 abandonedTile;
+		private RealTimeSince abandonedAt;
 
 		private RealTimeSince deathAt;
 		private int deathSequence;
@@ -154,8 +157,8 @@ namespace Jumpy
 				return;
 
 			// A hop aimed at a log stays locked to that log for the whole flight, so the target drifts
-			// along with it. Pinned to the water it was floating over instead, a hop chasing a fast log
-			// would spend most of its distance just catching back up to where the frog started.
+			// along with it. Pinned to the water below instead, a hop chasing a fast log would spend
+			// most of its distance catching back up to where the frog started.
 			if ( CurrentLog.IsValid() )
 			{
 				TilePosition = CurrentLog.WorldPosition.Round( 1 ) + LogOffset.Round( 1 );
@@ -177,8 +180,8 @@ namespace Jumpy
 			float elapsedTime = Time.Now - LastJumpTime;
 			float jumpAmount = float.Pow( elapsedTime * 24.0f, 2.5f );
 
-			// Frogs sharing a spot perch on top of each other. Visual only: the collider is
-			// pushed back down to ground level so cars still hit the whole stack.
+			// Frogs sharing a spot perch on top of each other. Visual only — the collider is pushed
+			// back down to ground level so cars still hit the whole stack.
 			stackOffset = stackOffset.LerpTo( GetStackIndex() * stackHeight, Time.Delta * 10 );
 			Vector3 stackBump = Vector3.Up * stackOffset;
 			collider.Center = colliderCenter - stackBump;
@@ -227,6 +230,7 @@ namespace Jumpy
 			LastJumpTime = Time.Now;
 			stackOffset = 0;
 			reroutingSideways = false;
+			abandonedAt = abandonedTileMemory;
 			TilePosition = position;
 			WorldPosition = position;
 			landingTraceOrigin = position + jumpClearance;
@@ -241,13 +245,10 @@ namespace Jumpy
 		}
 
 		// Claims a palette slot nobody else is wearing, so a full lobby reads as a row of distinct
-		// frogs. Past frogColors.Length frogs the palette is exhausted and duplicates are the only
-		// option left, so we stop being fussy and take any slot.
+		// frogs. Past frogColors.Length frogs the palette is exhausted, so we stop being fussy.
 		//
-		// Only ever called on the owner of a frog with no colour yet, so the pool it sees is every
-		// other frog's synced slot. Two frogs spawning in the same tick on different clients can still
-		// land on the same colour — it settles into a duplicate rather than a broken state, which is a
-		// fine trade for not routing colour assignment through the host.
+		// Two frogs spawning on the same tick on different clients can still land on one colour; that
+		// settles into a duplicate rather than a broken state, which beats routing this via the host.
 		private int PickColorIndex()
 		{
 			var taken = Scene.GetAllComponents<Frog>()
@@ -262,9 +263,8 @@ namespace Jumpy
 				: Game.Random.Int( frogColors.Length - 1 );
 		}
 
-		// Sole owner of the camera's position and FOV between respawns; anything written elsewhere
-		// gets overwritten next frame. Drift and punch are pure functions of IsDead and deathAt, so
-		// nothing accumulates and respawn needs no unwinding.
+		// Sole owner of the camera between respawns; anything written elsewhere is overwritten next
+		// frame. Drift and punch are pure functions of IsDead and deathAt, so nothing accumulates.
 		private void UpdateCamera()
 		{
 			if ( !IsLocalPlayer || !Scene.Camera.IsValid() )
@@ -306,20 +306,17 @@ namespace Jumpy
 
 		private void Move( Vector3 direction )
 		{
-			if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 traceOrigin ) )
+			if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 target ) )
 				return;
 
-			// Tiles only mean anything on solid ground; a spot on a log is wherever the log currently
-			// happens to be, so snapping it would drag the landing back onto a grid the frog isn't on.
 			bool landingOnLog = landing.GameObject.Tags.Has( "log" );
-			Vector3 target = landingOnLog ? landing.EndPosition.Round( 1 ) : SnapToGrid( landing.EndPosition );
 
 			if ( !Manager.Instance.IsGameActive && !Manager.Instance.IsWithinStartArea( target ) )
 				return;
 
 			IsGrounded = false;
 			LastJumpTime = Time.Now;
-			landingTraceOrigin = traceOrigin;
+			landingTraceOrigin = target + jumpClearance;
 
 			CurrentLog = landingOnLog ? landing.GameObject : null;
 			LogOffset = landingOnLog ? CurrentLog.Transform.World.PointToLocal( target ).Round( 1 ) : Vector3.Zero;
@@ -332,27 +329,41 @@ namespace Jumpy
 			SpawnJumpParticles( WorldPosition );
 		}
 
-		// Where a hop in this direction would put us: false when a wall blocks it or nothing is
-		// there to land on. Shared by Move and the bot's survivability check so they can't disagree.
-		private bool TryTraceHop( Vector3 direction, out SceneTraceResult landing, out Vector3 traceOrigin )
+		// Where a hop in this direction would land: false when a wall blocks it or nothing is there to
+		// land on. Shared by Move and the bot's safety check so the two can't disagree.
+		private bool TryTraceHop( Vector3 direction, out SceneTraceResult landing, out Vector3 target )
 		{
-			landing = default;
-
-			// Hops run tile to tile on solid ground, but a log rider sits wherever the log has carried
-			// it, off the grid entirely — snapping there first would quietly shorten or stretch the hop
-			// by up to half a tile depending on where the log happened to have drifted to.
+			// A log rider sits wherever the log has carried it, off the grid entirely — snapping first
+			// would shorten or stretch the hop by up to half a tile depending on the log's drift.
 			Vector3 origin = CurrentLog.IsValid() ? TilePosition : SnapToGrid( TilePosition );
 
-			Vector3 requestedJump = origin + jumpClearance;
-			traceOrigin = requestedJump + (direction * jumpDistance);
+			return TryTraceHop( origin, direction, out landing, out target );
+		}
 
-			SceneTraceResult wall = Scene.Trace.Sphere( collider.Radius, requestedJump, traceOrigin ).WithoutTags( wallIgnoreTags ).Run();
-			if ( wall.Hit && wall.Normal.Angle( Vector3.Up ) > maxJumpAngle )
+		// Takes the origin rather than reading it off the frog, so a bot can ask what a hop would look
+		// like from a tile it hasn't jumped to yet.
+		private bool TryTraceHop( Vector3 origin, Vector3 direction, out SceneTraceResult landing, out Vector3 target )
+		{
+			landing = default;
+			target = default;
+
+			Vector3 requestedJump = origin + jumpClearance;
+
+			landing = TraceDown( requestedJump + (direction * jumpDistance) );
+			if ( !landing.Hit )
 				return false;
 
-			landing = TraceDown( traceOrigin );
+			// Tiles only mean anything on solid ground; a spot on a log is wherever the log is now.
+			target = landing.GameObject.Tags.Has( "log" )
+				? landing.EndPosition.Round( 1 )
+				: SnapToGrid( landing.EndPosition );
 
-			return landing.Hit;
+			// Sweep to where the frog comes to rest, not to where the hop was aimed. A log rider aims
+			// from off the grid, so a hop that squeaked past the side of a tree used to pass this check
+			// and then get snapped straight into the trunk it had just missed.
+			SceneTraceResult wall = Scene.Trace.Sphere( collider.Radius, requestedJump, target + jumpClearance ).WithoutTags( wallIgnoreTags ).Run();
+
+			return !wall.Hit || wall.Normal.Angle( Vector3.Up ) <= maxJumpAngle;
 		}
 
 		private SceneTraceResult TraceDown( Vector3 origin )
@@ -388,14 +399,12 @@ namespace Jumpy
 			bool reckless = Game.Random.Float() < botRecklessness;
 			Vector3 sideFirst = Game.Random.Int( 1 ) == 0 ? Vector3.Left : Vector3.Right;
 
-			// Normally push forward, using sideways hops to steer around obstacles, and fall back to a
-			// backward retreat only when boxed in, so a frog never freezes for the whole round. Right
-			// after a retreat, try the sides first: that moves the frog to a new column before it
-			// re-advances instead of hopping straight back into the same dead-end.
+			// Push forward, steer around obstacles sideways, and retreat only when boxed in, so a frog
+			// never freezes for a whole round. Right after a retreat, try the sides first: that moves
+			// the frog to a new column instead of hopping straight back into the same dead end.
 			//
-			// Riding a log is the exception: sideways there just slides the frog along the log it's
-			// already on, and the gap ahead lines itself up as the rows drift past each other. So a
-			// rider only considers forward and otherwise waits, rather than twitching side to side.
+			// A log rider only considers forward. Sideways there just slides it along the log it's
+			// already on, and the gap ahead lines itself up as the rows drift past each other.
 			Vector3[] choices;
 
 			if ( CurrentLog.IsValid() && !IsDriftingOffWorld() )
@@ -407,12 +416,21 @@ namespace Jumpy
 
 			foreach ( Vector3 direction in choices )
 			{
-				if ( IsHopSafe( direction, reckless ) )
+				if ( !IsHopSafe( direction, reckless ) )
+					continue;
+
+				nextBotHopTime = Time.Now + Game.Random.Float( botHopMin, botHopMax );
+				reroutingSideways = direction == Vector3.Backward;
+
+				// Backing out means this spot led nowhere, so remember it rather than rediscovering
+				// that the moment we've shuffled far enough to face it again.
+				if ( reroutingSideways )
 				{
-					nextBotHopTime = Time.Now + Game.Random.Float( botHopMin, botHopMax );
-					reroutingSideways = direction == Vector3.Backward;
-					return direction;
+					abandonedTile = TilePosition;
+					abandonedAt = 0;
 				}
+
+				return direction;
 			}
 
 			nextBotHopTime = Time.Now + 0.1f;
@@ -431,7 +449,7 @@ namespace Jumpy
 		}
 
 		// Logs never turn around or wrap, so a rider that waits forever gets carried over the kill
-		// border. True once the current log is within botDriftBailoutTime of taking the frog with it.
+		// border. True once the current log is within botDriftBailoutTime of doing exactly that.
 		private bool IsDriftingOffWorld()
 		{
 			MovingEntity log = CurrentLog.Components.Get<MovingEntity>();
@@ -450,20 +468,61 @@ namespace Jumpy
 
 		private float GetKillBorder() => (Manager.Instance.WorldWidthY / 2) + Manager.TileSize;
 
-		// A reckless hop skips the traffic check only — terrain (water, walls, missing logs) is
-		// always fatal, so it stays a car gamble rather than a suicide.
+		// A reckless hop skips the traffic check only — water and walls stay fatal, so it's a car
+		// gamble rather than a suicide.
 		private bool IsHopSafe( Vector3 direction, bool ignoreTraffic = false )
 		{
-			if ( !TryTraceHop( direction, out SceneTraceResult landing, out _ ) )
+			if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 target ) )
 				return false;
 
 			if ( landing.GameObject.Tags.Has( "water" ) )
 				return false;
 
-			if ( !ignoreTraffic && IsTrafficDanger( SnapToGrid( landing.EndPosition ) ) )
+			if ( IsRecentlyAbandoned( target ) )
 				return false;
 
-			return true;
+			if ( !ignoreTraffic && IsTrafficDanger( target ) )
+				return false;
+
+			return HasWayOnward( landing, target, direction );
+		}
+
+		// HasWayOnward only sees one hop, so a bot can be promised an exit that is itself a dead end,
+		// back out of it, and hop straight back in — the same loop one tile beyond what the lookahead
+		// can see. Forgetting after a few seconds keeps this a nudge to try elsewhere, not a permanent
+		// no. Riders are exempt: their world moves underneath them, so where a spot led a moment ago
+		// says nothing about where it leads now.
+		private bool IsRecentlyAbandoned( Vector3 target )
+		{
+			return !CurrentLog.IsValid()
+				&& abandonedAt < abandonedTileMemory
+				&& (target - abandonedTile).WithZ( 0 ).Length < Manager.TileSize * 0.5f;
+		}
+
+		// One hop of lookahead, because a bot that only checks where it lands will strand itself. A
+		// lily row is a scatter of static pads over open water: land on one whose neighbours are all
+		// water and the only move left is the one that got you there, so the bot hops on, retreats, and
+		// spends the rest of the round doing that.
+		//
+		// Logs are exempt — a rider is supposed to sit still and be carried, and what's out of reach
+		// from a log this instant has drifted into reach a second later.
+		private bool HasWayOnward( SceneTraceResult landing, Vector3 target, Vector3 direction )
+		{
+			if ( landing.GameObject.Tags.Has( "log" ) )
+				return true;
+
+			foreach ( Vector3 onward in allDirections )
+			{
+				if ( onward == -direction )
+					continue;
+
+				// Traffic is deliberately not checked: cars pass, so a lane thick with them is still a
+				// way out, just not this second. Only terrain makes a spot a dead end.
+				if ( TryTraceHop( target, onward, out SceneTraceResult next, out _ ) && !next.GameObject.Tags.Has( "water" ) )
+					return true;
+			}
+
+			return false;
 		}
 
 		private bool IsTrafficDanger( Vector3 target )
@@ -496,8 +555,8 @@ namespace Jumpy
 
 		private SceneTraceResult TraceLandingSurface() => TraceDown( landingTraceOrigin );
 
-		// How many frogs am I perched on? Whoever jumped most recently lands on top, so count
-		// settled frogs at my landing spot that jumped before me. Ties break on object id.
+		// Whoever jumped most recently perches on top, so count settled frogs at my landing spot that
+		// jumped before me. Ties break on object id.
 		private int GetStackIndex()
 		{
 			int index = 0;
@@ -519,9 +578,8 @@ namespace Jumpy
 
 		private void Land()
 		{
-			// A hop that aimed at a log rode it down and is already attached. Only a hop that aimed
-			// somewhere else has to find out what it actually came down on — which may still be a log
-			// that drifted underneath and saved it.
+			// A hop that aimed at a log rode it down and is already attached. Any other hop has to find
+			// out what it actually came down on — maybe a log that drifted underneath and saved it.
 			if ( CurrentLog.IsValid() )
 				return;
 
@@ -558,8 +616,8 @@ namespace Jumpy
 			AddCameraShake( deathShakeTrauma );
 			NotifyChatMessage( $"☠️ {(IsBot ? BotName : Network.Owner.DisplayName)} {(deathType == DeathType.Car ? "got flattened" : "drowned")}!" );
 
-			// This is fired and forgotten, so a hold cut short by a round restart still wakes up later.
-			// Without the ticket it would respawn the frog out from under a newer death.
+			// Fired and forgotten, so a hold cut short by a round restart still wakes up later. Without
+			// the ticket it would respawn the frog out from under a newer death.
 			int sequence = ++deathSequence;
 
 			await Task.DelayRealtimeSeconds( DeathHoldSeconds );
@@ -612,9 +670,9 @@ namespace Jumpy
 			Chat.AddText( message );
 		}
 
-		// These RPCs are broadcast per-frog, so a crowd spawning or dying at once (round start, a car
-		// wiping a stack) makes every client fire N identical positional sounds on the same frame, and
-		// they stack constructively into a wall of noise. Play at most one per short window instead.
+		// These RPCs are broadcast per-frog, so a crowd spawning or dying at once fires N identical
+		// positional sounds on the same frame and they stack into a wall of noise. Play at most one
+		// per short window instead.
 		private static readonly Dictionary<SoundEvent, RealTimeSince> lastCrowdSound = new();
 
 		private static void PlayCrowdSound( SoundEvent sound, Vector3 position, float minInterval = 0.1f )
