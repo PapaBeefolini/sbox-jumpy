@@ -1,7 +1,7 @@
 {
   "RootObject": {
     "__guid": "eef3cb51-f92a-4a84-ac0f-d56690543e80",
-    "__version": 1,
+    "__version": 2,
     "Flags": 0,
     "Name": "car",
     "Position": "0,0,0",
@@ -10,19 +10,22 @@
     "Tags": "car",
     "Enabled": true,
     "NetworkMode": 1,
-    "NetworkInterpolation": true,
+    "NetworkFlags": 0,
     "NetworkOrphaned": 0,
+    "NetworkTransmit": true,
     "OwnerTransfer": 1,
     "Components": [
       {
         "__type": "Sandbox.SkinnedModelRenderer",
         "__guid": "03fe8465-f60c-4f49-b03a-692f07f98728",
         "__enabled": true,
+        "Flags": 0,
         "AnimationGraph": null,
         "BodyGroups": 18446744073709551615,
         "BoneMergeTarget": null,
         "CreateAttachments": false,
         "CreateBoneObjects": false,
+        "LodOverride": null,
         "MaterialGroup": null,
         "MaterialOverride": null,
         "Materials": null,
@@ -61,6 +64,8 @@
         "__type": "Sandbox.ModelCollider",
         "__guid": "8b55d8d4-d892-4c55-a1a2-af13daa714a1",
         "__enabled": true,
+        "Flags": 0,
+        "ColliderFlags": 0,
         "Elasticity": null,
         "Friction": null,
         "IsTrigger": false,
@@ -84,6 +89,7 @@
         "__type": "Jumpy.Car",
         "__guid": "fa621b8c-8616-4524-9b37-d379d10a0bf3",
         "__enabled": true,
+        "Flags": 0,
         "MaxSpeed": 1200,
         "MinSpeed": 1000,
         "OnComponentDestroy": null,
@@ -97,6 +103,7 @@
         "__type": "Sandbox.SoundPointComponent",
         "__guid": "10f24d05-84f8-4934-b33f-1d38c685d189",
         "__enabled": true,
+        "Flags": 0,
         "Distance": 512,
         "DistanceAttenuation": false,
         "DistanceAttenuationOverride": false,
@@ -119,9 +126,8 @@
         "Force2d": false,
         "MaxRepeatTime": 1,
         "MinRepeatTime": 1,
-        "Occlusion": false,
+        "OcclusionEnabled": false,
         "OcclusionOverride": false,
-        "OcclusionRadius": 32,
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,
@@ -130,15 +136,15 @@
         "OnComponentUpdate": null,
         "Pitch": 1,
         "PlayOnStart": true,
-        "ReflectionOverride": false,
-        "Reflections": false,
         "Repeat": false,
+        "ReverbEnabled": false,
+        "ReverbOverride": false,
         "SoundEvent": "sounds/engine.loop.sound",
         "SoundOverride": false,
         "StopOnNew": false,
         "TargetMixer": {
-          "Name": "unknown",
-          "Id": "00000000-0000-0000-0000-000000000000"
+          "Name": "game",
+          "Id": "f3f8ff49-5349-4588-b5fb-415ec0190d7f"
         },
         "Volume": 1
       }
@@ -153,13 +159,15 @@
         "Enabled": false,
         "IncludeStaticBodies": true,
         "IncludeKeyframedBodies": true,
-        "EditorAutoUpdate": true,
+        "EditorAutoUpdate": false,
         "AgentHeight": 64,
         "AgentRadius": 16,
         "AgentStepSize": 18,
         "AgentMaxSlope": 40,
         "ExcludedBodies": "",
-        "IncludedBodies": ""
+        "IncludedBodies": "",
+        "DeferGeneration": false,
+        "CustomBounds": false
       }
     },
     "__variables": []
