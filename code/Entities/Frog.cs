@@ -32,6 +32,14 @@ namespace Jumpy
 		// How long a bot remembers the spot it last backed out of.
 		private const float abandonedTileMemory = 3.0f;
 
+		// How far along a row a bot will trace a route out of a landing spot before calling it a dead
+		// end. Contiguous runs of lily pads are only a few tiles long, so this is rarely reached.
+		private const int wayOnwardSearchLimit = 12;
+
+		// How far off a row's centre line something can sit and still count as being on that row —
+		// wide enough to cover a car or log riding slightly proud of the grid, short of the next row.
+		private const float rowTolerance = 64f;
+
 		private const float cameraDistance = 800f;
 		private const float cameraFollowRate = 4f;
 		private const float baseFieldOfView = 70f;
@@ -49,6 +57,7 @@ namespace Jumpy
 		private static readonly string[] ignoreTags = { "player", "car", "train" };
 		private static readonly string[] wallIgnoreTags = { "player", "car", "train", "log" };
 		private static readonly Vector3[] allDirections = { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right };
+		private static readonly Vector3[] sideDirections = { Vector3.Left, Vector3.Right };
 
 		private const float nameColorFloor = 0.85f;
 		private const float nameColorWash = 0.25f;
@@ -402,38 +411,53 @@ namespace Jumpy
 			bool reckless = Game.Random.Float() < botRecklessness;
 			Vector3 sideFirst = Game.Random.Int( 1 ) == 0 ? Vector3.Left : Vector3.Right;
 
-			// Push forward, steer around obstacles sideways, and retreat only when boxed in, so a frog
-			// never freezes for a whole round. Right after a retreat, try the sides first: that moves
-			// the frog to a new column instead of hopping straight back into the same dead end.
-			//
 			// A log rider only considers forward. Sideways there just slides it along the log it's
-			// already on, and the gap ahead lines itself up as the rows drift past each other.
+			// already on, and the gap ahead lines itself up as the rows drift past each other — unless
+			// the log is carrying it off the world, which is worth any escape it can find.
+			//
+			// Standing still is the same answer whenever the way forward is merely occupied, and for
+			// the same reason: it clears on its own.
+			bool holdPosition = CurrentLog.IsValid()
+				? !IsDriftingOffWorld()
+				: IsWayForwardOpening();
+
+			// Otherwise push forward, steer around obstacles sideways, and retreat only when boxed in,
+			// so a frog never freezes for a whole round. Right after a retreat, try the sides first:
+			// that moves the frog to a new column instead of hopping straight back into the same dead
+			// end.
 			Vector3[] choices;
 
-			if ( CurrentLog.IsValid() && !IsDriftingOffWorld() )
+			if ( holdPosition )
 				choices = new[] { Vector3.Forward };
 			else if ( reroutingSideways )
 				choices = new[] { sideFirst, -sideFirst, Vector3.Forward, Vector3.Backward };
 			else
 				choices = new[] { Vector3.Forward, sideFirst, -sideFirst, Vector3.Backward };
 
-			foreach ( Vector3 direction in choices )
+			// Two passes. The first only takes hops that lead somewhere; the second settles for any hop
+			// that won't kill the frog, so one that has ended up somewhere with no way on — dropped into
+			// a pocket of lily pads by a log it was riding, say — climbs back out instead of sitting
+			// there for the rest of the round.
+			for ( int pass = 0; pass < 2; pass++ )
 			{
-				if ( !IsHopSafe( direction, reckless ) )
-					continue;
-
-				nextBotHopTime = Time.Now + Game.Random.Float( botHopMin, botHopMax );
-				reroutingSideways = direction == Vector3.Backward;
-
-				// Backing out means this spot led nowhere, so remember it rather than rediscovering
-				// that the moment we've shuffled far enough to face it again.
-				if ( reroutingSideways )
+				foreach ( Vector3 direction in choices )
 				{
-					abandonedTile = TilePosition;
-					abandonedAt = 0;
-				}
+					if ( !IsHopSafe( direction, reckless, requireWayOnward: pass == 0 ) )
+						continue;
 
-				return direction;
+					nextBotHopTime = Time.Now + Game.Random.Float( botHopMin, botHopMax );
+					reroutingSideways = direction == Vector3.Backward;
+
+					// Backing out means this spot led nowhere, so remember it rather than rediscovering
+					// that the moment we've shuffled far enough to face it again.
+					if ( reroutingSideways )
+					{
+						abandonedTile = TilePosition;
+						abandonedAt = 0;
+					}
+
+					return direction;
+				}
 			}
 
 			nextBotHopTime = Time.Now + 0.1f;
@@ -471,9 +495,48 @@ namespace Jumpy
 
 		private float GetKillBorder() => (Manager.Instance.WorldWidthY / 2) + Manager.TileSize;
 
+		// Whether the tile ahead is somewhere the frog wants to be and is only occupied for the moment:
+		// a lane a car is crossing, or the stretch of river a log is about to drift into. Waiting those
+		// out is what a player does. Hopping aside is for a tree, the world's edge, or the open water of
+		// a lily row, none of which are ever going to move.
+		//
+		// This is what keeps a bot off the sideways treadmill. Every pad in a lily row facing a river
+		// looks exactly like the one the bot is standing on, so a bot free to sidestep trades a perfect
+		// spot for an identical one, over and over, and spends the round shuffling along the row while
+		// the logs it was waiting for drift past behind it.
+		private bool IsWayForwardOpening()
+		{
+			if ( !TryTraceHop( Vector3.Forward, out SceneTraceResult ahead, out Vector3 target ) )
+				return false;
+
+			if ( ahead.GameObject.Tags.Has( "water" ) )
+				return HasLogsRunning( target.x );
+
+			// Solid ground with nothing on it isn't blocked at all, and the forward hop below takes it.
+			// Blocked and leading nowhere is a dead end, and waiting on one of those is the whole bug.
+			return IsTrafficDanger( target ) && HasWayOnward( ahead, target );
+		}
+
+		// A river row has logs running along it, so its water is a ride that hasn't arrived yet. The
+		// open water of a lily row never grows anything, and telling the two apart is the difference
+		// between a bot waiting two seconds and a bot wasting a round.
+		private bool HasLogsRunning( float rowX )
+		{
+			foreach ( MovingEntity entity in Scene.GetAllComponents<MovingEntity>() )
+			{
+				if ( !entity.GameObject.Tags.Has( "log" ) )
+					continue;
+
+				if ( float.Abs( entity.WorldPosition.x - rowX ) <= rowTolerance )
+					return true;
+			}
+
+			return false;
+		}
+
 		// A reckless hop skips the traffic check only — water and walls stay fatal, so it's a traffic
 		// gamble rather than a suicide.
-		private bool IsHopSafe( Vector3 direction, bool ignoreTraffic = false )
+		private bool IsHopSafe( Vector3 direction, bool ignoreTraffic, bool requireWayOnward )
 		{
 			if ( !TryTraceHop( direction, out SceneTraceResult landing, out Vector3 target ) )
 				return false;
@@ -487,14 +550,14 @@ namespace Jumpy
 			if ( !ignoreTraffic && IsTrafficDanger( target ) )
 				return false;
 
-			return HasWayOnward( landing, target, direction );
+			return !requireWayOnward || HasWayOnward( landing, target );
 		}
 
-		// HasWayOnward only sees one hop, so a bot can be promised an exit that is itself a dead end,
-		// back out of it, and hop straight back in — the same loop one tile beyond what the lookahead
-		// can see. Forgetting after a few seconds keeps this a nudge to try elsewhere, not a permanent
-		// no. Riders are exempt: their world moves underneath them, so where a spot led a moment ago
-		// says nothing about where it leads now.
+		// HasWayOnward gives up past a fixed budget, so a bot can be promised an exit that is itself a
+		// dead end, back out of it, and hop straight back in — the same loop one tile beyond what the
+		// lookahead can see. Forgetting after a few seconds keeps this a nudge to try elsewhere, not a
+		// permanent no. Riders are exempt: their world moves underneath them, so where a spot led a
+		// moment ago says nothing about where it leads now.
 		private bool IsRecentlyAbandoned( Vector3 target )
 		{
 			return !CurrentLog.IsValid()
@@ -502,35 +565,81 @@ namespace Jumpy
 				&& (target - abandonedTile).WithZ( 0 ).Length < Manager.TileSize * 0.5f;
 		}
 
-		// One hop of lookahead, because a bot that only checks where it lands will strand itself. A
-		// lily row is a scatter of static pads over open water: land on one whose neighbours are all
-		// water and the only move left is the one that got you there, so the bot hops on, retreats, and
-		// spends the rest of the round doing that.
+		// Whether a landing spot leads anywhere, because a bot that only checks where it lands will
+		// strand itself. A lily row is a scatter of static pads over open water, and asking only
+		// whether something beside the spot is dry gets a yes forever: the neighbour is another pad,
+		// just as stranded, or the bank the frog came from.
+		//
+		// So spread sideways along the landing row over whatever is solid and look for a tile the run
+		// can actually continue from. Never back behind the row — a route that doubles back is the
+		// treadmill this exists to avoid. Almost every hop answers on the first tile, since from
+		// ordinary ground the next row is right there; only a spot with nothing in front of it pays for
+		// the search, and pads chain into runs of two or three before the water breaks them up.
 		//
 		// Logs are exempt — a rider is supposed to sit still and be carried, and what's out of reach
 		// from a log this instant has drifted into reach a second later.
-		private bool HasWayOnward( SceneTraceResult landing, Vector3 target, Vector3 direction )
+		private bool HasWayOnward( SceneTraceResult landing, Vector3 target )
 		{
 			if ( landing.GameObject.Tags.Has( "log" ) )
 				return true;
 
-			foreach ( Vector3 onward in allDirections )
-			{
-				if ( onward == -direction )
-					continue;
+			List<Vector3> reached = new() { target };
 
-				// Traffic is deliberately not checked: cars pass, so a lane thick with them is still a
-				// way out, just not this second. Only terrain makes a spot a dead end.
-				if ( TryTraceHop( target, onward, out SceneTraceResult next, out _ ) && !next.GameObject.Tags.Has( "water" ) )
+			for ( int i = 0; i < reached.Count; i++ )
+			{
+				if ( CanAdvanceFrom( reached[i] ) )
+					return true;
+
+				if ( reached.Count >= wayOnwardSearchLimit )
+					break;
+
+				foreach ( Vector3 onward in sideDirections )
+				{
+					if ( !TryTraceHop( reached[i], onward, out SceneTraceResult next, out Vector3 step ) )
+						continue;
+
+					if ( next.GameObject.Tags.Has( "water" ) || IsAlreadyReached( reached, step ) )
+						continue;
+
+					reached.Add( step );
+				}
+			}
+
+			return false;
+		}
+
+		private static bool IsAlreadyReached( List<Vector3> reached, Vector3 step )
+		{
+			foreach ( Vector3 seen in reached )
+			{
+				if ( (seen - step).WithZ( 0 ).Length < Manager.TileSize * 0.5f )
 					return true;
 			}
 
 			return false;
 		}
 
+		// Whether the run can continue forward from a tile, given time. Solid ground or a log ahead is a
+		// way on now; river water is one the moment a log drifts into it. A tree, the world's edge and
+		// the open water around a lily row are not, and never will be.
+		//
+		// Traffic is deliberately not checked: cars pass, so a lane thick with them is still a way out,
+		// just not this second. Only terrain makes a spot a dead end.
+		private bool CanAdvanceFrom( Vector3 tile )
+		{
+			// Nothing is built past the finish row, so to this search the winning tile looks like the
+			// deadest end on the course. The run stops there — that's the point of it.
+			if ( tile.x >= Manager.Instance.WinTilePosition )
+				return true;
+
+			if ( !TryTraceHop( tile, Vector3.Forward, out SceneTraceResult ahead, out Vector3 target ) )
+				return false;
+
+			return !ahead.GameObject.Tags.Has( "water" ) || HasLogsRunning( target.x );
+		}
+
 		private bool IsTrafficDanger( Vector3 target )
 		{
-			const float rowTolerance = 64f;
 			const float carHalfLength = 100f;
 			const float exposureTime = 0.55f;
 
