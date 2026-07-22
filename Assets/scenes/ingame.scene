@@ -91,7 +91,7 @@
             "_type": "gameobject",
             "prefab": "prefabs/tree.prefab"
           },
-          "WorldHeight": 16,
+          "WorldHeight": 96,
           "WorldWidth": 28
         },
         {
