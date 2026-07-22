@@ -1,0 +1,55 @@
+{
+  "UI": false,
+  "Volume": "1",
+  "Pitch": "1.20000005 1.39999998",
+  "Decibels": 50,
+  "SelectionMode": "Random",
+  "Sounds": [
+    "sounds/train_engine.vsnd"
+  ],
+  "OcclusionEnabled": false,
+  "Occlusion": false,
+  "ReverbEnabled": true,
+  "Reflections": true,
+  "AirAbsorption": true,
+  "Transmission": true,
+  "OcclusionRadius": 64,
+  "DistanceAttenuation": true,
+  "Distance": 8000,
+  "Falloff": [
+    {
+      "x": 0,
+      "y": 1,
+      "in": 0,
+      "out": -1.8,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.05,
+      "y": 0.22,
+      "in": 3.5,
+      "out": -3.5,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 0.2,
+      "y": 0.04,
+      "in": 0.16,
+      "out": -0.16,
+      "mode": "Mirrored"
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "in": 0,
+      "out": 0,
+      "mode": "Mirrored"
+    }
+  ],
+  "DefaultMixer": {
+    "Name": "game",
+    "Id": "4200f6ca-dfea-41f8-ab2b-ee163c0a0a4a"
+  },
+  "__references": [],
+  "__version": 1
+}

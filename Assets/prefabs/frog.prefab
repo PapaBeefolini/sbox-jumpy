@@ -99,7 +99,7 @@
           "_type": "gameobject",
           "prefab": "prefabs/particles_death_water.prefab"
         },
-        "DeathSound": "sounds/jumpy.death.sound",
+        "DeathSound": "sounds/death.sound",
         "JumpParticles": {
           "_type": "gameobject",
           "prefab": "prefabs/particles_jump.prefab"
@@ -111,7 +111,7 @@
         "OnComponentFixedUpdate": null,
         "OnComponentStart": null,
         "OnComponentUpdate": null,
-        "RespawnSound": "sounds/jumpy.respawn.sound"
+        "RespawnSound": "sounds/respawn.sound"
       }
     ],
     "Children": [

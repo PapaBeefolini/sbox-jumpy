@@ -1,11 +1,11 @@
 {
   "UI": false,
   "Volume": "0.800000012",
-  "Pitch": "0.899999976 1.10000002",
-  "Decibels": 150,
+  "Pitch": "1",
+  "Decibels": 70,
   "SelectionMode": "Random",
   "Sounds": [
-    "sounds/jumpy.death.vsnd"
+    "sounds/respawn.vsnd"
   ],
   "OcclusionEnabled": false,
   "Occlusion": false,

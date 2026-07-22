@@ -133,12 +133,12 @@
           "Repeat": false,
           "ReverbEnabled": false,
           "ReverbOverride": false,
-          "SoundEvent": "sounds/jumpy.music.sound",
+          "SoundEvent": "sounds/music.sound",
           "SoundOverride": false,
           "StopOnNew": false,
           "TargetMixer": {
-            "Name": "unknown",
-            "Id": "00000000-0000-0000-0000-000000000000"
+            "Name": "music",
+            "Id": "77661c3f-56f1-4254-bc47-8e1b798b5277"
           },
           "Volume": 1
         }

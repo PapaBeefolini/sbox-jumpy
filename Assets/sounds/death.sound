@@ -1,21 +1,21 @@
 {
   "UI": false,
-  "Volume": "0.699999988",
-  "Pitch": "0.699999988",
-  "Decibels": 50,
+  "Volume": "0.800000012",
+  "Pitch": "0.899999976 1.10000002",
+  "Decibels": 150,
   "SelectionMode": "Random",
   "Sounds": [
-    "sounds/engine.loop.vsnd"
+    "sounds/death.vsnd"
   ],
-  "OcclusionEnabled": true,
-  "Occlusion": true,
+  "OcclusionEnabled": false,
+  "Occlusion": false,
   "ReverbEnabled": true,
   "Reflections": true,
   "AirAbsorption": true,
   "Transmission": true,
   "OcclusionRadius": 64,
   "DistanceAttenuation": true,
-  "Distance": 4000,
+  "Distance": 16000,
   "Falloff": [
     {
       "x": 0,

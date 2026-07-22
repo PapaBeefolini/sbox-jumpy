@@ -139,7 +139,7 @@
         "Repeat": false,
         "ReverbEnabled": false,
         "ReverbOverride": false,
-        "SoundEvent": "sounds/engine.loop.sound",
+        "SoundEvent": "sounds/train_engine.sound",
         "SoundOverride": false,
         "StopOnNew": false,
         "TargetMixer": {
