@@ -23,6 +23,8 @@ namespace Jumpy
 
 		[Property] public GameObject FencePrefab { get; set; }
 
+		[Property] public SoundEvent FenceOpenSound { get; set; }
+
 		[Property] public GameObject CarPrefab { get; set; }
 		[Property] public GameObject RoadPrefab { get; set; }
 		[Property] public GameObject BigRoadPrefab { get; set; }
@@ -80,6 +82,9 @@ namespace Jumpy
 
 		public float WorldWidthY => WorldWidth * TileSize;
 
+		private SoundPointComponent music;
+		private bool wasGameActive;
+
 		protected override async Task OnLoad()
 		{
 			if ( Scene.IsEditor )
@@ -100,16 +105,28 @@ namespace Jumpy
 		protected override void OnAwake()
 		{
 			Instance = this;
+			music = GetComponent<SoundPointComponent>();
 		}
 
 		protected override void OnStart()
 		{
 			Mouse.Visibility = MouseVisibility.Hidden;
+
+			wasGameActive = IsGameActive;
+
 			_ = StartNewGame();
 		}
 
 		protected override void OnUpdate()
 		{
+			if ( music.IsValid() )
+				music.Enabled = !IsGameOver;
+
+			if ( FenceOpenSound.IsValid() && IsGameActive && !wasGameActive )
+				Sound.Play( FenceOpenSound );
+
+			wasGameActive = IsGameActive;
+
 			if ( !Networking.IsHost || !IsGameActive )
 				return;
 

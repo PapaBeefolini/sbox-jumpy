@@ -33,6 +33,7 @@
           },
           "CheckpointCount": 2,
           "CountdownSeconds": 5,
+          "FenceOpenSound": "sounds/fence_open.sound",
           "FencePrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/fence.prefab"
@@ -90,7 +91,7 @@
             "_type": "gameobject",
             "prefab": "prefabs/tree.prefab"
           },
-          "WorldHeight": 96,
+          "WorldHeight": 16,
           "WorldWidth": 28
         },
         {
@@ -509,12 +510,14 @@
           "__guid": "eb756471-630d-4222-9132-3d0d1b14d000",
           "__enabled": true,
           "Flags": 0,
+          "GameOverSound": "sounds/game_over.sound",
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
-          "OnComponentUpdate": null
+          "OnComponentUpdate": null,
+          "VictorySound": "sounds/victory.sound"
         }
       ],
       "Children": []

@@ -62,7 +62,7 @@
 		var podium = PodiumOrder();
 		var rest = Ranking.Skip( 3 ).ToList();
 		var winner = Ranking.FirstOrDefault();
-		var localWin = winner != null && winner.IsLocal;
+		var localWin = LocalWon;
 
 		<div class="gameover">
 			<div class="go-header">
@@ -201,6 +201,12 @@
 	private const float DeathCardTime = Frog.DeathHoldSeconds;
 	private const float DeathCardFadeTime = 0.35f;
 
+	// Fanfare for the local player's own win, played once as the game-over screen takes over.
+	[Property] public SoundEvent VictorySound { get; set; }
+
+	// Its counterpart: a sting when the race ends and the local player didn't win.
+	[Property] public SoundEvent GameOverSound { get; set; }
+
 	private Manager Manager { get; set; }
 
 	// Referenced so marker layout can measure the rail, to fan apart badges that would collide and to
@@ -308,10 +314,18 @@
 		{
 			BuildRanking();
 			gameOverAt = 0f;
+
+			if ( LocalWon && VictorySound.IsValid() )
+				Sound.Play( VictorySound );
+			else if ( !LocalWon && GameOverSound.IsValid() )
+				Sound.Play( GameOverSound );
 		}
 
 		wasGameOver = IsGameOver;
 	}
+
+	// Top of the frozen standings, which is what the game-over screen calls the winner.
+	private bool LocalWon => Ranking.FirstOrDefault() is RankRow winner && winner.IsLocal;
 
 	private void BuildRanking()
 	{
