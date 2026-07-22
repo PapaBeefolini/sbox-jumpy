@@ -602,8 +602,8 @@ gameui {
                 position: absolute;
                 top: 50%;
                 border: 3px solid black; // colour overridden inline with the frog's own
-                background-color: rgba(black, 0.55);
-                box-shadow: 0 2px 6px rgba(black, 0.75);
+                background-color: rgba(black, 0.6);
+                box-shadow: 0 2px 6px rgba(black, 0.8);
                 align-items: center;
                 justify-content: center;
 
@@ -641,10 +641,7 @@ gameui {
                 }
 
                 &.local {
-                    // Held on the rail line while its cluster fans around it, so it has to draw
-                    // over the badges that slide past it.
                     z-index: 10;
-                    box-shadow: 0 0 10px rgba(white, 0.55);
                 }
 
                 &.dead {
