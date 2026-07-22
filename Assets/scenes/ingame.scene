@@ -78,6 +78,14 @@
             "_type": "gameobject",
             "prefab": "prefabs/tile.prefab"
           },
+          "TrainPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/train.prefab"
+          },
+          "TrainTrackPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefabs/train_track.prefab"
+          },
           "TreePrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/tree.prefab"

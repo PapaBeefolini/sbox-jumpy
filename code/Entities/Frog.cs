@@ -20,8 +20,8 @@ namespace Jumpy
 		private const float idleHopMin = 0.5f;
 		private const float idleHopMax = 1.4f;
 
-		// Odds that a given hop ignores oncoming cars — perfect dodging reads as robotic. A bot still
-		// won't leap into water or a wall; that's not "getting hit by a car".
+		// Odds that a given hop ignores oncoming traffic — perfect dodging reads as robotic. A bot
+		// still won't leap into water or a wall; that's not "getting hit by a car".
 		private const float botRecklessMin = 0.04f;
 		private const float botRecklessMax = 0.18f;
 
@@ -34,7 +34,7 @@ namespace Jumpy
 
 		private const float cameraDistance = 800f;
 		private const float cameraFollowRate = 4f;
-		private const float baseFieldOfView = 75f;
+		private const float baseFieldOfView = 70f;
 
 		// The HUD's death card counts this exact value down, so it lives here rather than in both.
 		public const float DeathHoldSeconds = 3.0f;
@@ -46,8 +46,8 @@ namespace Jumpy
 		private const float deathDriftHeight = 90f;
 
 		private static readonly Vector3 jumpClearance = Vector3.Up * 33;
-		private static readonly string[] ignoreTags = { "player", "car" };
-		private static readonly string[] wallIgnoreTags = { "player", "car", "log" };
+		private static readonly string[] ignoreTags = { "player", "car", "train" };
+		private static readonly string[] wallIgnoreTags = { "player", "car", "train", "log" };
 		private static readonly Vector3[] allDirections = { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right };
 
 		private const float nameColorFloor = 0.85f;
@@ -215,6 +215,9 @@ namespace Jumpy
 
 			if ( other.Tags.Has( "car" ) )
 				_ = Die( DeathType.Car );
+
+			if ( other.Tags.Has( "train" ) )
+				_ = Die( DeathType.Train );
 		}
 
 		[Rpc.Broadcast]
@@ -468,7 +471,7 @@ namespace Jumpy
 
 		private float GetKillBorder() => (Manager.Instance.WorldWidthY / 2) + Manager.TileSize;
 
-		// A reckless hop skips the traffic check only — water and walls stay fatal, so it's a car
+		// A reckless hop skips the traffic check only — water and walls stay fatal, so it's a traffic
 		// gamble rather than a suicide.
 		private bool IsHopSafe( Vector3 direction, bool ignoreTraffic = false )
 		{
@@ -550,6 +553,18 @@ namespace Jumpy
 					return true;
 			}
 
+			// A train crosses the whole world in under half a second, so the car's "will it arrive
+			// within exposureTime" window doesn't transfer — anything close enough to time a hop
+			// against is already on top of you. Any train still running on the row means wait.
+			foreach ( MovingEntity train in Scene.GetAllComponents<MovingEntity>() )
+			{
+				if ( !train.GameObject.Tags.Has( "train" ) )
+					continue;
+
+				if ( float.Abs( train.WorldPosition.x - target.x ) <= rowTolerance )
+					return true;
+			}
+
 			return false;
 		}
 
@@ -614,7 +629,7 @@ namespace Jumpy
 			UpdateAppearance( IsDead );
 			SpawnDeathParticles( deathType, WorldPosition );
 			AddCameraShake( deathShakeTrauma );
-			NotifyChatMessage( $"☠️ {(IsBot ? BotName : Network.Owner.DisplayName)} {(deathType == DeathType.Car ? "got flattened" : "drowned")}!" );
+			NotifyChatMessage( $"☠️ {(IsBot ? BotName : Network.Owner.DisplayName)} {DeathVerb( deathType )}!" );
 
 			// Fired and forgotten, so a hold cut short by a round restart still wakes up later. Without
 			// the ticket it would respawn the frog out from under a newer death.
@@ -631,12 +646,22 @@ namespace Jumpy
 			Manager.Instance.RespawnFrog( this );
 		}
 
+		private static string DeathVerb( DeathType deathType ) => deathType switch
+		{
+			DeathType.Car => "got flattened",
+			DeathType.Train => "got railroaded",
+			DeathType.Drift => "floated away",
+			_ => "drowned"
+		};
+
 		[Rpc.Broadcast]
 		private void SpawnDeathParticles( DeathType deathType, Vector3 position )
 		{
 			switch ( deathType )
 			{
+				// Flattened either way, so the train reuses the car's splat.
 				case DeathType.Car:
+				case DeathType.Train:
 					DeathParticlesCar.Clone( position + Vector3.Up * 8 );
 					break;
 

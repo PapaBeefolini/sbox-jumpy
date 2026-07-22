@@ -26,6 +26,8 @@ namespace Jumpy
 		[Property] public GameObject CarPrefab { get; set; }
 		[Property] public GameObject RoadPrefab { get; set; }
 		[Property] public GameObject BigRoadPrefab { get; set; }
+		[Property] public GameObject TrainTrackPrefab { get; set; }
+		[Property] public GameObject TrainPrefab { get; set; }
 
 		[Property] public GameObject LogPrefab { get; set; }
 		[Property] public GameObject LillyPrefab { get; set; }
@@ -247,6 +249,7 @@ namespace Jumpy
 
 			int roadFreq = Game.Random.Int( 8 );
 			int bigRoadFreq = Game.Random.Int( 12 );
+			int trainFreq = Game.Random.Int( 20 );
 			int riverFreq = Game.Random.Int( 12 );
 			int lillyFreq = Game.Random.Int( 16 );
 
@@ -268,6 +271,7 @@ namespace Jumpy
 			{
 				roadFreq--;
 				bigRoadFreq--;
+				trainFreq--;
 				riverFreq--;
 				lillyFreq--;
 
@@ -350,6 +354,18 @@ namespace Jumpy
 							SpawnRoadLane( x, flipped );
 
 						bigRoadFreq = Game.Random.Int( 32 );
+						continue;
+					}
+
+					if ( trainFreq <= 0 && !rowWasRoad && !checkpointAhead )
+					{
+						rowWasRoad = true;
+						CreateRoad( TrainTrackPrefab, x * TileSize );
+						SpawnTrainLane( x, Game.Random.Int( 1 ) == 1 );
+
+						x++;
+
+						trainFreq = Game.Random.Int( 40 );
 						continue;
 					}
 
@@ -441,6 +457,9 @@ namespace Jumpy
 
 		private void SpawnRoadLane( int row, bool flipped )
 			=> SpawnLane( row, 30, Rotation.FromYaw( flipped ? 90 : -90 ), CarPrefab, 0.9f, 5, flipped );
+
+		private void SpawnTrainLane( int row, bool flipped )
+			=> SpawnLane( row, 0, Rotation.FromYaw( flipped ? 180 : 0 ), TrainPrefab, 4, 7, flipped );
 
 		// Spawners sit off the far edge of the world and feed entities across it.
 		private void SpawnLane( int row, float height, Rotation rotation, GameObject prefab, float delayMin, float delayMax, bool flipped )

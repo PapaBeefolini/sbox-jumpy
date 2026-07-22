@@ -692,12 +692,13 @@
 
 	private string DeathCause => shownDeathType switch
 	{
+		DeathType.Train => "RUN DOWN BY A TRAIN",
 		DeathType.Water => "YOU FELL IN THE WATER",
 		DeathType.Drift => "YOUR LOG FLOATED OFF THE MAP",
 		_ => "FLATTENED BY A CAR"
 	};
 
-	private string DeathClass => shownDeathType == DeathType.Car ? "splat" : "splash";
+	private string DeathClass => shownDeathType is DeathType.Car or DeathType.Train ? "splat" : "splash";
 
 	// Must mirror Manager.RespawnFrog's rule, or the card lies about where you're going.
 	private string RespawnLabel( Frog frog )
