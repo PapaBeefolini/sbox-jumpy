@@ -556,11 +556,8 @@ namespace Jumpy
 			// A train crosses the whole world in under half a second, so the car's "will it arrive
 			// within exposureTime" window doesn't transfer — anything close enough to time a hop
 			// against is already on top of you. Any train still running on the row means wait.
-			foreach ( MovingEntity train in Scene.GetAllComponents<MovingEntity>() )
+			foreach ( Train train in Scene.GetAllComponents<Train>() )
 			{
-				if ( !train.GameObject.Tags.Has( "train" ) )
-					continue;
-
 				if ( float.Abs( train.WorldPosition.x - target.x ) <= rowTolerance )
 					return true;
 			}
