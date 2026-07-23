@@ -25,6 +25,14 @@ namespace Jumpy
 		private const float botRecklessMin = 0.04f;
 		private const float botRecklessMax = 0.18f;
 
+		// Odds that a hop peels off to one side even though the way forward is open. Frogs that only
+		// ever go straight funnel into the same column and cross as one clump; a little lateral wander
+		// spreads the pack across the course. The side is only taken when it's genuinely safe and
+		// still leads onward, so this never trades progress for shuffling -- it just picks a different
+		// open tile now and then. Rolled once per frog so some weave and some make a beeline.
+		private const float botWanderMin = 0.12f;
+		private const float botWanderMax = 0.30f;
+
 		// How close to the kill border a log rider gets before it stops waiting for the way forward to
 		// clear and takes whatever escape hop it can find.
 		private const float botDriftBailoutTime = 2.0f;
@@ -140,6 +148,7 @@ namespace Jumpy
 		private float nextIdleHopTime;
 		private bool reroutingSideways;
 		private float botRecklessness = -1f;
+		private float botWanderlust = -1f;
 		private Vector3 abandonedTile;
 		private RealTimeSince abandonedAt;
 
@@ -413,7 +422,11 @@ namespace Jumpy
 			if ( botRecklessness < 0f )
 				botRecklessness = Game.Random.Float( botRecklessMin, botRecklessMax );
 
+			if ( botWanderlust < 0f )
+				botWanderlust = Game.Random.Float( botWanderMin, botWanderMax );
+
 			bool reckless = Game.Random.Float() < botRecklessness;
+			bool wander = Game.Random.Float() < botWanderlust;
 			Vector3 sideFirst = Game.Random.Int( 1 ) == 0 ? Vector3.Left : Vector3.Right;
 
 			// A log rider only considers forward. Sideways there just slides it along the log it's
@@ -436,6 +449,8 @@ namespace Jumpy
 				choices = new[] { Vector3.Forward };
 			else if ( reroutingSideways )
 				choices = new[] { sideFirst, -sideFirst, Vector3.Forward, Vector3.Backward };
+			else if ( wander )
+				choices = new[] { sideFirst, Vector3.Forward, -sideFirst, Vector3.Backward };
 			else
 				choices = new[] { Vector3.Forward, sideFirst, -sideFirst, Vector3.Backward };
 
