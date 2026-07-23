@@ -136,8 +136,10 @@ namespace Jumpy
 
 			var frogs = Scene.GetAllComponents<Frog>().ToList();
 
-			// CheckpointIndex is synced and monotonic, so it's up to date on the owning client by
-			// the time its delayed respawn fires.
+			// CheckpointIndex is FromHost, so this write replicates from here (the host) to the frog's
+			// owner — including remote clients we're only a proxy for — and is up to date on that client
+			// by the time its delayed, owner-side respawn reads it. A plain Sync would be owner-authored
+			// and this write would never leave the host, stranding client frogs back at the start pen.
 			foreach ( Frog frog in frogs )
 			{
 				for ( int i = CheckpointXs.Count - 1; i > frog.CheckpointIndex; i-- )

@@ -101,7 +101,12 @@ namespace Jumpy
 		[Sync] public float LastJumpTime { get; set; }
 
 		// Furthest checkpoint band reached this run; -1 means none yet (respawn back at the start pen).
-		[Sync] public int CheckpointIndex { get; set; } = -1;
+		// FromHost, not plain Sync: only the host detects band crossings (Manager.OnUpdate), and it does
+		// so for every frog including ones it doesn't own. A plain Sync is owner-authored, so the host's
+		// write to a remote client's frog — where the host is a proxy — never reaches that client, and its
+		// owner-side respawn reads a stale -1 and drops back to the start pen. Host authority replicates
+		// the write to the owning client so its respawn lands on the right band.
+		[Sync( SyncFlags.FromHost )] public int CheckpointIndex { get; set; } = -1;
 
 		[Sync] public DeathType LastDeathType { get; set; } = DeathType.Car;
 
