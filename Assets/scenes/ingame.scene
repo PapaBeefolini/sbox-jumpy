@@ -26,12 +26,10 @@
             "_type": "gameobject",
             "prefab": "prefabs/big-road.prefab"
           },
-          "BotCount": 3,
           "CarPrefab": {
             "_type": "gameobject",
             "prefab": "prefabs/car.prefab"
           },
-          "CheckpointCount": 2,
           "CountdownSeconds": 5,
           "FenceOpenSound": "sounds/fence_open.sound",
           "FencePrefab": {

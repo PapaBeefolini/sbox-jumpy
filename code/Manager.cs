@@ -11,6 +11,16 @@ namespace Jumpy
 
 		public const int TileSize = 96;
 		private const float recentSpawnMemory = 5f;
+		private const int maxBots = 10;
+		private const int maxCheckpoints = 5;
+
+		[ConVar( "bot_count", ConVarFlags.GameSetting, Help = "How many bot frogs race alongside the players" )]
+		[Range( 0, maxBots ), Step( 1 ), Title( "Bots" )]
+		public static int BotCount { get; set; } = 3;
+
+		[ConVar( "checkpoint_count", ConVarFlags.GameSetting, Help = "Safe bands along the run that become respawn points." )]
+		[Range( 0, maxCheckpoints ), Step( 1 ), Title( "Checkpoints" )]
+		public static int CheckpointCount { get; set; } = 2;
 
 		private static readonly string[] botNames =
 		{
@@ -39,8 +49,6 @@ namespace Jumpy
 
 		[Property] public GameObject SpawnerPrefab { get; set; }
 
-		[Property, Group( "Bots" )] public int BotCount { get; set; } = 3;
-
 		[Property, Group( "Start Area" )] public int StartAreaWidth { get; set; } = 8;
 		[Property, Group( "Start Area" )] public int StartAreaDepth { get; set; } = 3;
 		[Property, Group( "Start Area" )] public float CountdownSeconds { get; set; } = 5f;
@@ -50,10 +58,6 @@ namespace Jumpy
 		// Measured in tiles. Width spans side-to-side (Y axis); height runs from start to finish (X axis).
 		[Property, Group( "World" )] public int WorldWidth { get; set; } = 28;
 		[Property, Group( "World" )] public int WorldHeight { get; set; } = 96;
-
-		// Safe bands spaced evenly along the run. Reaching one becomes your respawn point, so
-		// death only costs the segment since your last checkpoint.
-		[Property, Group( "World" )] public int CheckpointCount { get; set; } = 2;
 
 		[Sync] public bool IsGameActive { get; set; }
 		[Sync] public bool IsGameOver { get; set; }
@@ -416,10 +420,11 @@ namespace Jumpy
 		{
 			float finishX = (WorldHeight - 1) * TileSize;
 			var rows = new HashSet<int>();
+			int count = int.Clamp( CheckpointCount, 0, maxCheckpoints );
 
-			for ( int i = 0; i < CheckpointCount; i++ )
+			for ( int i = 0; i < count; i++ )
 			{
-				float frac = (i + 1f) / (CheckpointCount + 1f);
+				float frac = (i + 1f) / (count + 1f);
 				int row = (int)float.Round( (StartAreaMaxX + frac * (finishX - StartAreaMaxX)) / TileSize );
 
 				rows.Add( int.Clamp( row, areaDepth, WorldHeight - 2 ) );
@@ -495,7 +500,7 @@ namespace Jumpy
 				return;
 
 			var bots = Scene.GetAllComponents<Frog>().Where( f => f.IsBot ).ToList();
-			int target = int.Max( 0, BotCount );
+			int target = int.Clamp( BotCount, 0, maxBots );
 
 			for ( int i = bots.Count; i < target; i++ )
 				SpawnBot( i );
