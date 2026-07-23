@@ -143,8 +143,8 @@ namespace Jumpy
 
 		protected override void OnAwake()
 		{
-			renderer = Components.Get<SkinnedModelRenderer>();
-			collider = Components.Get<SphereCollider>();
+			renderer = GetComponent<SkinnedModelRenderer>( true );
+			collider = GetComponent<SphereCollider>( true );
 			colliderCenter = collider.Center;
 		}
 
