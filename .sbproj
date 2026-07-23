@@ -51,7 +51,7 @@
         "PostLaunchCommand": ""
       }
     ],
-    "StartupScene": "scenes/main.scene",
+    "StartupScene": "scenes/ingame.scene",
     "LaunchMode": "QuickPlay"
   }
 }
