@@ -1,19 +1,653 @@
-﻿gameui {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	right: 0px;
-	bottom: 0px;
-	font-family: Poppins;
+gameui {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    font-family: Poppins;
 
-	label {
-		font-size: 96px;
-		font-weight: bold;
-		color: #b6ff00;
-		text-shadow: 4px 4px 0 black;
-		width: 100%;
-		height: 100%;
-		text-align: center;
-		align-items: center;
-	}
+    .gameover {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(black, 0.8);
+        transition: opacity 0.3s ease-out;
+
+        &:intro {
+            opacity: 0;
+        }
+    }
+
+    .go-header {
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 34px;
+
+        .go-title {
+            .ttext {
+                font-size: 72px;
+                font-weight: bold;
+                color: #b6ff00;
+                text-shadow: 5px 5px 0 black;
+                letter-spacing: 4px;
+            }
+
+            &.win .ttext {
+                color: #ffd54a;
+                animation: go-win-pulse 1.2s 0.7s ease-in-out infinite;
+            }
+        }
+
+        .go-winner {
+            flex-direction: row;
+            align-items: center;
+            margin-top: 6px;
+
+            .crown {
+                font-size: 20px;
+                font-weight: bold;
+                color: #ffd54a;
+                letter-spacing: 5px;
+                text-shadow: 2px 2px 0 black;
+                margin-right: 14px;
+            }
+
+            .wname {
+                font-size: 40px;
+                font-weight: bold;
+                text-shadow: 2.5px 2.5px 0 black;
+            }
+        }
+    }
+
+    .podium {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .slot {
+        flex-direction: column;
+        align-items: center;
+        margin: 0 16px;
+
+        .pillar-top {
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 12px;
+
+            .avatar {
+                width: 84px;
+                height: 84px;
+                border-radius: 128px;
+                border: 4px solid white;
+                background-color: rgba(black, 0.6);
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 3px 6px rgba(black, 0.6);
+
+                .frog-icon {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 32px;
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }
+            }
+
+            .sname {
+                margin-top: 8px;
+                font-size: 22px;
+                font-weight: bold;
+                // Overridden inline with the frog's own colour; this is only the fallback.
+                color: white;
+                text-shadow: 2px 2px 0 black;
+                white-space: nowrap;
+            }
+
+            .sprog {
+                font-size: 16px;
+                font-weight: bold;
+                color: #d5ff6b;
+                text-shadow: 1px 1px 0 black;
+            }
+        }
+
+        .pillar {
+            width: 128px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px 8px 0 0;
+            background-color: black;
+            box-shadow: 0 2px 16px rgba(black, 0.6);
+
+            .place {
+                font-size: 32px;
+                font-weight: bold;
+                color: rgba(0, 0, 0, 0.6);
+                text-shadow: 0px 1px 0 rgba(white, 0.3);
+            }
+        }
+        // Winner - taller, gold, glowing.
+        &.rank-1 {
+            .avatar {
+                width: 112px;
+                height: 112px;
+                border-radius: 128px;
+                border-width: 4px;
+                animation: go-glow 1.5s ease-in-out infinite;
+
+                .frog-icon {
+                    width: 92px;
+                    height: 92px;
+                    border-radius: 72px;
+                }
+            }
+
+            // Gold used to mark the winner's name; the frog's own colour does that job now,
+            // and the gold pillar below still reads as first place.
+            .sname {
+                font-size: 28px;
+            }
+
+            .sprog {
+                font-size: 16px;
+            }
+
+            .pillar {
+                width: 164px;
+                height: 168px;
+                background-image: linear-gradient(to top, #f5b301, #ffe27a);
+            }
+        }
+
+        &.rank-2 {
+            .pillar {
+                height: 128px;
+                background-image: linear-gradient(to top, #aeb4c2, #eef0f5);
+            }
+        }
+
+        &.rank-3 {
+            .pillar {
+                height: 96px;
+                background-image: linear-gradient(to top, #a96a35, #e0995a);
+            }
+        }
+
+        // The name itself now carries the frog's colour, so "this one is you" needs its own
+        // cue - a lime glow behind the letters, echoing the lime border on the .orow rows.
+        &.local .sname {
+            text-shadow: 2px 2px 0 black, 0 0 14px;
+        }
+
+        &.dead .pillar-top {
+            opacity: 0.5;
+        }
+    }
+
+    // Never scrolls - there's no pointer during a round, so anything out of view is unreachable.
+    // Rows are sized to fit instead, and the list splits into two columns once there are enough
+    // of them (the split itself is decided in code, see OtherColumns).
+    .others {
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 24px;
+
+        .ocol {
+            flex-direction: column;
+            width: 480px;
+        }
+
+        &.two-col .ocol {
+            width: 372px;
+            margin: 0 6px;
+        }
+
+        // Rows slide in one after another; the stagger is set inline per row (Reveal).
+        .orow {
+            flex-direction: row;
+            align-items: center;
+            flex-shrink: 0;
+            padding: 4px 12px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.42);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+
+            .orank {
+                width: 28px;
+                font-size: 16px;
+                font-weight: bold;
+                color: #d5ff6b;
+                text-shadow: 2px 2px 0 black;
+            }
+
+            .oavatar {
+                width: 30px;
+                height: 30px;
+                border-radius: 16px;
+                border: 2px solid white;
+                background-color: rgba(0, 0, 0, 0.55);
+                align-items: center;
+                justify-content: center;
+
+                .frog-icon {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 12px;
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }
+            }
+
+            .oname {
+                flex-grow: 1;
+                margin-left: 10px;
+                font-size: 15px;
+                font-weight: bold;
+                color: white;
+                text-shadow: 2px 2px 0 black;
+                white-space: nowrap;
+                // Long names truncate rather than shoving the percentage out of the row.
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .oprog {
+                font-size: 14px;
+                font-weight: bold;
+                color: #b6ff00;
+                text-shadow: 1px 1px 0 black;
+            }
+
+            // The lime border carries "this one is you" on its own now that .oname is tinted
+            // with the frog's colour inline.
+            &.local {
+                border: 2px solid #b6ff00;
+            }
+
+            &.dead {
+                opacity: 0.5;
+            }
+        }
+    }
+
+    .next-round {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 28px;
+
+        .nr-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px 0 black;
+        }
+
+        .nr-time {
+            font-size: 38px;
+            font-weight: bold;
+            color: #b6ff00;
+            text-shadow: 3px 3px 0 black;
+            margin-top: -2px;
+        }
+
+        .nr-bar {
+            width: 320px;
+            height: 12px;
+            margin-top: 4px;
+            border-radius: 4px;
+            background-color: rgba(black, 0.6);
+            border: 2px solid rgba(white, 0.2);
+
+            .nr-fill {
+                height: 100%;
+                border-radius: 4px;
+                background-image: linear-gradient(to right, #7ac70c, #b6ff00);
+            }
+        }
+    }
+
+    @keyframes go-win-pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.07);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes go-glow {
+        0% {
+            box-shadow: 0 0 12px rgba(255, 213, 74, 0.7);
+        }
+
+        50% {
+            box-shadow: 0 0 28px rgba(255, 213, 74, 1);
+        }
+
+        100% {
+            box-shadow: 0 0 12px rgba(255, 213, 74, 0.7);
+        }
+    }
+
+    .countdown {
+        position: absolute;
+        top: 10%;
+        left: 0px;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        pointer-events: none;
+
+        .count-number {
+            font-size: 72px;
+            font-weight: bold;
+            color: #b6ff00;
+            text-shadow: 3px 3px 0 black;
+            animation: count-pulse 1s ease-out infinite;
+        }
+
+        .count-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 6px;
+            text-shadow: 2px 2px 0 black;
+            margin-top: -6px;
+        }
+
+        &.go .count-number {
+            color: #ffe27a;
+            animation: count-go 0.6s ease-out both;
+        }
+    }
+
+    @keyframes count-pulse {
+        0% {
+            opacity: 0;
+            transform: scale(0.6);
+        }
+
+        30% {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        55% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes count-go {
+        0% {
+            opacity: 0;
+            transform: scale(0.4);
+        }
+
+        40% {
+            opacity: 1;
+            transform: scale(1.35);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .checkpoint-banner {
+        position: absolute;
+        top: 10%;
+        left: 0px;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: none;
+
+        .cp-title {
+            font-size: 38px;
+            font-weight: bold;
+            color: #b6ff00;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 0 black;
+        }
+
+        .cp-sub {
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px 0 black;
+            margin-top: -2px;
+        }
+    }
+
+    // No transition/:intro here: opacity and transform are written inline every frame.
+    .death-card {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(black, 0.8);
+        pointer-events: none;
+
+        .dc-panel {
+            flex-direction: column;
+            align-items: center;
+            padding: 64px 192px;
+            border-radius: 12px;
+            background-color: rgba(black, 0.8);
+            border: 2px solid rgba(black, 0.6);
+        }
+
+        .dc-title {
+            font-size: 64px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-shadow: 4px 4px 0 black;
+
+            &.splat {
+                color: #ff4d4d;
+            }
+
+            &.splash {
+                color: #4ec3ff;
+            }
+        }
+
+        .dc-cause {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 5px;
+            text-shadow: 3px 3px 0 black;
+            margin-top: -4px;
+        }
+
+        .dc-timer {
+            flex-direction: column;
+            align-items: center;
+            margin-top: 26px;
+
+            .dc-label {
+                font-size: 12px;
+                font-weight: bold;
+                color: white;
+                letter-spacing: 5px;
+                text-shadow: 2px 2px 0 black;
+            }
+
+            .dc-time {
+                font-size: 52px;
+                font-weight: bold;
+                color: #b6ff00;
+                text-shadow: 3px 3px 0 black;
+                margin-top: -4px;
+            }
+        }
+
+        .dc-where {
+            font-size: 12px;
+            font-weight: bold;
+            color: #d5ff6b;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 0 black;
+            margin-top: 6px;
+        }
+    }
+
+    .race-track {
+        position: absolute;
+        // The rail line lands 21px below this, and a cluster can fan MaxFanUp above that with a
+        // half a badge on top of it again - low enough that the highest badge stays on screen.
+        // Keep in step with MaxFanUp and LocalBadge in the razor.
+        top: 30px;
+        left: 20%;
+        right: 20%;
+        height: 42px;
+        flex-direction: row;
+        align-items: center;
+
+        .cap {
+            flex-shrink: 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 0 black;
+            letter-spacing: 2px;
+            padding: 4px 12px;
+            border-radius: 8px;
+            background-color: rgba(black, 0.6);
+            border: 2px solid rgba(black, 0.6);
+
+            &.start {
+                color: #d5ff6b;
+                box-shadow: 0 0 8px rgba(black, 0.6);
+            }
+
+            &.finish {
+                color: #d5ff6b;
+                border-color: rgba(#d5ff6b, 0.6);
+                box-shadow: 0 0 8px rgba(#d5ff6b, 0.6);
+            }
+        }
+
+        .rail {
+            position: relative;
+            height: 16px;
+            flex-grow: 1;
+            margin: 0 12px;
+            border-radius: 4px;
+            background-color: rgba(black, 0.6);
+            border: 2px solid rgba(black, 0.6);
+            border-top-color: rgba(white, 0.4);
+
+            .rail-fill {
+                position: absolute;
+                left: 0px;
+                top: 0px;
+                bottom: 0px;
+                border-radius: 4px;
+                background-image: linear-gradient(to right, rgba(122, 199, 12, 0.35), rgba(182, 255, 0, 0.85));
+                box-shadow: 0 0 12px rgba(182, 255, 0, 0.5);
+            }
+
+            .checkpoint-tick {
+                position: absolute;
+                top: -6px;
+                bottom: -6px;
+                width: 8px;
+                margin-left: -4px;
+                border: 1px solid rgba(black, 0.6);
+                border-radius: 2px;
+                background-color: #b6ff00;
+
+                &.reached {
+                    background-color: #b6ff00;
+                    box-shadow: 0 0 12px rgba(#b6ff00, 0.8);
+                }
+            }
+
+            // Size, radius, ring colour and the cluster's vertical offset all arrive inline - a
+            // badge shrinks as its cluster grows, so only what holds still lives here. The negative
+            // margins that centre it on left: progress% are written inline too, since they depend
+            // on whatever size it's drawing at this frame.
+            .marker {
+                position: absolute;
+                top: 50%;
+                border: 3px solid black; // colour overridden inline with the frog's own
+                background-color: rgba(black, 0.6);
+                box-shadow: 0 2px 6px rgba(black, 0.8);
+                align-items: center;
+                justify-content: center;
+
+                .frog-icon {
+                    // Sized inline to match the badge it sits in.
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                }
+
+                // The badge it hangs under has no fixed width to centre against, so the name sits in
+                // a generous box of its own, centred on the badge with a negative margin. The box is
+                // wider than any name will draw - it's a centring frame, not a bound - and the label
+                // is centred inside it by flex, since text-align doesn't do it here. Opacity is
+                // written inline, ramping with how much clear air the badge has.
+                .pname {
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    width: 140px;
+                    margin-left: -70px;
+                    margin-top: 3px;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+
+                    .ptext {
+                        font-size: 12px;
+                        font-weight: bold;
+                        // Overridden inline with the frog's own colour; this is only the fallback.
+                        color: white;
+                        text-shadow: 1px 1px 0 black;
+                        white-space: nowrap;
+                    }
+                }
+
+                &.local {
+                    z-index: 10;
+                }
+
+                &.dead {
+                    opacity: 0.4;
+                }
+            }
+        }
+    }
 }

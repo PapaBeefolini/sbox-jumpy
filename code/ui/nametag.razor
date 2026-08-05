@@ -1,11 +1,12 @@
-﻿@using Sandbox;
+@using System
+@using Sandbox;
 @inherits PanelComponent
 @namespace Jumpy
 
-@if (frog.IsValid() && !frog.IsDead && Network.Owner is Connection owner && owner != Connection.Local)
+@if (frog.IsValid() && !frog.IsDead && Label() is string label)
 {
 	<root>
-		<div class="name">@owner.DisplayName</div>
+		<div class="name" style="color: @frog.NameColor.Hex;">@label</div>
 	</root>
 }
 
@@ -16,8 +17,21 @@
 	protected override void OnEnabled()
 	{
 		base.OnEnabled();
+
 		frog = GameObject.Components.GetInAncestorsOrSelf<Frog>();
 	}
 
-	protected override int BuildHash() => System.HashCode.Combine(Network.Owner, !frog?.IsDead);
+	// Bots always show their name; players show theirs to everyone but themselves.
+	private string Label()
+	{
+		if ( frog.IsBot )
+			return string.IsNullOrEmpty( frog.BotName ) ? "Bot" : frog.BotName;
+
+		if ( Network.Owner is Connection owner && owner != Connection.Local )
+			return owner.DisplayName;
+
+		return null;
+	}
+
+	protected override int BuildHash() => HashCode.Combine( Network.Owner, frog?.IsBot, frog?.BotName, !frog?.IsDead, frog?.ColorIndex );
 }

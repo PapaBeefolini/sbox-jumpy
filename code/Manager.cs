@@ -1,5 +1,5 @@
 using Sandbox;
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,12 +7,39 @@ namespace Jumpy
 {
 	public sealed class Manager : Component, Component.INetworkListener
 	{
+		public static Manager Instance { get; private set; }
+
+		public const int TileSize = 96;
+		private const float recentSpawnMemory = 5f;
+		private const int maxBots = 10;
+		private const int maxCheckpoints = 5;
+
+		[ConVar( "bot_count", ConVarFlags.GameSetting, Help = "How many bot frogs race alongside the players" )]
+		[Range( 0, maxBots ), Step( 1 ), Title( "Bots" )]
+		public static int BotCount { get; set; } = 3;
+
+		[ConVar( "checkpoint_count", ConVarFlags.GameSetting, Help = "Safe bands along the run that become respawn points." )]
+		[Range( 0, maxCheckpoints ), Step( 1 ), Title( "Checkpoints" )]
+		public static int CheckpointCount { get; set; } = 2;
+
+		private static readonly string[] botNames =
+		{
+			"Hopper", "Ribbit", "Croak", "Lily", "Tad",
+			"Splash", "Bouncer", "Wart", "Puddles", "Bulls-eye"
+		};
+
 		[Property] public GameObject PlayerPrefab { get; set; }
 		[Property] public GameObject TilePrefab { get; set; }
+
+		[Property] public GameObject FencePrefab { get; set; }
+
+		[Property] public SoundEvent FenceOpenSound { get; set; }
 
 		[Property] public GameObject CarPrefab { get; set; }
 		[Property] public GameObject RoadPrefab { get; set; }
 		[Property] public GameObject BigRoadPrefab { get; set; }
+		[Property] public GameObject TrainTrackPrefab { get; set; }
+		[Property] public GameObject TrainPrefab { get; set; }
 
 		[Property] public GameObject LogPrefab { get; set; }
 		[Property] public GameObject LillyPrefab { get; set; }
@@ -22,15 +49,45 @@ namespace Jumpy
 
 		[Property] public GameObject SpawnerPrefab { get; set; }
 
-		[Sync] public bool IsGameActive { get; set; } = false;
-		[Sync] public bool IsGameOver { get; set; } = false;
+		[Property, Group( "Start Area" )] public int StartAreaWidth { get; set; } = 8;
+		[Property, Group( "Start Area" )] public int StartAreaDepth { get; set; } = 3;
+		[Property, Group( "Start Area" )] public float CountdownSeconds { get; set; } = 5f;
 
-		private int worldLength = 64;
-		private int worldWidth = 28;
-		private int tileSize = 96;
-		private int winTilePosition = 0;
-		private bool lastGenerationWasRoad = false;
+		[Property, Group( "Rounds" )] public float RestartDelaySeconds { get; set; } = 10f;
 
+		// Measured in tiles. Width spans side-to-side (Y axis); height runs from start to finish (X axis).
+		[Property, Group( "World" )] public int WorldWidth { get; set; } = 28;
+		[Property, Group( "World" )] public int WorldHeight { get; set; } = 96;
+
+		[Sync] public bool IsGameActive { get; set; }
+		[Sync] public bool IsGameOver { get; set; }
+		[Sync] public float WinTilePosition { get; set; }
+		[Sync] public int CountdownRemaining { get; set; }
+
+		[Sync] public TimeUntil NextRoundStart { get; set; }
+
+		// Start-area pen bounds; frogs are confined inside these until the countdown ends.
+		[Sync] public float StartAreaMinX { get; set; }
+		[Sync] public float StartAreaMaxX { get; set; }
+		[Sync] public float StartAreaMinY { get; set; }
+		[Sync] public float StartAreaMaxY { get; set; }
+
+		// Every walkable tile on every checkpoint band, so a checkpoint respawn picks a random
+		// unoccupied spot on the reached row instead of always the centre.
+		[Sync] public List<Vector3> CheckpointSpawns { get; set; } = new();
+
+		// The X threshold of each band, ascending. Drives reach detection, the HUD ticks, and
+		// which row a frog respawns on (indexed by Frog.CheckpointIndex).
+		[Sync] public List<float> CheckpointXs { get; set; } = new();
+
+		// Spawn spots handed out recently. Respawn RPCs haven't round-tripped during a
+		// round-start burst, so this is what keeps two frogs from being dealt the same spot.
+		private readonly List<(Frog frog, Vector3 position, float time)> recentSpawns = new();
+
+		public float WorldWidthY => WorldWidth * TileSize;
+
+		private SoundPointComponent music;
+		private bool wasGameActive;
 
 		protected override async Task OnLoad()
 		{
@@ -41,10 +98,71 @@ namespace Jumpy
 			{
 				LoadingScreen.Title = "Creating Lobby";
 				await Task.DelayRealtimeSeconds( 0.1f );
-				Networking.CreateLobby();
+				Networking.CreateLobby( new Sandbox.Network.LobbyConfig
+				{
+					MaxPlayers = 8,
+					Name = $"{Connection.Local.DisplayName}'s Game"
+				} );
 			}
 		}
 
+		protected override void OnAwake()
+		{
+			Instance = this;
+			music = GetComponent<SoundPointComponent>();
+		}
+
+		protected override void OnStart()
+		{
+			Mouse.Visibility = MouseVisibility.Hidden;
+
+			wasGameActive = IsGameActive;
+
+			_ = StartNewGame();
+		}
+
+		protected override void OnUpdate()
+		{
+			if ( music.IsValid() )
+				music.Enabled = !IsGameOver;
+
+			if ( FenceOpenSound.IsValid() && IsGameActive && !wasGameActive )
+				Sound.Play( FenceOpenSound );
+
+			wasGameActive = IsGameActive;
+
+			if ( !Networking.IsHost || !IsGameActive )
+				return;
+
+			var frogs = Scene.GetAllComponents<Frog>().ToList();
+
+			// CheckpointIndex is FromHost, so this write replicates from here (the host) to the frog's
+			// owner — including remote clients we're only a proxy for — and is up to date on that client
+			// by the time its delayed, owner-side respawn reads it. A plain Sync would be owner-authored
+			// and this write would never leave the host, stranding client frogs back at the start pen.
+			foreach ( Frog frog in frogs )
+			{
+				for ( int i = CheckpointXs.Count - 1; i > frog.CheckpointIndex; i-- )
+				{
+					if ( frog.WorldPosition.x >= CheckpointXs[i] )
+					{
+						frog.CheckpointIndex = i;
+						break;
+					}
+				}
+			}
+
+			// The flag is synced, so proxy clients show the winner at 100% instead of trusting
+			// their lagging interpolated position, which reads just short of the finish.
+			var finishers = frogs.Where( frog => frog.WorldPosition.x >= WinTilePosition ).ToList();
+			if ( finishers.Count > 0 )
+			{
+				foreach ( Frog frog in finishers )
+					frog.HasFinished = true;
+
+				_ = EndGame();
+			}
+		}
 
 		public void OnActive( Connection connection )
 		{
@@ -53,42 +171,11 @@ namespace Jumpy
 			if ( PlayerPrefab is null )
 				return;
 
-			var player = PlayerPrefab.Clone( new Transform(Vector3.Up * 100), name: $"Player - {connection.DisplayName}" );
+			var player = PlayerPrefab.Clone( new Transform( Vector3.Up * 100 ), name: $"Player - {connection.DisplayName}" );
 			player.NetworkSpawn( connection );
 
-			Frog frog = player.Components.Get<Frog>();
-			RespawnFrog( frog );
+			RespawnFrog( player.Components.Get<Frog>() );
 		}
-
-
-		protected override void OnStart()
-		{
-			Mouse.Visible = false;
-			_ = StartNewGame();
-		}
-
-
-		protected override void OnUpdate()
-		{
-			/*if ( Input.EscapePressed )
-			{
-				IsGameActive = false;
-				Game.ActiveScene.LoadFromFile( "scenes/main.scene" );
-			}*/
-
-			if ( !Networking.IsHost || !IsGameActive )
-				return;
-
-			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
-			{
-				if ( frog.WorldPosition.x >= winTilePosition )
-				{
-					_ = EndGame();
-					return;
-				}
-			}
-		}
-
 
 		public async Task StartNewGame()
 		{
@@ -97,15 +184,24 @@ namespace Jumpy
 
 			IsGameActive = false;
 			IsGameOver = false;
+			CountdownRemaining = 0;
 
 			GenerateWorld();
+			EnsureBots();
 			RespawnAllFrogs();
 
-			await Task.DelayRealtimeSeconds( 1.5f );
+			// Let the frogs settle onto the start platform before the clock starts.
+			await Task.DelayRealtimeSeconds( 1.0f );
 
+			for ( int seconds = (int)float.Ceiling( CountdownSeconds ); seconds > 0; seconds-- )
+			{
+				CountdownRemaining = seconds;
+				await Task.DelayRealtimeSeconds( 1.0f );
+			}
+
+			CountdownRemaining = 0;
 			IsGameActive = true;
 		}
-
 
 		public async Task EndGame()
 		{
@@ -114,12 +210,53 @@ namespace Jumpy
 
 			IsGameActive = false;
 			IsGameOver = true;
+			NextRoundStart = RestartDelaySeconds;
 
-			await Task.DelayRealtimeSeconds( 3.0f );
+			await Task.DelayRealtimeSeconds( RestartDelaySeconds );
 
 			_ = StartNewGame();
 		}
 
+		public void RespawnFrog( Frog frog )
+		{
+			bool hasCheckpoint = frog.CheckpointIndex >= 0 && frog.CheckpointIndex < CheckpointXs.Count;
+
+			frog.Respawn( hasCheckpoint ? GetCheckpointSpawn( frog ) : GetSpawnPoint( frog ) );
+		}
+
+		public Vector3 GetSpawnPoint( Frog frog )
+		{
+			var spawnPoints = Scene.GetAllComponents<SpawnPoint>().Select( sp => sp.WorldPosition ).ToList();
+
+			return spawnPoints.Count > 0 ? ClaimSpawn( frog, spawnPoints ) : Vector3.Zero;
+		}
+
+		public Vector3 GetCheckpointSpawn( Frog frog )
+		{
+			float rowX = CheckpointXs[frog.CheckpointIndex];
+			var candidates = CheckpointSpawns.Where( p => float.Abs( p.x - rowX ) < 1f ).ToList();
+
+			return candidates.Count > 0 ? ClaimSpawn( frog, candidates ) : new Vector3( rowX, 0, 40 );
+		}
+
+		public bool IsWithinStartArea( Vector3 worldPos )
+		{
+			return worldPos.x >= StartAreaMinX && worldPos.x <= StartAreaMaxX
+				&& worldPos.y >= StartAreaMinY && worldPos.y <= StartAreaMaxY;
+		}
+
+		// Prefers a spot nobody is standing on or was just sent to, and remembers what it handed out.
+		private Vector3 ClaimSpawn( Frog frog, List<Vector3> candidates )
+		{
+			ForgetStaleSpawns( frog );
+
+			var free = candidates.Where( p => !IsSpawnPointOccupied( p, frog ) ).ToList();
+			Vector3 chosen = Game.Random.FromList( free.Count > 0 ? free : candidates );
+
+			recentSpawns.Add( (frog, chosen, Time.Now) );
+
+			return chosen;
+		}
 
 		private void ClearWorld()
 		{
@@ -127,169 +264,176 @@ namespace Jumpy
 				child.Destroy();
 		}
 
-
 		private void GenerateWorld()
 		{
 			ClearWorld();
+			CheckpointSpawns.Clear();
+			CheckpointXs.Clear();
 
 			int roadFreq = Game.Random.Int( 8 );
 			int bigRoadFreq = Game.Random.Int( 12 );
+			int trainFreq = Game.Random.Int( 20 );
 			int riverFreq = Game.Random.Int( 12 );
 			int lillyFreq = Game.Random.Int( 16 );
 
-			for ( int x = 0; x < worldLength; x++ )
+			int halfWidth = WorldWidth / 2;
+
+			int areaDepth = int.Clamp( StartAreaDepth, 1, WorldHeight - 1 );
+			int areaWidth = int.Clamp( StartAreaWidth, 1, WorldWidth );
+			int startColumn = (WorldWidth - areaWidth) / 2;
+
+			// Half-tile slack so frogs can stand on the edge tiles.
+			StartAreaMinX = -TileSize * 0.5f;
+			StartAreaMaxX = (areaDepth - 1) * TileSize + TileSize * 0.5f;
+			StartAreaMinY = (startColumn - halfWidth) * TileSize - TileSize * 0.5f;
+			StartAreaMaxY = (startColumn + areaWidth - 1 - halfWidth) * TileSize + TileSize * 0.5f;
+
+			var checkpointRows = ReserveCheckpointRows( areaDepth );
+
+			for ( int x = 0; x < WorldHeight; x++ )
 			{
 				roadFreq--;
 				bigRoadFreq--;
+				trainFreq--;
 				riverFreq--;
 				lillyFreq--;
 
-				lastGenerationWasRoad = false;
+				bool rowWasRoad = false;
 
-				for ( int y = 0; y < worldWidth; y++ )
+				for ( int y = 0; y < WorldWidth; y++ )
 				{
-					Vector3 currentPosition = new Vector3( x * tileSize, y * tileSize - tileSize * 14, Sandbox.Utility.Noise.Perlin( x * 32, y * 32 ) * 8 );
+					Vector3 currentPosition = new Vector3( x * TileSize, y * TileSize - TileSize * halfWidth, Sandbox.Utility.Noise.Perlin( x * 32, y * 32 ) * 8 );
 
-					// Starter tiles at first row
-					if ( x == 0 )
+					if ( x < areaDepth )
 					{
-						CreateTile( currentPosition, new Color( 0.75f, 1, 0.75f ) );
-						GameObject spawnPoint = new GameObject( true, "SpawnPoint" );
-						spawnPoint.Components.Create<SpawnPoint>();
-						spawnPoint.WorldPosition = currentPosition + Vector3.Up * 32;
-						spawnPoint.SetParent( GameObject );
-						spawnPoint.NetworkSpawn();
+						if ( y >= startColumn && y < startColumn + areaWidth )
+						{
+							CreateTile( currentPosition, new Color( 0.75f, 1, 0.75f ) );
+							CreateSpawnPoint( currentPosition + Vector3.Up * 32 );
+
+							if ( x == areaDepth - 1 )
+								CreateFence( currentPosition.WithX( StartAreaMaxX - 8.0f ) + Vector3.Up * 32.0f );
+						}
 						continue;
 					}
 
-					// Win tiles at last row
-					if ( x >= worldLength - 1 )
+					if ( x >= WorldHeight - 1 )
 					{
 						CreateTile( currentPosition, new Color( 1, 0.75f, 0.75f ) );
-						winTilePosition = (int)currentPosition.x;
+						WinTilePosition = currentPosition.x;
 						continue;
 					}
 
-					// Throw in some jagged edges
-					if ( y <= 1 || y >= 26 )
+					// Handled before the lane rolls so no hazard ever spawns on a checkpoint band
+					// and its X is never mutated.
+					if ( checkpointRows.Contains( x ) )
 					{
-						if ( Game.Random.Int( 1 ) == 1 )
-							continue;
+						CreateTile( currentPosition, new Color( 0.55f, 0.8f, 1f ) );
+						CheckpointSpawns.Add( currentPosition + Vector3.Up * 32 );
+						if ( y == 0 )
+							CheckpointXs.Add( currentPosition.x );
+						continue;
 					}
 
-					// Rivers
-					if ( riverFreq <= 0 )
+					// A multi-row lane runs x++ internally, so it must not start within its span of
+					// a reserved checkpoint row or it would leap over it and swallow the band.
+					bool checkpointAhead = checkpointRows.Contains( x + 1 )
+						|| checkpointRows.Contains( x + 2 )
+						|| checkpointRows.Contains( x + 3 );
+
+					// Jagged edges
+					if ( (y <= 1 || y >= WorldWidth - 2) && Game.Random.Int( 1 ) == 1 )
+						continue;
+
+					if ( riverFreq <= 0 && !checkpointAhead )
 					{
-						for ( int i = 0; i < 2; i++ )
-						{
-							float offset = tileSize * 28;
-							bool flipped = false;
-							if ( i == 1 )
-							{
-								offset = -offset;
-								flipped = true;
-							}
-							GameObject root = SpawnerPrefab.Clone( new Vector3( x * tileSize, offset, 0 ) );
-							EntitySpawner spawner = root.Components.Get<EntitySpawner>();
-							root.SetParent( GameObject );
-							_ = spawner.SpawnEntities( LogPrefab, 3, 9, flipped );
-							x++;
-						}
+						for ( int lane = 0; lane < 2; lane++, x++ )
+							SpawnRiverLane( x, lane == 1 );
+
 						riverFreq = Game.Random.Int( 12 );
 						continue;
 					}
 
-					// Roads
-					if ( roadFreq <= 0 && !lastGenerationWasRoad )
+					if ( roadFreq <= 0 && !rowWasRoad && !checkpointAhead )
 					{
-						lastGenerationWasRoad = true;
+						rowWasRoad = true;
+						CreateRoad( RoadPrefab, x * TileSize + 48 );
 
-						var road = RoadPrefab.Clone( new Vector3( x * tileSize + 48, 0, 0 ) );
-						road.SetParent( GameObject );
-						road.NetworkSpawn();
-						for ( int i = 0; i < 2; i++ )
-						{
-							float offset = tileSize * 28;
-							float angle = -90;
-							bool flipped = false;
-							if ( i == 1 )
-							{
-								offset = -offset;
-								angle = 90;
-								flipped = true;
-							}
-							GameObject root = SpawnerPrefab.Clone( new Vector3( x * tileSize, offset, 30 ), Rotation.FromYaw( angle ) );
-							EntitySpawner spawner = root.Components.Get<EntitySpawner>();
-							root.SetParent( GameObject );
-							_ = spawner.SpawnEntities( CarPrefab, 0.9f, 5, flipped );
-							x++;
-						}
+						for ( int lane = 0; lane < 2; lane++, x++ )
+							SpawnRoadLane( x, lane == 1 );
+
 						roadFreq = Game.Random.Int( 24 );
 						continue;
 					}
 
-					if ( bigRoadFreq <= 0 && !lastGenerationWasRoad )
+					if ( bigRoadFreq <= 0 && !rowWasRoad && !checkpointAhead )
 					{
-						lastGenerationWasRoad = true;
+						rowWasRoad = true;
+						CreateRoad( BigRoadPrefab, x * TileSize + 96 );
 
-						var road = BigRoadPrefab.Clone( new Vector3( x * tileSize + 96, 0, 0 ) );
-						road.SetParent( GameObject );
-						road.NetworkSpawn();
-						float offset = tileSize * 28;
-						float angle = -90;
-						bool flipped = false;
-						if ( Game.Random.Int( 1 ) == 1 )
-						{
-							offset = -offset;
-							angle = 90;
-							flipped = true;
-						}
-						for ( int i = 0; i < 3; i++ )
-						{
-							GameObject root = SpawnerPrefab.Clone( new Vector3( x * tileSize, offset, 30 ), Rotation.FromYaw( angle ) );
-							EntitySpawner spawner = root.Components.Get<EntitySpawner>();
-							root.SetParent( GameObject );
-							_ = spawner.SpawnEntities( CarPrefab, 0.9f, 5, flipped );
-							x++;
-						}
+						// Every lane of a big road runs the same way.
+						bool flipped = Game.Random.Int( 1 ) == 1;
+						for ( int lane = 0; lane < 3; lane++, x++ )
+							SpawnRoadLane( x, flipped );
+
 						bigRoadFreq = Game.Random.Int( 32 );
 						continue;
 					}
 
-					// Lillypads
+					if ( trainFreq <= 0 && !rowWasRoad && !checkpointAhead )
+					{
+						rowWasRoad = true;
+						CreateRoad( TrainTrackPrefab, x * TileSize );
+						SpawnTrainLane( x, Game.Random.Int( 1 ) == 1 );
+
+						x++;
+
+						trainFreq = Game.Random.Int( 40 );
+						continue;
+					}
+
 					if ( lillyFreq <= 0 )
 					{
-						for ( int k = 0; k < worldWidth; k++ )
+						for ( int k = 0; k < WorldWidth; k++ )
 						{
 							if ( Game.Random.Int( 1 ) == 1 )
 								continue;
-							var lilly = LillyPrefab.Clone( new Vector3( x * tileSize, k * tileSize - tileSize * 14, 12 ), Rotation.FromYaw( Game.Random.Float( 0, 360 ) ) );
-							lilly.SetParent( GameObject );
-							lilly.NetworkSpawn();
+
+							CreateDecoration( LillyPrefab, new Vector3( x * TileSize, k * TileSize - TileSize * halfWidth, 12 ), 1f );
 						}
 						lillyFreq = Game.Random.Int( 16 );
 						break;
 					}
 
-					// Regular tiles.
-					CreateTile( currentPosition );
+					CreateTile( currentPosition, Color.White );
 
-					// Obstacles
 					if ( Game.Random.Int( 28 ) == 28 )
-					{
-						var prefab = Game.Random.FromArray( new GameObject[] { TreePrefab, RockPrefab } );
-						CreateDecoration( prefab, new Vector3( currentPosition, 32 ) );
-					}
+						CreateDecoration( Game.Random.FromArray( new[] { TreePrefab, RockPrefab } ), new Vector3( currentPosition, 32 ), Game.Random.Float( 0.8f, 1.2f ) );
 
-					// Misc Debris
 					if ( Game.Random.Int( 24 ) == 24 )
-					{
-						CreateDecoration( PebblesPrefab, new Vector3( currentPosition, 32 ) );
-					}
+						CreateDecoration( PebblesPrefab, new Vector3( currentPosition, 32 ), Game.Random.Float( 0.8f, 1.2f ) );
 				}
 			}
 		}
 
+		// Rows reserved for checkpoint bands, evenly spaced by progress fraction i/(N+1), snapped to a
+		// tile row and kept clear of the start pen and the win row.
+		private HashSet<int> ReserveCheckpointRows( int areaDepth )
+		{
+			float finishX = (WorldHeight - 1) * TileSize;
+			var rows = new HashSet<int>();
+			int count = int.Clamp( CheckpointCount, 0, maxCheckpoints );
+
+			for ( int i = 0; i < count; i++ )
+			{
+				float frac = (i + 1f) / (count + 1f);
+				int row = (int)float.Round( (StartAreaMaxX + frac * (finishX - StartAreaMaxX)) / TileSize );
+
+				rows.Add( int.Clamp( row, areaDepth, WorldHeight - 2 ) );
+			}
+
+			return rows;
+		}
 
 		private void CreateTile( Vector3 position, Color color )
 		{
@@ -299,51 +443,131 @@ namespace Jumpy
 			root.NetworkSpawn();
 		}
 
-
-		private void CreateTile( Vector3 position )
+		private void CreateFence( Vector3 position )
 		{
-			CreateTile( position, Color.White );
+			if ( !FencePrefab.IsValid() )
+				return;
+
+			GameObject fence = FencePrefab.Clone( position );
+			fence.SetParent( GameObject );
+			fence.NetworkSpawn();
 		}
 
-		private void CreateDecoration( GameObject prefab, Vector3 position )
+		private void CreateSpawnPoint( Vector3 position )
 		{
-			var root = prefab.Clone(position, Rotation.FromYaw( Game.Random.Float( 0, 360 ) ), Game.Random.Float( 0.8f, 1.2f ) );
+			GameObject spawnPoint = new GameObject( true, "SpawnPoint" );
+			spawnPoint.Components.Create<SpawnPoint>();
+			spawnPoint.WorldPosition = position;
+			spawnPoint.SetParent( GameObject );
+			spawnPoint.NetworkSpawn();
+		}
+
+		private void CreateDecoration( GameObject prefab, Vector3 position, float scale )
+		{
+			var root = prefab.Clone( position, Rotation.FromYaw( Game.Random.Float( 0, 360 ) ), scale );
 			root.SetParent( GameObject );
 			root.NetworkSpawn();
 		}
 
+		private void CreateRoad( GameObject prefab, float x )
+		{
+			var road = prefab.Clone( new Vector3( x, 0, 0 ) );
+			road.SetParent( GameObject );
+			road.NetworkSpawn();
+		}
+
+		private void SpawnRiverLane( int row, bool flipped )
+			=> SpawnLane( row, 0, Rotation.Identity, LogPrefab, 3, 9, flipped );
+
+		private void SpawnRoadLane( int row, bool flipped )
+			=> SpawnLane( row, 30, Rotation.FromYaw( flipped ? 90 : -90 ), CarPrefab, 0.9f, 5, flipped );
+
+		private void SpawnTrainLane( int row, bool flipped )
+			=> SpawnLane( row, 0, Rotation.FromYaw( flipped ? 180 : 0 ), TrainPrefab, 4, 7, flipped );
+
+		// Spawners sit off the far edge of the world and feed entities across it.
+		private void SpawnLane( int row, float height, Rotation rotation, GameObject prefab, float delayMin, float delayMax, bool flipped )
+		{
+			float y = WorldWidthY * (flipped ? -1 : 1);
+			GameObject root = SpawnerPrefab.Clone( new Vector3( row * TileSize, y, height ), rotation );
+			root.SetParent( GameObject );
+
+			_ = root.Components.Get<EntitySpawner>().SpawnEntities( prefab, delayMin, delayMax, flipped );
+		}
+
+		// Bots live at the scene root (not as Manager children) so they survive world regeneration.
+		private void EnsureBots()
+		{
+			if ( !Networking.IsHost )
+				return;
+
+			var bots = Scene.GetAllComponents<Frog>().Where( f => f.IsBot ).ToList();
+			int target = int.Clamp( BotCount, 0, maxBots );
+
+			for ( int i = bots.Count; i < target; i++ )
+				SpawnBot( i );
+
+			for ( int i = target; i < bots.Count; i++ )
+				bots[i].GameObject.Destroy();
+		}
+
+		private void SpawnBot( int index )
+		{
+			if ( PlayerPrefab is null )
+				return;
+
+			string name = GetBotName( index );
+			var bot = PlayerPrefab.Clone( new Transform( Vector3.Up * 100 ), name: $"Bot - {name}" );
+
+			Frog frog = bot.Components.Get<Frog>();
+			frog.IsBot = true;
+			frog.BotName = name;
+
+			// No owning connection — host-authoritative so every client sees the same bot.
+			bot.NetworkSpawn();
+			RespawnFrog( frog );
+		}
+
+		private static string GetBotName( int index )
+		{
+			return index < botNames.Length ? botNames[index] : $"Frog {index + 1}";
+		}
 
 		private void RespawnAllFrogs()
 		{
 			foreach ( Frog frog in Scene.GetAllComponents<Frog>() )
+			{
+				// A fresh round wipes checkpoint progress so everyone starts back in the pen.
+				frog.CheckpointIndex = -1;
 				RespawnFrog( frog );
+			}
 		}
 
-
-		public void RespawnFrog( Frog frog )
+		private void ForgetStaleSpawns( Frog frog )
 		{
-			frog.Respawn( GetSpawnPoint() );
+			recentSpawns.RemoveAll( entry => !entry.frog.IsValid() || entry.frog == frog || Time.Now - entry.time > recentSpawnMemory );
 		}
 
-
-		public Vector3 GetSpawnPoint()
+		private bool IsSpawnPointOccupied( Vector3 spot, Frog ignore )
 		{
-			var spawnPoint = Scene.GetAllComponents<SpawnPoint>().OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
-			if ( spawnPoint != null )
-				return spawnPoint.WorldPosition;
-			return Vector3.Zero;
-		}
+			float radius = TileSize * 0.5f;
 
+			foreach ( var entry in recentSpawns )
+			{
+				if ( (entry.position - spot).WithZ( 0 ).Length < radius )
+					return true;
+			}
 
-		public float GetWorldWidthY()
-		{
-			return worldWidth * tileSize;
-		}
+			foreach ( Frog other in Scene.GetAllComponents<Frog>() )
+			{
+				if ( other == ignore || other.IsDead )
+					continue;
 
+				if ( (other.WorldPosition - spot).WithZ( 0 ).Length < radius )
+					return true;
+			}
 
-		public float GetTileSize()
-		{
-			return tileSize;
+			return false;
 		}
 	}
 }

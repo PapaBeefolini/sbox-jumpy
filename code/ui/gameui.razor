@@ -1,35 +1,811 @@
-﻿@using System
+@using System
 @using System.Collections.Generic
+@using System.Globalization
 @using System.Linq
-@using System.Threading.Tasks
 @using Sandbox;
-@using Sandbox.Network
+@using Sandbox.UI;
 @inherits PanelComponent
 @namespace Jumpy
 
 <root>
-	@if (IsGameOver)
+	@if (!IsGameOver && Countdown > 0)
 	{
-		<label>Game Over!</label>
+		<div class="countdown">
+			<div class="count-number">@Countdown</div>
+			<div class="count-label">GET READY</div>
+		</div>
+	}
+	else if (!IsGameOver && ShowGo)
+	{
+		<div class="countdown go">
+			<div class="count-number go-text">GO!</div>
+		</div>
+	}
+
+	@if (!IsGameOver && ShowCheckpoint)
+	{
+		<div class="checkpoint-banner" style="@CheckpointStyle()">
+			<div class="cp-title">CHECKPOINT@(CheckpointTotal > 1 ? $" {shownCheckpoint + 1}/{CheckpointTotal}" : "")</div>
+			<div class="cp-sub">RESPAWN POINT SET</div>
+		</div>
+	}
+
+	@if (!IsGameOver)
+	{
+		<div class="race-track">
+			<div class="cap start">START</div>
+			<div class="rail" @ref="railPanel">
+				<div class="rail-fill" style="width: @Percent(LeaderProgress);"></div>
+				@foreach (var tick in CheckpointTicks())
+				{
+					<div class="checkpoint-tick @(tick.Reached ? "reached" : "")" style="left: @Percent(tick.Fraction);"></div>
+				}
+				@foreach (var entry in BuildEntries())
+				{
+					var frog = entry.Frog;
+					<div class="marker @(frog.IsLocalPlayer ? "local" : "") @(frog.IsDead ? "dead" : "")" style="@MarkerStyle(entry)">
+						<div class="frog-icon" style="@IconStyle(entry)"></div>
+						@if (entry.DrawNameAlpha > 0.01f)
+						{
+							<div class="pname" style="opacity: @F(entry.DrawNameAlpha);">
+								<div class="ptext" style="color: @frog.NameColor.Hex;">@GetName(frog)</div>
+							</div>
+						}
+					</div>
+				}
+			</div>
+			<div class="cap finish">FINISH</div>
+		</div>
+	}
+	else
+	{
+		var podium = PodiumOrder();
+		var rest = Ranking.Skip( 3 ).ToList();
+		var winner = Ranking.FirstOrDefault();
+		var localWin = LocalWon;
+
+		<div class="gameover">
+			<div class="go-header">
+				<div class="go-title @(localWin ? "win" : "")" style="@Reveal(0.08f, 0.36f, 0f, -70f, 1.7f)">
+					<div class="ttext">@(localWin ? "YOU WIN!" : "RACE OVER")</div>
+				</div>
+				@if (winner != null)
+				{
+					<div class="go-winner">
+						<div class="crown" style="@Reveal(0.36f, 0.28f, 0f, 0f, 0.2f)">WINNER</div>
+						<div class="wname" style="color: @winner.NameColor.Hex; @Reveal(0.44f, 0.28f, 0f, 0f, 0.2f)">@winner.Name</div>
+					</div>
+				}
+			</div>
+
+			<div class="podium">
+				@foreach (var slot in podium)
+				{
+					var row = slot.Row;
+					var delay = SlotDelay( slot.Rank );
+					<div class="slot rank-@slot.Rank @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")" style="@Reveal(delay, 0.4f, 0f, 120f, 0.8f)">
+						<div class="pillar-top">
+							<div class="avatar" style="border-color: @row.Color.Hex;">
+								<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
+							</div>
+							<div class="sname" style="color: @row.NameColor.Hex;">@row.Name</div>
+							<div class="sprog">@RevealPercent(row.Progress, delay + 0.15f, 0.55f)</div>
+						</div>
+						<div class="pillar">
+							<div class="place" style="@Reveal(delay + 0.28f, 0.28f, 0f, 0f, 0.2f)">@Ordinal(slot.Rank)</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			@if (rest.Count > 0)
+			{
+				var columns = OtherColumns(rest);
+				<div class="others @(columns.Count > 1 ? "two-col" : "")">
+					@foreach (var column in columns)
+					{
+						<div class="ocol">
+							@foreach (var entry in column)
+							{
+								var row = entry.Row;
+								<div class="orow @(row.IsLocal ? "local" : "") @(row.IsDead ? "dead" : "")" style="@Reveal(1.35f + entry.Order * 0.07f, 0.34f, -80f, 0f, 1f)">
+									<div class="orank">@entry.Rank</div>
+									<div class="oavatar" style="border-color: @row.Color.Hex;">
+										<div class="frog-icon" style="background-image: url( @row.Avatar );"></div>
+									</div>
+									<div class="oname" style="color: @row.NameColor.Hex;">@row.Name</div>
+									<div class="oprog">@Percent(row.Progress)</div>
+								</div>
+							}
+						</div>
+					}
+				</div>
+			}
+
+			<div class="next-round" style="@Reveal(1.6f, 0.36f, 0f, 26f, 0.4f)">
+				<div class="nr-label">NEXT WORLD IN</div>
+				<div class="nr-time" style="transform: scale( @DigitPop(NextRoundRemaining) );">@NextRoundSeconds</div>
+				<div class="nr-bar">
+					<div class="nr-fill" style="width: @NextRoundBarWidth;"></div>
+				</div>
+			</div>
+		</div>
+	}
+
+	@* Layered last so it sits over the race track, and yields to the game-over screen. *@
+	@if (!IsGameOver && ShowDeath)
+	{
+		<div class="death-card" style="@DeathCardStyle()">
+			<div class="dc-panel" style="@DeathPanelStyle()">
+				<div class="dc-title @DeathClass">@DeathTitle</div>
+				<div class="dc-cause">@DeathCause</div>
+				<div class="dc-timer">
+					<div class="dc-label">RESPAWNING IN</div>
+					<div class="dc-time" style="transform: scale( @DigitPop(RespawnRemaining) );">@RespawnSeconds</div>
+				</div>
+				<div class="dc-where">@shownRespawnLabel</div>
+			</div>
+		</div>
 	}
 </root>
 
 @code
 {
-	private Manager Manager { get; set; }
-	private bool IsGameOver { get; set; }
-	protected override int BuildHash() => HashCode.Combine(RealTime.Now);
+	// Badge sizes in panel units. A badge shrinks as its cluster grows, so a packed field stays compact
+	// without anyone vanishing behind a neighbour. Geometry this fluid is written inline per frame; the
+	// stylesheet only carries what never changes.
+	private const float BadgeMax = 36f;
+	private const float BadgeMin = 24f;
+	private const float LocalBadge = 42f;
 
+	// Cluster size at which badges have shrunk all the way down to BadgeMin.
+	private const int BadgeFloorAtCount = 6;
+
+	// How much of a badge the next one in the fan may cover.
+	private const float LaneOverlap = 0.32f;
+
+	// Badges closer together than this along the rail (panel units, centre to centre) count as
+	// overlapping and get fanned apart.
+	private const float ClusterGap = 30f;
+
+	// A name runs far wider than the badge it hangs under, so it needs its own much bigger clearance.
+	// Below NameGap it's hidden entirely; over the NameFade above that it ramps in, so a name doesn't
+	// blink on and off while two frogs trade tiles.
+	private const float NameGap = 72f;
+	private const float NameFade = 28f;
+
+	// Hard cap on how tall one cluster may draw, and how far the fan may reach either side of the rail.
+	// Up is the tight one: the rail sits near the top of the screen, so MaxFanUp plus half a LocalBadge
+	// has to clear the rail's own distance from the top — see .race-track in the scss.
+	private const float MaxClusterSpan = 84f;
+	private const float MaxFanUp = 26f;
+	private const float MaxFanDown = 84f;
+
+	// How hard a pip chases its packed position: high enough that a hop reads as a quick glide, low
+	// enough to still look like motion. The vertical fan settles softer so a cluster parting doesn't snap.
+	private const float SmoothRate = 14f;
+	private const float OffsetSmoothRate = 12f;
+
+	// Clearance is quantised to tile rows, so this is what turns a step change in the gap into a fade.
+	private const float NameFadeRate = 8f;
+
+	// Progress jump beyond which a badge teleports instead of gliding — a respawn, not a hop.
+	private const float SnapDistance = 0.1f;
+
+	private const float CheckpointBannerTime = 2.5f;
+
+	// Beyond this many non-podium finishers the list splits into two columns rather than running off
+	// the bottom of the screen. There's no mouse during a round, so nothing here may scroll.
+	private const int OthersSingleColumnMax = 5;
+
+	private const float DeathCardTime = Frog.DeathHoldSeconds;
+	private const float DeathCardFadeTime = 0.35f;
+
+	// Fanfare for the local player's own win, played once as the game-over screen takes over.
+	[Property] public SoundEvent VictorySound { get; set; }
+
+	// Its counterpart: a sting when the race ends and the local player didn't win.
+	[Property] public SoundEvent GameOverSound { get; set; }
+
+	private Manager Manager { get; set; }
+
+	// Referenced so marker layout can measure the rail, to fan apart badges that would collide and to
+	// tell which ones have the clear air to carry a name.
+	private Panel railPanel;
+
+	// Per-frog eased marker position, keyed by game object id so it survives the entry list being
+	// rebuilt every frame.
+	private readonly Dictionary<Guid, MarkerAnim> markerAnims = new();
+
+	private bool IsGameOver { get; set; }
+	private int lastCountdown;
+	private bool wasGameOver;
+	private RealTimeSince goShownAt = 1000f;
+	private List<RankRow> Ranking = new();
+
+	// Local player's checkpoint progress, tracked so we can announce each new one exactly once.
+	private RealTimeSince checkpointShownAt = 1000f;
+	private int lastCheckpoint = -1;
+	private int shownCheckpoint;
+
+	// Cause and destination are snapshotted at the moment of death: the frog respawns out from under
+	// the card, and reading them live would rewrite it mid-fade.
+	private RealTimeSince deathShownAt = 1000f;
+	private bool wasLocalDead;
+	private DeathType shownDeathType = DeathType.Car;
+	private string shownRespawnLabel = "";
+
+	// The whole game-over reveal is a function of this, computed per frame in code rather than via CSS
+	// keyframes — the panel rebuilds every frame, which doesn't reliably restart a one-shot animation.
+	private RealTimeSince gameOverAt = 1000f;
+
+	private IEnumerable<Frog> Frogs => Scene?.GetAllComponents<Frog>() ?? Enumerable.Empty<Frog>();
+	private Frog LocalFrog => Frogs.FirstOrDefault( f => f.IsLocalPlayer );
+	private int Countdown => Manager.IsValid() ? Manager.CountdownRemaining : 0;
+	private bool ShowGo => goShownAt < 1.0f;
+	private bool ShowCheckpoint => checkpointShownAt < CheckpointBannerTime;
+	private bool ShowDeath => deathShownAt < DeathCardTime;
+	private float RespawnRemaining => float.Max( 0f, DeathCardTime - (float)deathShownAt );
+	private int RespawnSeconds => (int)float.Ceiling( RespawnRemaining );
+	private int CheckpointTotal => Manager.IsValid() ? Manager.CheckpointXs.Count : 0;
+	private float RestartDelay => Manager.IsValid() && Manager.RestartDelaySeconds > 0f ? Manager.RestartDelaySeconds : 6f;
+	private float NextRoundRemaining => Manager.IsValid() ? float.Max( 0f, Manager.NextRoundStart ) : 0f;
+	private int NextRoundSeconds => (int)float.Ceiling( NextRoundRemaining );
+	private string NextRoundBarWidth => Percent( NextRoundRemaining.LerpInverse( 0f, RestartDelay ) );
+
+	// Rail width in panel units. Box.Rect is screen pixels and marker sizes are authored in panel
+	// units, so it has to come back through the panel's own scale. Zero until the first layout pass.
+	private float RailWidth => railPanel is null ? 0f : railPanel.Box.Rect.Width * railPanel.ScaleFromScreen;
+
+	// Furthest-along frog, used to fill the track up to the current race leader.
+	private float LeaderProgress => Frogs.Select( GetProgress ).DefaultIfEmpty( 0f ).Max();
+
+	// Start line is the front of the pen, so the whole start area reads 0%.
+	private float StartLine => Manager.StartAreaMaxX;
+	private bool HasTrack => Manager.IsValid() && Manager.WinTilePosition > 0 && Manager.WinTilePosition > StartLine;
+
+	protected override int BuildHash() => HashCode.Combine( RealTime.Now );
 
 	protected override void OnUpdate()
 	{
-		if (!Manager.IsValid())
+		if ( !Manager.IsValid() )
 		{
 			Manager = Scene.GetAllComponents<Manager>().FirstOrDefault();
+			return;
 		}
-		else
+
+		IsGameOver = Manager.IsGameOver;
+
+		// Flash "GO!" the moment the countdown ends.
+		int countdown = Manager.CountdownRemaining;
+		if ( lastCountdown == 1 && countdown == 0 && !IsGameOver )
+			goShownAt = 0f;
+		lastCountdown = countdown;
+
+		// A new round resets CheckpointIndex to -1, which drops the tracker back with it, so the next
+		// race announces its first checkpoint too.
+		var localFrog = LocalFrog;
+		int checkpoint = localFrog.IsValid() ? localFrog.CheckpointIndex : -1;
+		if ( checkpoint > lastCheckpoint )
 		{
-			IsGameOver = Manager.IsGameOver;
+			checkpointShownAt = 0f;
+			shownCheckpoint = checkpoint;
 		}
+		lastCheckpoint = checkpoint;
+
+		bool localDead = localFrog.IsValid() && localFrog.IsDead;
+
+		if ( localDead && !wasLocalDead )
+		{
+			deathShownAt = 0f;
+			shownDeathType = localFrog.LastDeathType;
+			shownRespawnLabel = RespawnLabel( localFrog );
+		}
+
+		// A round restart can respawn a frog early. Skip the card to its fade rather than hard-cut it,
+		// but only if it hasn't faded already — otherwise an on-schedule respawn replays it.
+		if ( !localDead && wasLocalDead && deathShownAt < DeathCardTime - DeathCardFadeTime )
+			deathShownAt = DeathCardTime - DeathCardFadeTime;
+
+		wasLocalDead = localDead;
+
+		// Freeze the final standings on the frame the race ends and start the reveal clock.
+		if ( IsGameOver && !wasGameOver )
+		{
+			BuildRanking();
+			gameOverAt = 0f;
+
+			if ( LocalWon && VictorySound.IsValid() )
+				Sound.Play( VictorySound );
+			else if ( !LocalWon && GameOverSound.IsValid() )
+				Sound.Play( GameOverSound );
+		}
+
+		wasGameOver = IsGameOver;
+	}
+
+	// Top of the frozen standings, which is what the game-over screen calls the winner.
+	private bool LocalWon => Ranking.FirstOrDefault() is RankRow winner && winner.IsLocal;
+
+	private void BuildRanking()
+	{
+		Ranking = Frogs
+			.Select( f => new RankRow
+			{
+				Name = GetName( f ),
+				Avatar = GetAvatarUrl( f ),
+				Color = f.FrogColor,
+				NameColor = f.NameColor,
+				Progress = GetProgress( f ),
+				IsLocal = f.IsLocalPlayer,
+				IsDead = f.IsDead
+			} )
+			.OrderByDescending( r => r.Progress )
+			.ToList();
+	}
+
+	// Inline entrance style: eases an element from (fromX, fromY, fromScale) to its resting (0, 0, 1)
+	// over 'duration' seconds, starting 'delay' seconds after game over.
+	private string Reveal( float delay, float duration, float fromX = 0f, float fromY = 0f, float fromScale = 1f, bool overshoot = true )
+	{
+		float raw = ((float)gameOverAt - delay) / duration;
+		float e = overshoot ? raw.EaseOutBack() : raw.EaseOutCubic();
+		float x = fromX * (1f - e);
+		float y = fromY * (1f - e);
+		float s = fromScale + (1f - fromScale) * e;
+		float o = ((float)gameOverAt - delay).LerpInverse( 0f, duration * 0.4f );
+
+		return $"opacity: {F(o)}; transform: translateX({F(x)}px) translateY({F(y)}px) scale({F(s)});";
+	}
+
+	// A percentage that counts up from 0 to its final value as the slot reveals.
+	private string RevealPercent( float target, float delay, float duration )
+	{
+		return Percent( target * (((float)gameOverAt - delay) / duration).EaseOutCubic() );
+	}
+
+	// Podium reveals bottom-up: 3rd, then 2nd, then the winner last.
+	private static float SlotDelay( int rank ) => rank switch
+	{
+		1 => 1.1f,
+		2 => 0.8f,
+		3 => 0.6f,
+		_ => 1.2f
+	};
+
+	// Pops the digit the instant it ticks down, then eases back to rest over the second.
+	private static string DigitPop( float remaining )
+	{
+		float frac = remaining - float.Floor( remaining );
+		return F( 1f + (0.25f * frac * frac * frac) );
+	}
+
+	// Ramps in over fadeIn, holds, then ramps back out over the last fadeOut of its lifetime.
+	private static float FadeOpacity( float elapsed, float lifetime, float fadeOut, float fadeIn )
+	{
+		float fadeStart = lifetime - fadeOut;
+
+		return elapsed > fadeStart
+			? elapsed.LerpInverse( lifetime, fadeStart )
+			: elapsed.LerpInverse( 0f, fadeIn );
+	}
+
+	private static string F( float value )
+	{
+		return value.ToString( "0.##", CultureInfo.InvariantCulture );
+	}
+
+	// Top three, reordered for display as 2nd - 1st - 3rd so the winner sits centre stage.
+	private List<(int Rank, RankRow Row)> PodiumOrder()
+	{
+		var top = Ranking.Take( 3 ).Select( ( r, i ) => (Rank: i + 1, Row: r) ).ToList();
+		var order = new int[] { 2, 1, 3 };
+
+		return top.OrderBy( t => Array.IndexOf( order, t.Rank ) ).ToList();
+	}
+
+	// Everyone off the podium, split into columns here rather than by flex-wrap so the break is
+	// deterministic. Fills column-major, so ranks still read straight down.
+	private static List<List<(int Rank, RankRow Row, int Order)>> OtherColumns( List<RankRow> rest )
+	{
+		var items = rest.Select( ( r, i ) => (Rank: i + 4, Row: r, Order: i) ).ToList();
+
+		if ( items.Count <= OthersSingleColumnMax )
+			return new() { items };
+
+		int perColumn = (items.Count + 1) / 2;
+
+		return new()
+		{
+			items.Take( perColumn ).ToList(),
+			items.Skip( perColumn ).ToList()
+		};
+	}
+
+	private static string Ordinal( int n )
+	{
+		return n switch
+		{
+			1 => "1ST",
+			2 => "2ND",
+			3 => "3RD",
+			_ => n + "TH"
+		};
+	}
+
+	private List<FrogEntry> BuildEntries()
+	{
+		// Sorted by tile row, not raw progress: a frog's WorldPosition eases toward its tile and carries
+		// a hop arc, so two frogs on the same row sit at slightly different x values that wobble every
+		// frame, and sorting on that makes the pips look like they're swapping places. Id breaks exact
+		// ties the same way the in-world frog stack does.
+		var entries = Frogs
+			.Select( f => new FrogEntry { Frog = f, Row = GetRow( f ) } )
+			.OrderBy( e => e.Row )
+			.ThenBy( e => e.Frog.GameObject.Id )
+			.ToList();
+
+		foreach ( var entry in entries )
+			entry.Progress = RowProgress( entry.Row );
+
+		// The layout works in whole rows, so it only changes when a frog actually changes row; the pip
+		// is then eased toward it rather than snapped to it. What you see stays smooth while what the
+		// layout reasons about stays discrete.
+		//
+		// Before the first layout pass the rail has no measurable width, so every pip lands on the same
+		// spot and the field reads as one cluster. Correct, just not spread out yet — and it's one frame.
+		AssignOffsets( entries, RailWidth );
+		AssignNames( entries, RailWidth );
+		Smooth( entries );
+
+		return entries;
+	}
+
+	// A name only reads when its badge has clear air on both sides, so being alone in a cluster isn't
+	// enough — the next cluster along has to be well clear too. Entries are ordered along the rail, so
+	// checking each against its immediate neighbours covers it. The result is an eased strength rather
+	// than a flag, so a name fades as the gap closes instead of blinking off the frame two frogs touch.
+	private static void AssignNames( List<FrogEntry> entries, float railWidth )
+	{
+		for ( int i = 0; i < entries.Count; i++ )
+		{
+			var entry = entries[i];
+
+			if ( !entry.Alone )
+			{
+				entry.NameAlpha = 0f;
+
+				continue;
+			}
+
+			float before = i == 0 ? float.MaxValue : (entry.Progress - entries[i - 1].Progress) * railWidth;
+			float after = i == entries.Count - 1 ? float.MaxValue : (entries[i + 1].Progress - entry.Progress) * railWidth;
+
+			entry.NameAlpha = float.Min( before, after ).LerpInverse( NameGap, NameGap + NameFade );
+		}
+	}
+
+	// Fans overlapping pips apart vertically, centred on the rail line. Entries arrive ordered along the
+	// rail, so a cluster is just a run of neighbours that never leave a gap between them — walk the list
+	// and cut wherever the next pip clears the one before it. Order inside a cluster comes from the same
+	// stable row/Id sort, so frogs running neck and neck hold their slot instead of trading places.
+	private static void AssignOffsets( List<FrogEntry> entries, float railWidth )
+	{
+		int i = 0;
+		while ( i < entries.Count )
+		{
+			int j = i + 1;
+			while ( j < entries.Count && (entries[j].Progress - entries[j - 1].Progress) * railWidth <= ClusterGap )
+				j++;
+
+			int count = j - i;
+			float badge = BadgeSize( count );
+
+			for ( int k = i; k < j; k++ )
+			{
+				entries[k].Size = entries[k].Frog.IsLocalPlayer ? LocalBadge : badge;
+				entries[k].Alone = count == 1;
+			}
+
+			if ( count == 1 )
+			{
+				entries[i].Offset = 0f;
+				i = j;
+
+				continue;
+			}
+
+			// Lanes tighten once the cluster would outgrow its cap, so a full field on the start line
+			// fans into a tidy stack rather than a tower down the screen.
+			float lane = float.Min( badge * (1f - LaneOverlap), MaxClusterSpan / (count - 1) );
+			float middle = (count - 1) * 0.5f;
+			float localOffset = 0f;
+
+			for ( int k = i; k < j; k++ )
+			{
+				entries[k].Offset = (k - i - middle) * lane;
+
+				if ( entries[k].Frog.IsLocalPlayer )
+					localOffset = entries[k].Offset;
+			}
+
+			// Your own badge holds the rail line and the rest of the cluster shifts around it, so the
+			// one marker you're actually watching never moves vertically. That shift alone would hang
+			// half a big pack off the top of the screen when you're at the front of it, so the cluster
+			// is then pushed back inside the fan's reach — offsets stay ordered either way.
+			float shift = -localOffset;
+			float lowest = entries[i].Offset + shift;
+			float highest = entries[j - 1].Offset + shift;
+
+			if ( lowest < -MaxFanUp )
+				shift += -MaxFanUp - lowest;
+			else if ( highest > MaxFanDown )
+				shift += MaxFanDown - highest;
+
+			for ( int k = i; k < j; k++ )
+				entries[k].Offset += shift;
+
+			i = j;
+		}
+	}
+
+	// Badges shrink as their cluster grows, bottoming out at BadgeFloorAtCount. Clustered badges all
+	// draw the same size, so the fan reads as one pack rather than a size gradient.
+	private static float BadgeSize( int clusterCount )
+	{
+		return MathX.Lerp( BadgeMax, BadgeMin, ((float)clusterCount).LerpInverse( 1f, BadgeFloorAtCount ) );
+	}
+
+	// A badge's size changes every frame as its cluster grows and thins, so its geometry can't come from
+	// the stylesheet — only the parts that hold still do. The ring always carries the frog's own colour;
+	// on your badge it's the size and the glow that pick you out.
+	private static string MarkerStyle( FrogEntry entry )
+	{
+		float half = entry.DrawSize * 0.5f;
+
+		return $"left: {Percent( entry.DrawProgress )}; width: {F( entry.DrawSize )}px; height: {F( entry.DrawSize )}px; " +
+			$"margin-left: {F( -half )}px; margin-top: {F( -half )}px; border-radius: {F( half )}px; " +
+			$"border-color: {entry.Frog.FrogColor.Hex}; transform: translateY({F( entry.DrawOffset )}px);";
+	}
+
+	// The avatar sits inside the badge's ring, so it has to scale with it.
+	private static string IconStyle( FrogEntry entry )
+	{
+		float size = entry.DrawSize * 0.74f;
+
+		return $"width: {F( size )}px; height: {F( size )}px; border-radius: {F( size * 0.5f )}px; " +
+			$"background-image: url( {GetAvatarUrl( entry.Frog )} );";
+	}
+
+	// Eases each pip toward the layout just decided, so a frog changing row glides to its new spot and
+	// a pip being fanned out slides apart rather than popping.
+	private void Smooth( List<FrogEntry> entries )
+	{
+		float delta = RealTime.Delta;
+
+		foreach ( var entry in entries )
+		{
+			Guid id = entry.Frog.GameObject.Id;
+
+			if ( !markerAnims.TryGetValue( id, out var anim ) )
+			{
+				// First sight of this frog — start it where it belongs rather than sliding it in from
+				// wherever the previous occupant of this slot happened to be.
+				anim = new MarkerAnim { Progress = entry.Progress, Offset = entry.Offset, Size = entry.Size, Name = entry.NameAlpha };
+			}
+			else if ( float.Abs( entry.Progress - anim.Progress ) > SnapDistance )
+			{
+				// Deaths and checkpoint respawns teleport a frog. That isn't motion to animate, so jump
+				// the badge instead of gliding it the length of the rail. The name still fades — it's
+				// the one part of this that reads as a hard cut.
+				anim.Progress = entry.Progress;
+				anim.Offset = entry.Offset;
+				anim.Size = entry.Size;
+				anim.Name = anim.Name.LerpTo( entry.NameAlpha, delta * NameFadeRate );
+			}
+			else
+			{
+				anim.Progress = anim.Progress.LerpTo( entry.Progress, delta * SmoothRate );
+				anim.Offset = anim.Offset.LerpTo( entry.Offset, delta * OffsetSmoothRate );
+				anim.Size = anim.Size.LerpTo( entry.Size, delta * OffsetSmoothRate );
+				anim.Name = anim.Name.LerpTo( entry.NameAlpha, delta * NameFadeRate );
+			}
+
+			markerAnims[id] = anim;
+
+			entry.DrawProgress = anim.Progress;
+			entry.DrawOffset = anim.Offset;
+			entry.DrawSize = anim.Size;
+			entry.DrawNameAlpha = anim.Name;
+		}
+
+		// Forget frogs that are no longer around, so a rejoin starts fresh rather than gliding in from
+		// wherever that id sat last round.
+		if ( markerAnims.Count > entries.Count )
+		{
+			var live = entries.Select( e => e.Frog.GameObject.Id ).ToHashSet();
+			foreach ( var id in markerAnims.Keys.Where( k => !live.Contains( k ) ).ToList() )
+				markerAnims.Remove( id );
+		}
+	}
+
+	private float GetProgress( Frog frog )
+	{
+		// The host flags whoever reached the finish; trust that over this client's lagging proxy
+		// position so the winner reads a clean 100% everywhere, not 99%.
+		if ( frog.HasFinished )
+			return 1f;
+
+		if ( !HasTrack )
+			return 0f;
+
+		return frog.WorldPosition.x.LerpInverse( StartLine, Manager.WinTilePosition );
+	}
+
+	// Where a tile row sits on the rail, as the fraction GetProgress would report for a frog on it.
+	private float RowProgress( int row )
+	{
+		if ( row == int.MaxValue )
+			return 1f;
+
+		if ( !HasTrack )
+			return 0f;
+
+		return ((float)row * Manager.TileSize).LerpInverse( StartLine, Manager.WinTilePosition );
+	}
+
+	// Which tile row a frog is standing on, rounded to drop the sub-unit jitter raw progress carries.
+	// Clamped to the rail's span: the pen is several tiles deep and all of it reads 0%, so without this
+	// the frogs waiting there split into one cluster per pen row — each restarting its lane count at 0,
+	// and all drawn at the same spot on the rail, stacking on top of each other.
+	private int GetRow( Frog frog )
+	{
+		if ( frog.HasFinished )
+			return int.MaxValue;
+
+		if ( !HasTrack )
+			return 0;
+
+		float x = float.Clamp( frog.WorldPosition.x, StartLine, Manager.WinTilePosition );
+
+		return (int)float.Round( x / Manager.TileSize );
+	}
+
+	// Rail ticks for each checkpoint band, flagged with whether the local player has banked it, so the
+	// HUD keeps showing checkpoint state after the banner has gone.
+	private IEnumerable<(float Fraction, bool Reached)> CheckpointTicks()
+	{
+		if ( !HasTrack )
+			yield break;
+
+		var localFrog = LocalFrog;
+		int reached = localFrog.IsValid() ? localFrog.CheckpointIndex : -1;
+
+		for ( int i = 0; i < Manager.CheckpointXs.Count; i++ )
+			yield return (Manager.CheckpointXs[i].LerpInverse( StartLine, Manager.WinTilePosition ), i <= reached);
+	}
+
+	// Pops down into place with an overshoot, holds, then fades out. Animated by hand for the same
+	// reason the game-over reveal is.
+	private string CheckpointStyle()
+	{
+		float e = ((float)checkpointShownAt / 0.34f).EaseOutBack();
+		float y = -34f * (1f - e);
+		float scale = 0.7f + 0.3f * e;
+		float o = FadeOpacity( checkpointShownAt, CheckpointBannerTime, 0.5f, 0.15f );
+
+		return $"opacity: {F(o)}; transform: translateY({F(y)}px) scale({F(scale)});";
+	}
+
+	private string DeathTitle => shownDeathType switch
+	{
+		DeathType.Water => "SPLASH!",
+		DeathType.Drift => "LOST AT SEA!",
+		_ => "SPLAT!"
+	};
+
+	private string DeathCause => shownDeathType switch
+	{
+		DeathType.Train => "RUN DOWN BY A TRAIN",
+		DeathType.Water => "YOU FELL IN THE WATER",
+		DeathType.Drift => "YOUR LOG FLOATED OFF THE MAP",
+		_ => "FLATTENED BY A CAR"
+	};
+
+	private string DeathClass => shownDeathType is DeathType.Car or DeathType.Train ? "splat" : "splash";
+
+	// Must mirror Manager.RespawnFrog's rule, or the card lies about where you're going.
+	private string RespawnLabel( Frog frog )
+	{
+		if ( !Manager.IsValid() )
+			return "";
+
+		int index = frog.CheckpointIndex;
+		if ( index < 0 || index >= Manager.CheckpointXs.Count )
+			return "BACK TO THE START";
+
+		return CheckpointTotal > 1
+			? $"BACK TO CHECKPOINT {index + 1}/{CheckpointTotal}"
+			: "BACK TO THE CHECKPOINT";
+	}
+
+	// Opacity lives on the root only; setting it on the panel too would multiply the two.
+	private string DeathCardStyle()
+	{
+		return $"opacity: {F( FadeOpacity( deathShownAt, DeathCardTime, DeathCardFadeTime, 0.1f ) )};";
+	}
+
+	// Slams in from oversized; the overshoot is what sells the impact.
+	private string DeathPanelStyle()
+	{
+		float e = ((float)deathShownAt / 0.28f).EaseOutBack();
+		float scale = 1.9f - (0.9f * e);
+		float y = -22f * (1f - e);
+
+		return $"transform: translateY({F(y)}px) scale({F(scale)});";
+	}
+
+	private static string Percent( float progress )
+	{
+		return (progress * 100f).ToString( "0.0", CultureInfo.InvariantCulture ) + "%";
+	}
+
+	private static string GetName( Frog frog )
+	{
+		if ( frog.IsBot )
+			return string.IsNullOrEmpty( frog.BotName ) ? "Bot" : frog.BotName;
+
+		return frog.Network.Owner?.DisplayName ?? "Frog";
+	}
+
+	private static string GetAvatarUrl( Frog frog )
+	{
+		if ( frog.IsBot )
+			return "ui/frog.png";
+
+		var steamId = frog.Network.Owner?.SteamId ?? Connection.Local.SteamId;
+
+		return $"avatar:{steamId}";
+	}
+
+	private class FrogEntry
+	{
+		public Frog Frog { get; set; }
+		public int Row { get; set; }
+
+		// Where the layout decided this badge belongs, in panel units. Alone means nothing else landed
+		// in its cluster, which is the first thing a name needs.
+		public float Progress { get; set; }
+		public float Offset { get; set; }
+		public float Size { get; set; }
+		public bool Alone { get; set; }
+		public float NameAlpha { get; set; }
+
+		// Where it's actually drawn this frame, easing toward the above.
+		public float DrawProgress { get; set; }
+		public float DrawOffset { get; set; }
+		public float DrawSize { get; set; }
+		public float DrawNameAlpha { get; set; }
+	}
+
+	private struct MarkerAnim
+	{
+		public float Progress { get; set; }
+		public float Offset { get; set; }
+		public float Size { get; set; }
+		public float Name { get; set; }
+	}
+
+	// A frozen snapshot of a player's standing, captured the moment the race ends so respawns and
+	// restarts don't reshuffle the results while they're shown.
+	private class RankRow
+	{
+		public string Name;
+		public string Avatar;
+		public Color Color;
+		public Color NameColor;
+		public float Progress;
+		public bool IsLocal;
+		public bool IsDead;
 	}
 }

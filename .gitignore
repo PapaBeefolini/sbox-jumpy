@@ -6,17 +6,20 @@
 .vs/*
 .vscode/*
 *.csproj
+*.csproj.user
 obj
 bin
 Properties/*
 code/obj/*
 code/Properties/*
 .sbox/*
+.mcp.json
 
 # Auto-generated asset related files
 *.generated.*
 *.*_c
 !*.shader_c
+*.*_d
 *.los
 *.vpk
 *launchSettings.json

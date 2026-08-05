@@ -1,10 +1,10 @@
-﻿using Sandbox;
+using Sandbox;
 
 namespace Jumpy
 {
 	public class Car : MovingEntity
 	{
-		private string[] models = new string[]
+		private static readonly string[] models =
 		{
 			"models/car-lowpoly-1.vmdl",
 			"models/car-lowpoly-2.vmdl",
@@ -14,7 +14,7 @@ namespace Jumpy
 			"models/car-lowpoly-6.vmdl",
 		};
 
-		private Color[] colors = new Color[]
+		private static readonly Color[] colors =
 		{
 			new Color( 0.6f, 0.05f, 0.05f ),
 			new Color( 0.05f, 0.6f, 0.05f ),
@@ -25,22 +25,23 @@ namespace Jumpy
 			new Color( 0.6f, 0.6f, 0.05f ),
 		};
 
-
 		protected override void OnStart()
 		{
-			SetAppearance( models[Game.Random.Int( models.Length - 1 )], colors[Game.Random.Int( colors.Length - 1 )] );
+			SetAppearance( Game.Random.FromArray( models ), Game.Random.FromArray( colors ) );
 		}
 
-
-		[Broadcast(NetPermission.HostOnly)]
+		[Rpc.Broadcast( NetFlags.OwnerOnly )]
 		private void SetAppearance( string modelPath, Color color )
 		{
-			var renderer = Components.Get<ModelRenderer>();
+			ModelRenderer renderer = Components.Get<ModelRenderer>();
+			ModelCollider modelCollider = Components.Get<ModelCollider>();
+			if ( !renderer.IsValid() || !modelCollider.IsValid() )
+				return;
+
 			renderer.Model = Model.Load( modelPath );
 			renderer.Tint = color;
 
-			var collider = Components.Get<ModelCollider>();
-			collider.Model = renderer.Model;
+			modelCollider.Model = renderer.Model;
 		}
 	}
 }
