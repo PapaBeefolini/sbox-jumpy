@@ -195,16 +195,14 @@
           "__enabled": true,
           "Flags": 0,
           "__version": 1,
-          "Filter": "Bilinear",
-          "Gamma": 1.5,
-          "Mode": "Screen",
+          "Mode": "Additive",
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "Strength": 1.8,
+          "Strength": 0.5,
           "Threshold": 0.2,
           "Tint": "1,1,1,1"
         },
@@ -543,7 +541,8 @@
     "GameObjectSystems": {
       "Sandbox.Clutter.ClutterGridSystem": {
         "Storage": {
-          "$blob": "fea5f28d-cf12-47e9-bbca-af316b6e490a"
+          "$blob": "64db792e-5935-8fbc-8cfa-050cd49fa7fd",
+          "$refs": []
         }
       },
       "Sandbox.SelectionSetsSystem": {
