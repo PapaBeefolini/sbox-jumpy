@@ -586,7 +586,7 @@ gameui {
                 margin-left: -4px;
                 border: 1px solid rgba(black, 0.6);
                 border-radius: 2px;
-                background-color: #b6ff00;
+                background-color: #b6ff00 * 2;
 
                 &.reached {
                     background-color: #b6ff00;

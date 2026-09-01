@@ -202,7 +202,7 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "Strength": 0.5,
+          "Strength": 0.4,
           "Threshold": 0.2,
           "Tint": "1,1,1,1"
         },
@@ -499,6 +499,7 @@
           "Scale": 1,
           "ScaleStrategy": "ConsistentHeight",
           "TargetCamera": null,
+          "Timing": "BeforePostProcess",
           "ZIndex": 100
         },
         {
