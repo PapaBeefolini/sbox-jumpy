@@ -8,5 +8,6 @@
   "gain": 0,
   "rate": 44100,
   "compress": false,
-  "bitrate": 256
+  "bitrate": 256,
+  "guid": "41396c90-88e1-4abe-9ce3-2271c4182a01"
 }
