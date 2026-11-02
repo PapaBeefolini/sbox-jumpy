@@ -11,6 +11,7 @@ namespace Jumpy
 		private const float jumpDistance = Manager.TileSize;
 		private const float jumpHeight = 6;
 		private const float maxJumpAngle = 35;
+		private const float stickDeadzone = 0.5f;
 
 		private const float stackHeight = 18;
 		private const float stackRadius = 16;
@@ -399,16 +400,24 @@ namespace Jumpy
 
 		private Vector3 GetInputDirection()
 		{
-			if ( Input.Down( "Forward" ) )
+			// Actions cover WASD and the D-pad; the arrow keys ride along since an action only takes one key.
+			if ( Input.Down( "Forward" ) || Input.Keyboard.Down( "uparrow" ) )
 				return Vector3.Forward;
-			if ( Input.Down( "Backward" ) )
+			if ( Input.Down( "Backward" ) || Input.Keyboard.Down( "downarrow" ) )
 				return Vector3.Backward;
-			if ( Input.Down( "Left" ) )
+			if ( Input.Down( "Left" ) || Input.Keyboard.Down( "leftarrow" ) )
 				return Vector3.Left;
-			if ( Input.Down( "Right" ) )
+			if ( Input.Down( "Right" ) || Input.Keyboard.Down( "rightarrow" ) )
 				return Vector3.Right;
 
-			return Vector3.Zero;
+			// The left stick only ever reaches AnalogMove, so snap it to whichever axis it leans on most.
+			Vector3 stick = Input.AnalogMove;
+			if ( float.Max( float.Abs( stick.x ), float.Abs( stick.y ) ) < stickDeadzone )
+				return Vector3.Zero;
+
+			return float.Abs( stick.x ) >= float.Abs( stick.y )
+				? ( stick.x > 0 ? Vector3.Forward : Vector3.Backward )
+				: ( stick.y > 0 ? Vector3.Left : Vector3.Right );
 		}
 
 		private Vector3 GetBotDirection()
