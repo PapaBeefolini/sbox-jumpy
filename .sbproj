@@ -60,6 +60,13 @@
     "RecommendedMinPlayers": 1,
     "RecommendedMaxPlayers": 0,
     "Coop": true,
-    "Versus": true
+    "Versus": true,
+    "WorkshopTags": [
+      "Arcade",
+      "Casual",
+      "Cozy",
+      "Party",
+      "Racing"
+    ]
   }
 }
