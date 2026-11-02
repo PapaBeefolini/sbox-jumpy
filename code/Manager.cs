@@ -158,7 +158,10 @@ namespace Jumpy
 			if ( finishers.Count > 0 )
 			{
 				foreach ( Frog frog in finishers )
+				{
 					frog.HasFinished = true;
+					frog.NotifyFinished();
+				}
 
 				_ = EndGame();
 			}

@@ -16,6 +16,11 @@ namespace Jumpy
 		private const float stackHeight = 18;
 		private const float stackRadius = 16;
 
+		private const int totemStackSize = 3;
+		private const int logRiderHops = 5;
+		private const int comebackDeaths = 5;
+		private const float earlyExitSeconds = 2.0f;
+
 		private const float botHopMin = 0.10f;
 		private const float botHopMax = 0.28f;
 		private const float idleHopMin = 0.5f;
@@ -156,6 +161,15 @@ namespace Jumpy
 		private RealTimeSince deathAt;
 		private int deathSequence;
 
+		// The local player's progress toward the round-based achievements. Only the owner tracks it,
+		// since only the owner's client can unlock anything for them.
+		private bool wasGameActive;
+		private bool sawGatesOpen;
+		private RealTimeSince gatesOpenedAt;
+		private int roundDeaths;
+		private int logHops;
+		private GameObject lastLog;
+
 		protected override void OnAwake()
 		{
 			renderer = GetComponent<SkinnedModelRenderer>( true );
@@ -167,11 +181,15 @@ namespace Jumpy
 		{
 			if ( IsLocalPlayer )
 				AddComponent<AudioListener>();
+
+			// Joining mid-round isn't the gates opening, so don't count it as a round start.
+			wasGameActive = Manager.Instance.IsValid() && Manager.Instance.IsGameActive;
 		}
 
 		protected override void OnUpdate()
 		{
 			UpdateCamera();
+			UpdateAchievements();
 			renderer.Tint = FrogColor;
 		}
 
@@ -225,6 +243,7 @@ namespace Jumpy
 				{
 					IsGrounded = true;
 					Land();
+					TrackLogLanding();
 				}
 			}
 
@@ -340,6 +359,9 @@ namespace Jumpy
 
 			if ( !Manager.Instance.IsGameActive && !Manager.Instance.IsWithinStartArea( target ) )
 				return;
+
+			if ( IsLocalPlayer )
+				PlayerAchievements.Count( PlayerAchievements.HopsStat );
 
 			IsGrounded = false;
 			LastJumpTime = Time.Now;
@@ -726,6 +748,13 @@ namespace Jumpy
 			return index;
 		}
 
+		// Settled frogs sharing my landing spot, me included.
+		private int GetStackSize()
+		{
+			return 1 + Scene.GetAllComponents<Frog>().Count( other => other != this && !other.IsDead && other.IsGrounded
+				&& (other.WorldPosition - TilePosition).WithZ( 0 ).Length <= stackRadius );
+		}
+
 		private void Land()
 		{
 			// A hop that aimed at a log rode it down and is already attached. Any other hop has to find
@@ -764,6 +793,7 @@ namespace Jumpy
 			UpdateAppearance( IsDead );
 			SpawnDeathParticles( deathType, WorldPosition );
 			AddCameraShake( deathShakeTrauma );
+			RecordDeathAchievements( deathType );
 			NotifyChatMessage( $"☠️ {(IsBot ? BotName : Network.Owner.DisplayName)} {DeathVerb( deathType )}!" );
 
 			// Fired and forgotten, so a hold cut short by a round restart still wakes up later. Without
@@ -779,6 +809,92 @@ namespace Jumpy
 				return;
 
 			Manager.Instance.RespawnFrog( this );
+		}
+
+		private void UpdateAchievements()
+		{
+			if ( !IsLocalPlayer || !Manager.Instance.IsValid() )
+				return;
+
+			bool gameActive = Manager.Instance.IsGameActive;
+
+			if ( gameActive && !wasGameActive )
+			{
+				sawGatesOpen = true;
+				gatesOpenedAt = 0;
+				roundDeaths = 0;
+				PlayerAchievements.Count( PlayerAchievements.RoundsPlayedStat );
+			}
+
+			wasGameActive = gameActive;
+
+			if ( CheckpointIndex >= 0 )
+				PlayerAchievements.Unlock( PlayerAchievements.Checkpoint );
+
+			if ( gameActive && IsGrounded && !IsDead && GetStackSize() >= totemStackSize )
+				PlayerAchievements.Unlock( PlayerAchievements.TotemPole );
+		}
+
+		private void RecordDeathAchievements( DeathType deathType )
+		{
+			if ( !IsLocalPlayer )
+				return;
+
+			roundDeaths++;
+			PlayerAchievements.RecordDeath( deathType );
+
+			if ( sawGatesOpen && Manager.Instance.IsGameActive && gatesOpenedAt < earlyExitSeconds )
+				PlayerAchievements.Unlock( PlayerAchievements.EarlyExit );
+		}
+
+		// Counts hops from one log onto a different one. Shuffling along the same log neither adds to
+		// the run nor breaks it; coming down anywhere off the river does.
+		private void TrackLogLanding()
+		{
+			if ( !IsLocalPlayer )
+				return;
+
+			if ( !CurrentLog.IsValid() )
+			{
+				logHops = 0;
+				lastLog = null;
+				return;
+			}
+
+			if ( CurrentLog == lastLog )
+				return;
+
+			// The first log of a run was reached from land, so it isn't a log-to-log hop. Checked by
+			// reference rather than IsValid: the log just left may already have despawned off the edge.
+			if ( lastLog is not null )
+				logHops++;
+
+			lastLog = CurrentLog;
+
+			if ( logHops >= logRiderHops )
+				PlayerAchievements.Unlock( PlayerAchievements.LogRider );
+		}
+
+		// Only the host decides who crossed the line, but achievements can only be unlocked on the
+		// winner's own machine, so the host hands the win to whichever client owns this frog.
+		[Rpc.Owner]
+		public void NotifyFinished()
+		{
+			if ( !IsLocalPlayer )
+				return;
+
+			PlayerAchievements.Count( PlayerAchievements.WinsStat );
+			PlayerAchievements.Unlock( PlayerAchievements.FirstWin );
+
+			// Joined after the gates opened, so this round's death count started late.
+			if ( !sawGatesOpen )
+				return;
+
+			if ( roundDeaths == 0 )
+				PlayerAchievements.Unlock( PlayerAchievements.Flawless );
+
+			if ( roundDeaths >= comebackDeaths )
+				PlayerAchievements.Unlock( PlayerAchievements.Comeback );
 		}
 
 		private static string DeathVerb( DeathType deathType ) => deathType switch
